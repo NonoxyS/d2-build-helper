@@ -84,7 +84,8 @@ fun D2BuildHelperTheme(
   }
 
   MaterialTheme(
-    colorScheme = colors,
+    colorScheme = DarkColors,
+    typography = Typography,
     content = content
   )
 }
