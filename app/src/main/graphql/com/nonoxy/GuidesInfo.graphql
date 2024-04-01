@@ -1,0 +1,11 @@
+query GuidesInfo {
+    heroStats {
+        guide {
+            heroId
+            guides {
+                steamAccountId
+                matchId
+            }
+        }
+    }
+}

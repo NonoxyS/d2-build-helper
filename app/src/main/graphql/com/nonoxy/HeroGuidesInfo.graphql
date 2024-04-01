@@ -1,0 +1,11 @@
+query HeroGuidesInfo($heroId: Short) {
+    heroStats {
+        guide(heroId: $heroId) {
+            heroId
+            guides {
+                steamAccountId
+                matchId
+            }
+        }
+    }
+}
