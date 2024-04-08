@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -22,6 +24,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildFeatures {
+            buildConfig = true
+        }
+
+        val localProperties = Properties()
+        localProperties.load(project.rootProject.file("local.properties").inputStream())
+
+        buildConfigField("String", "apiKey", "\"${localProperties.getProperty("apiKey")}\"")
     }
 
     buildTypes {
@@ -74,10 +85,14 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     //Firebase
-    implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.11.0")
 
     //Google Fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.4")
+
+    //Glide
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
