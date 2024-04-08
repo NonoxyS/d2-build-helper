@@ -1,11 +1,14 @@
-package com.nonoxy.d2buildhelper.data
+package com.nonoxy.d2buildhelper.data.repository
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.nonoxy.GuidesInfoQuery
 import com.nonoxy.HeroBuildQuery
 import com.nonoxy.HeroGuidesInfoQuery
-import com.nonoxy.d2buildhelper.domain.HeroBuildClient
+import com.nonoxy.d2buildhelper.data.toGuideInfo
+import com.nonoxy.d2buildhelper.data.toHeroGuideBuild
+import com.nonoxy.d2buildhelper.data.toHeroGuideInfo
+import com.nonoxy.d2buildhelper.domain.repository.HeroBuildClient
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 

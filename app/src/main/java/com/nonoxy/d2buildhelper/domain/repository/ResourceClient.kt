@@ -1,4 +1,4 @@
-package com.nonoxy.d2buildhelper.domain
+package com.nonoxy.d2buildhelper.domain.repository
 
 interface ResourceClient {
     suspend fun getItemNameById(itemIds: List<Int>): MutableMap<Short, String>

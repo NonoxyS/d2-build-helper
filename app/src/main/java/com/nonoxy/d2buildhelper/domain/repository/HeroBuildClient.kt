@@ -1,4 +1,4 @@
-package com.nonoxy.d2buildhelper.domain
+package com.nonoxy.d2buildhelper.domain.repository
 
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild

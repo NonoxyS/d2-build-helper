@@ -3,10 +3,10 @@ package com.nonoxy.d2buildhelper.di
 import com.apollographql.apollo3.ApolloClient
 import com.google.firebase.ktx.Firebase
 import com.nonoxy.d2buildhelper.BuildConfig
-import com.nonoxy.d2buildhelper.data.ApolloHeroBuildClient
-import com.nonoxy.d2buildhelper.data.FirebaseResourceClient
-import com.nonoxy.d2buildhelper.domain.HeroBuildClient
-import com.nonoxy.d2buildhelper.domain.ResourceClient
+import com.nonoxy.d2buildhelper.data.repository.ApolloHeroBuildClient
+import com.nonoxy.d2buildhelper.data.repository.FirebaseResourceClient
+import com.nonoxy.d2buildhelper.domain.repository.HeroBuildClient
+import com.nonoxy.d2buildhelper.domain.repository.ResourceClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
