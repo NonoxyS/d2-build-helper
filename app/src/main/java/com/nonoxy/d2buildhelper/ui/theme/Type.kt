@@ -22,14 +22,14 @@ val fontFamily = FontFamily(
         androidx.compose.ui.text.font.Font(resId = R.font.noto_sans_regular)
 )
 
-// Set of Material typography styles to start with
 val Typography = Typography(
         bodyLarge = TextStyle(
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 lineHeight = 24.sp,
-                letterSpacing = 0.1.sp
+                letterSpacing = 0.1.sp,
+
         ),
         bodySmall = TextStyle(
                 fontFamily = fontFamily,
