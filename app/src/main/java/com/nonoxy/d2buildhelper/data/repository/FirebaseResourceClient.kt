@@ -18,7 +18,7 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
             .get(Source.CACHE)
             .await()
 
-        if (firestoreResult.documents.isEmpty()) {
+        if (firestoreResult.documents.size != itemIds.size) {
             firestoreResult = firebaseClient.firestore.collection("items")
                 .whereIn("id", itemIds)
                 .get(Source.SERVER)
@@ -35,14 +35,14 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
 
     override suspend fun getHeroNameById(heroIds: List<Int>):
             MutableMap<Short, MutableMap<String, String>> {
-        val heroNames = mutableMapOf<Short, MutableMap<String, String>>()
 
+        val heroNames = mutableMapOf<Short, MutableMap<String, String>>()
         var firestoreResult = firebaseClient.firestore.collection("heroes")
             .whereIn("id", heroIds)
             .get(Source.CACHE)
             .await()
 
-        if (firestoreResult.documents.isEmpty()) {
+        if (firestoreResult.documents.size != heroIds.size) {
             firestoreResult = firebaseClient.firestore.collection("heroes")
                 .whereIn("id", heroIds)
                 .get(Source.SERVER)
@@ -60,6 +60,7 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
 
     override suspend fun getHeroImageUrlByName(heroName: String):
             String = suspendCancellableCoroutine { continuation ->
+
         firebaseClient.storage.reference
             .child("hero_icons/${heroName}_minimap_icon.png").downloadUrl
             .addOnSuccessListener { uri ->
