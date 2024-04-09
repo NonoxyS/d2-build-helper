@@ -14,7 +14,7 @@ import com.nonoxy.d2buildhelper.domain.usecases.GetHeroImageUrlByNameUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroNameByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemImageUrlByNameUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemNameByIdUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetUtilImageUrlByNameUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetAdditionalImageUrlByNameUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -96,7 +96,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideGetUtilImageUrlByNameUseCase(firebaseClient: ResourceClient): GetUtilImageUrlByNameUseCase {
-        return GetUtilImageUrlByNameUseCase(firebaseClient)
+    fun provideGetAdditionalImageUrlByNameUseCase(firebaseClient: ResourceClient): GetAdditionalImageUrlByNameUseCase {
+        return GetAdditionalImageUrlByNameUseCase(firebaseClient)
     }
 }
