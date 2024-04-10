@@ -25,6 +25,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,9 +117,6 @@ private fun GuideItem(
                             modifier = Modifier
                                 .size(18.dp)
                         )
-                        {
-                            it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        }
 
                         Spacer(modifier = Modifier.width(10.dp))
 
@@ -129,9 +127,6 @@ private fun GuideItem(
                             modifier = Modifier
                                 .size(32.dp)
                         )
-                        {
-                            it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        }
 
                         Spacer(modifier = Modifier.width(10.dp))
 
@@ -147,7 +142,8 @@ private fun GuideItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "47:27",
+                            text = convertSecondsToMinutesAndSeconds(
+                                seconds = build?.durationSeconds?: 0),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
                         )
@@ -163,9 +159,6 @@ private fun GuideItem(
                                 .size(16.dp)
                                 .clip(RoundedCornerShape(4.dp))
                         )
-                        {
-                            it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
@@ -261,9 +254,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -293,9 +283,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -324,9 +311,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -356,9 +340,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -387,9 +368,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -418,9 +396,6 @@ fun ShowItemsRow(
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-                {
-                    it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                }
             } else {
                 Box(modifier = Modifier
                     .width(36.dp)
@@ -445,9 +420,6 @@ fun ShowItemsRow(
                     .size(28.dp)
                     .clip(CircleShape)
             )
-            {
-                it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            }
         } else {
             Box(modifier = Modifier
                 .size(28.dp)
@@ -456,3 +428,5 @@ fun ShowItemsRow(
         }
     }
 }
+
+fun convertSecondsToMinutesAndSeconds(seconds: Int): String = "${seconds / 60}:${seconds % 60}"
