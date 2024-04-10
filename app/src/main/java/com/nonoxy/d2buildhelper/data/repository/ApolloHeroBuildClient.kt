@@ -39,7 +39,9 @@ class ApolloHeroBuildClient(private val apolloClient: ApolloClient) : HeroBuildC
         )
             .execute()
             .data
-            ?.match
-            ?.players?.firstNotNullOfOrNull { it?.toHeroGuideBuild() }!!
+            ?.match.let {
+                match -> match?.players?.firstNotNullOfOrNull{ player ->
+                    player?.toHeroGuideBuild(match.durationSeconds?: 0) }!! }
+
     }
 }

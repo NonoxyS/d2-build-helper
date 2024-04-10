@@ -1,5 +1,6 @@
 query HeroBuild($matchId: Long!, $steamAccountId: Long) {
     match(id: $matchId) {
+        durationSeconds
         players(steamAccountId: $steamAccountId) {
             matchId
             steamAccountId

@@ -3,6 +3,7 @@ package com.nonoxy.d2buildhelper.domain.model
 data class HeroGuideBuild(
     val matchId: Long,
     val steamAccountId: Long,
+    val durationSeconds: Int,
     val position: MatchPlayerPositionType?,
     val isRadiant: Boolean?,
     val kills: Byte,

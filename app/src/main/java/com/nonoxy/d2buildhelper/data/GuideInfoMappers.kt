@@ -48,10 +48,11 @@ fun HeroGuidesInfoQuery.Guide.toHeroGuideInfo(): HeroGuideInfo {
     )
 }
 
-fun HeroBuildQuery.Player.toHeroGuideBuild(): HeroGuideBuild {
+fun HeroBuildQuery.Player.toHeroGuideBuild(durationSeconds: Int): HeroGuideBuild {
     return HeroGuideBuild(
         matchId = matchId.toString().toLong(),
         steamAccountId = steamAccountId.toString().toLong(),
+        durationSeconds = durationSeconds,
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
         kills = kills.toString().toByte(),
