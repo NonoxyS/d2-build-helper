@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
+import com.nonoxy.d2buildhelper.domain.model.InventoryChange
+import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
 import com.nonoxy.d2buildhelper.domain.usecases.GetGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuideBuildUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuidesInfoUseCase
@@ -54,20 +56,24 @@ class HeroGuidesViewModel @Inject constructor(
             val heroBuilds = getHeroBuilds(guides)
             Log.d("TestTime", "end getting heroBuilds from api")
 
+            val itemPurchases = async { getItemPurchases(heroBuilds) }
+
+            val inventoryChanges = async { getInventoryCharges(heroBuilds) }
+
             Log.d("TestTime", "start getting heroNames from api")
             val heroNames = getHeroNameByIdUseCase.execute(guides.map { it.heroId.toInt() })
             Log.d("TestTime", "end getting heroNames from api")
 
             Log.d("TestTime", "start getting heroImages from api")
-            val heroImageUrls = getHeroImages(heroNames)
+            val heroImageUrls = async { getHeroImages(heroNames) }
             Log.d("TestTime", "end getting heroImages from api")
 
             Log.d("TestTime", "start getting item images from api")
-            val itemImageUrls = getItemImages(heroBuilds)
+            val itemImageUrls = async { getItemImages(heroBuilds) }
             Log.d("TestTime", "end getting item images from api")
 
             Log.d("TestTime", "start getting additional images from api")
-            val additionalImageUrls = getAdditionalImages(heroBuilds)
+            val additionalImageUrls = async { getAdditionalImages(heroBuilds) }
             Log.d("TestTime", "end getting additional images from api")
 
             // Получаем имена для загрузки изображений позиции игрока и за какую сторону играл
@@ -78,21 +84,25 @@ class HeroGuidesViewModel @Inject constructor(
 
             Log.d("TestTime", "end getting data")
 
+            _state.update { it.copy(
+                guides = guides,
+                heroBuilds = heroBuilds,
+                itemImageUrls = itemImageUrls.await(),
+                heroImageUrls = heroImageUrls.await(),
+                heroNames = heroNames,
+                additionalImageUrls = additionalImageUrls.await(),
+                itemPurchases = itemPurchases.await(),
+                inventoryChanges = inventoryChanges.await(),
+                isLoading = false
+            ) }
             Log.d("TestTime", "GUIDES => $guides")
             Log.d("TestTime", "heroBuilds => $heroBuilds")
             Log.d("TestTime", "itemImages => $itemImageUrls")
             Log.d("TestTime", "heroImages => $heroImageUrls")
             Log.d("TestTime", "heroNames => $heroNames")
             Log.d("TestTime", "additionalImage => $additionalImageUrls")
-            _state.update { it.copy(
-                guides = guides,
-                heroBuilds = heroBuilds,
-                itemImageUrls = itemImageUrls,
-                heroImageUrls = heroImageUrls,
-                heroNames = heroNames,
-                additionalImageUrls = additionalImageUrls,
-                isLoading = false
-            ) }
+            Log.d("TestTime", "itemPurchases => $itemPurchases")
+            Log.d("TestTime", "inventoryChanges => $inventoryChanges")
         }
     }
 
@@ -103,6 +113,8 @@ class HeroGuidesViewModel @Inject constructor(
         val heroImageUrls: MutableMap<Short, String> = mutableMapOf(),
         val heroNames: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
         val additionalImageUrls: MutableMap<String, String> = mutableMapOf(),
+        val itemPurchases: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
+        val inventoryChanges: MutableMap<Short, List<InventoryChange>> = mutableMapOf(),
         val isLoading: Boolean = false,
     )
 
@@ -211,4 +223,25 @@ class HeroGuidesViewModel @Inject constructor(
         return additionalImageUrls
     }
 
+    private fun getItemPurchases(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+            MutableMap<Short, List<ItemPurchase>> {
+
+        val buildItemPurchases = mutableMapOf<Short, List<ItemPurchase>>()
+        heroBuilds.map { build ->
+            buildItemPurchases[build.key] =
+                build.value.itemPurchases?.mapNotNull { it }?: emptyList()
+        }
+        return buildItemPurchases
+    }
+
+    private fun getInventoryCharges(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+            MutableMap<Short, List<InventoryChange>> {
+
+        val buildInventoryChanges = mutableMapOf<Short, List<InventoryChange>>()
+        heroBuilds.map { build ->
+            buildInventoryChanges[build.key] =
+                build.value.inventoryChanges?.mapNotNull { it }?: emptyList()
+        }
+        return buildInventoryChanges
+    }
 }
