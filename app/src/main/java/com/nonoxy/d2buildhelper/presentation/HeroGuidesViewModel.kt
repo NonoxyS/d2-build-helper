@@ -58,6 +58,10 @@ class HeroGuidesViewModel @Inject constructor(
 
             val itemPurchases = async { getItemPurchases(heroBuilds) }
 
+            val sortedBuildEndItemsByTime = async { sortEndItemsByTime(
+                heroBuilds = heroBuilds,
+                itemPurchases = itemPurchases.await()) }
+
             val inventoryChanges = async { getInventoryCharges(heroBuilds) }
 
             Log.d("TestTime", "start getting heroNames from api")
@@ -93,16 +97,18 @@ class HeroGuidesViewModel @Inject constructor(
                 additionalImageUrls = additionalImageUrls.await(),
                 itemPurchases = itemPurchases.await(),
                 inventoryChanges = inventoryChanges.await(),
+                sortedBuildEndItemsByTime = sortedBuildEndItemsByTime.await(),
                 isLoading = false
             ) }
             Log.d("TestTime", "GUIDES => $guides")
             Log.d("TestTime", "heroBuilds => $heroBuilds")
-            Log.d("TestTime", "itemImages => $itemImageUrls")
-            Log.d("TestTime", "heroImages => $heroImageUrls")
+            Log.d("TestTime", "itemImages => ${itemImageUrls.await()}")
+            Log.d("TestTime", "heroImages => ${heroImageUrls.await()}")
             Log.d("TestTime", "heroNames => $heroNames")
-            Log.d("TestTime", "additionalImage => $additionalImageUrls")
-            Log.d("TestTime", "itemPurchases => $itemPurchases")
-            Log.d("TestTime", "inventoryChanges => $inventoryChanges")
+            Log.d("TestTime", "additionalImage => ${additionalImageUrls.await()}")
+            Log.d("TestTime", "itemPurchases => ${itemPurchases.await()}")
+            Log.d("TestTime", "inventoryChanges => ${inventoryChanges.await()}")
+            Log.d("TestTime", "sortedEndItems => ${sortedBuildEndItemsByTime.await()}")
         }
     }
 
@@ -115,6 +121,7 @@ class HeroGuidesViewModel @Inject constructor(
         val additionalImageUrls: MutableMap<String, String> = mutableMapOf(),
         val itemPurchases: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
         val inventoryChanges: MutableMap<Short, List<InventoryChange>> = mutableMapOf(),
+        val sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
         val isLoading: Boolean = false,
     )
 
@@ -243,5 +250,36 @@ class HeroGuidesViewModel @Inject constructor(
                 build.value.inventoryChanges?.mapNotNull { it }?: emptyList()
         }
         return buildInventoryChanges
+    }
+
+    private fun sortEndItemsByTime(heroBuilds: MutableMap<Short, HeroGuideBuild>,
+                                   itemPurchases: MutableMap<Short, List<ItemPurchase>>):
+            MutableMap<Short, List<ItemPurchase>> {
+
+        val sortedBuildEndItemsByTime = mutableMapOf<Short, List<ItemPurchase>>()
+        heroBuilds.map { (heroId, build) ->
+            val endBuildItemIds = listOfNotNull(
+                build.endItem0Id,
+                build.endItem1Id,
+                build.endItem2Id,
+                build.endItem3Id,
+                build.endItem4Id,
+                build.endItem5Id)
+
+            // Result is map of (heroId, List<ItemPurchase>) where itemPurchase contained in end
+            // item build(next is EIB). First, list of itemPurchase filter by itemId contained in EIB
+            // then sorting by unique itemId elements and get only item with last purchase time
+            // After all, sorting the List<ItemPurchase> by time of buying item
+            // P.S. i know, its pretty bad code and a bit unreadable code
+            heroId to itemPurchases[heroId]?.filter { purchase ->
+                purchase.itemId.toShort() in endBuildItemIds
+            }?.groupBy { it.itemId.toShort() }
+                ?.mapValues { (_, purchases) ->
+                    purchases.maxBy { it.time }
+                }?.values?.toList()?.sortedWith(compareBy { it.time })
+        }.forEach { (heroId, sortedEndItems) ->
+            sortedBuildEndItemsByTime[heroId] = sortedEndItems ?: emptyList()
+        }
+        return sortedBuildEndItemsByTime
     }
 }

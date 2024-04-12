@@ -40,6 +40,8 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
+import com.nonoxy.d2buildhelper.domain.model.InventoryChange
+import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
 
 @Composable
 fun GuidesScreen(
@@ -69,6 +71,9 @@ fun GuidesScreen(
                         heroImagesUrls = state.heroImageUrls,
                         heroNames = state.heroNames,
                         additionalImageUrls = state.additionalImageUrls,
+                        itemPurchases = state.itemPurchases,
+                        inventoryChanges = state.inventoryChanges,
+                        sortedBuildEndItemsByTime = state.sortedBuildEndItemsByTime,
                         modifier = Modifier
                             .fillMaxSize())
                 }
@@ -84,149 +89,149 @@ private fun GuideItem(
     itemImageUrls: MutableMap<Short, String>,
     heroImagesUrls: MutableMap<Short, String>,
     heroNames: MutableMap<Short, MutableMap<String, String>>,
-    additionalImageUrls: MutableMap<String, String> = mutableMapOf(),
+    additionalImageUrls: MutableMap<String, String>,
+    itemPurchases: MutableMap<Short, List<ItemPurchase>>,
+    inventoryChanges: MutableMap<Short, List<InventoryChange>>,
+    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline)
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline)
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.primaryContainer)
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.primaryContainer)
-                    .padding(16.dp)
+            Column(
+                modifier = Modifier,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        GlideImage(
-                            model = additionalImageUrls[build?.position?.name],
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(18.dp)
-                        )
+                    GlideImage(
+                        model = additionalImageUrls[build?.position?.name],
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                        GlideImage(
-                            model = heroImagesUrls[guide.heroId],
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(32.dp)
-                        )
+                    GlideImage(
+                        model = heroImagesUrls[guide.heroId],
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(32.dp)
+                    )
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                        Text(
-                            text = heroNames[guide.heroId]?.get("displayName").toString(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = convertSecondsToMinutesAndSeconds(
-                                seconds = build?.durationSeconds?: 0),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        GlideImage(
-                            model =
-                            if (build?.isRadiant == true) additionalImageUrls["radiant_square"]
-                            else additionalImageUrls["dire_square"],
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = build?.kills.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .widthIn(min = 15.dp),
-                            textAlign = TextAlign.Center,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = "/",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0x5C)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = build?.deaths.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .widthIn(min = 15.dp),
-                            textAlign = TextAlign.Center,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = "/",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0x5C)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = build?.assists.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .widthIn(min = 15.dp),
-                            textAlign = TextAlign.Center,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                        Spacer(modifier = Modifier.width(48.dp))
-
-                        Text(
-                            text = "+${build?.impact}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        LinearProgressIndicator(
-                            progress = { build?.impact?.div(50f) ?: 20f },
-                            modifier = Modifier
-                                .fillMaxWidth(fraction = 0.5f)
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(2.dp)),
-                        )
-                    }
-
-                    ShowItemsRow(
-                        build = build,
-                        itemImageUrls = itemImageUrls
+                    Text(
+                        text = heroNames[guide.heroId]?.get("displayName").toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
                     )
                 }
+
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = convertSecondsToMinutesAndSeconds(
+                            seconds = build?.durationSeconds?: 0),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    GlideImage(
+                        model =
+                        if (build?.isRadiant == true) additionalImageUrls["radiant_square"]
+                        else additionalImageUrls["dire_square"],
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = build?.kills.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .widthIn(min = 15.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "/",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0x5C)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = build?.deaths.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .widthIn(min = 15.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "/",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0x5C)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = build?.assists.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .widthIn(min = 15.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+                    )
+                    Spacer(modifier = Modifier.width(48.dp))
+
+                    Text(
+                        text = "+${build?.impact}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    LinearProgressIndicator(
+                        progress = { build?.impact?.div(50f) ?: 20f },
+                        modifier = Modifier
+                            .fillMaxWidth(fraction = 0.5f)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(2.dp)),
+                    )
+                }
+
+                ShowItemsRow(
+                    guide.heroId,
+                    build = build,
+                    itemImageUrls = itemImageUrls,
+                    sortedBuildEndItemsByTime
+                )
             }
         }
     }
@@ -234,8 +239,10 @@ private fun GuideItem(
 
 @Composable
 fun ShowItemsRow(
+    heroId: Short,
     build: HeroGuideBuild?,
-    itemImageUrls: MutableMap<Short, String> = mutableMapOf()
+    itemImageUrls: MutableMap<Short, String>,
+    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>
 ) {
     Row(
         modifier = Modifier,
@@ -245,9 +252,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem0Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem0Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(0)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -261,9 +286,10 @@ fun ShowItemsRow(
                     .clip(RoundedCornerShape(6.dp))
                     .background(MaterialTheme.colorScheme.outline))
             }
-
             Text(
-                text = "06:33",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(0) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -274,9 +300,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem1Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem1Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(1)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -291,7 +335,9 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = "09:12",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(1) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -302,9 +348,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem2Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem2Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(2)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -320,7 +384,9 @@ fun ShowItemsRow(
             }
 
             Text(
-                text = "15:46",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(2) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -331,9 +397,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem3Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem3Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(3)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -348,7 +432,9 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = "17:14",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(3) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -359,9 +445,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem4Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem4Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(4)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -376,7 +480,9 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = "21:35",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(4) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -387,9 +493,27 @@ fun ShowItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (itemImageUrls[build?.endItem5Id] != "null") {
+            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } != null) {
                 GlideImage(
-                    model = itemImageUrls[build?.endItem5Id],
+                    model = itemImageUrls[
+                        sortedBuildEndItemsByTime[heroId]?.get(5)?.itemId?.toShort()],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                )
+            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } == null)
+                and (listOf(
+                    build?.endItem0Id,
+                    build?.endItem1Id,
+                    build?.endItem2Id,
+                    build?.endItem3Id,
+                    build?.endItem4Id,
+                    build?.endItem5Id).contains(117))) // 117 - Aegis
+            {
+                GlideImage(
+                    model = itemImageUrls[117],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
@@ -404,7 +528,9 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = "25:41",
+                text = convertSecondsToMinutesAndSeconds(
+                    sortedBuildEndItemsByTime[heroId]
+                        ?.getOrElse(5) { null }?.time?: -404), // -404 - No item or Aegis
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -429,4 +555,9 @@ fun ShowItemsRow(
     }
 }
 
-fun convertSecondsToMinutesAndSeconds(seconds: Int): String = "${seconds / 60}:${seconds % 60}"
+fun convertSecondsToMinutesAndSeconds(seconds: Int): String =
+    if (seconds > 0)
+        "${ if (seconds / 60 >= 10) seconds / 60 else "0${seconds / 60}" }:" +
+                "${ if (seconds % 60 >= 10) seconds % 60 else "0${seconds % 60}" }"
+    else if (seconds == -404) ""
+    else "00:00"
