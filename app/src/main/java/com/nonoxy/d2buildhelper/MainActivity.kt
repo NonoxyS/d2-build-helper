@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nonoxy.d2buildhelper.presentation.GuidesScreen
-import com.nonoxy.d2buildhelper.presentation.HeroGuidesViewModel
+import com.nonoxy.d2buildhelper.presentation.GuidesScreenViewModel
 import com.nonoxy.d2buildhelper.ui.theme.D2BuildHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    val viewModel = hiltViewModel<HeroGuidesViewModel>()
+                    val viewModel = hiltViewModel<GuidesScreenViewModel>()
                     val state by viewModel.state.collectAsState()
                     GuidesScreen(state = state)
                 }
