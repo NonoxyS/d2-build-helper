@@ -49,23 +49,23 @@ class GuidesScreenViewModel @Inject constructor(
             Log.d("TestTime", "start getting data")
 
             Log.d("TestTime", "start getting guides from api")
-            val guides = getGuidesInfoUseCase.execute()
+            val guides = async(Dispatchers.IO) { getGuidesInfoUseCase.execute() }
             Log.d("TestTime", "end getting guides from api")
 
             Log.d("TestTime", "start getting heroBuilds from api")
-            val heroBuilds = getHeroBuilds(guides)
+            val heroBuilds = async(Dispatchers.IO) { getHeroBuilds(guides.await()) }
             Log.d("TestTime", "end getting heroBuilds from api")
 
-            val itemPurchases = async { getItemPurchases(heroBuilds) }
+            val itemPurchases = async { getItemPurchases(heroBuilds.await()) }
 
             val sortedBuildEndItemsByTime = async { sortEndItemsByTime(
-                heroBuilds = heroBuilds,
+                heroBuilds = heroBuilds.await(),
                 itemPurchases = itemPurchases.await()) }
 
-            val inventoryChanges = async { getInventoryCharges(heroBuilds) }
+            val inventoryChanges = async { getInventoryCharges(heroBuilds.await()) }
 
             Log.d("TestTime", "start getting heroNames from api")
-            val heroNames = getHeroNameByIdUseCase.execute(guides.map { it.heroId.toInt() })
+            val heroNames = getHeroNameByIdUseCase.execute(guides.await().map { it.heroId.toInt() })
             Log.d("TestTime", "end getting heroNames from api")
 
             Log.d("TestTime", "start getting heroImages from api")
@@ -73,11 +73,11 @@ class GuidesScreenViewModel @Inject constructor(
             Log.d("TestTime", "end getting heroImages from api")
 
             Log.d("TestTime", "start getting item images from api")
-            val itemImageUrls = async { getItemImages(heroBuilds) }
+            val itemImageUrls = async { getItemImages(heroBuilds.await()) }
             Log.d("TestTime", "end getting item images from api")
 
             Log.d("TestTime", "start getting additional images from api")
-            val additionalImageUrls = async { getAdditionalImages(heroBuilds) }
+            val additionalImageUrls = async { getAdditionalImages(heroBuilds.await()) }
             Log.d("TestTime", "end getting additional images from api")
 
             // Получаем имена для загрузки изображений позиции игрока и за какую сторону играл
@@ -89,8 +89,8 @@ class GuidesScreenViewModel @Inject constructor(
             Log.d("TestTime", "end getting data")
 
             _state.update { it.copy(
-                guides = guides,
-                heroBuilds = heroBuilds,
+                guides = guides.await(),
+                heroBuilds = heroBuilds.await(),
                 itemImageUrls = itemImageUrls.await(),
                 heroImageUrls = heroImageUrls.await(),
                 heroNames = heroNames,
@@ -100,8 +100,8 @@ class GuidesScreenViewModel @Inject constructor(
                 sortedBuildEndItemsByTime = sortedBuildEndItemsByTime.await(),
                 isLoading = false
             ) }
-            Log.d("TestTime", "GUIDES => $guides")
-            Log.d("TestTime", "heroBuilds => $heroBuilds")
+            Log.d("TestTime", "GUIDES => ${guides.await()}")
+            Log.d("TestTime", "heroBuilds => ${heroBuilds.await()}")
             Log.d("TestTime", "itemImages => ${itemImageUrls.await()}")
             Log.d("TestTime", "heroImages => ${heroImageUrls.await()}")
             Log.d("TestTime", "heroNames => $heroNames")
