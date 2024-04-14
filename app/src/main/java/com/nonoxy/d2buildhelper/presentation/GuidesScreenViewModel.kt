@@ -11,10 +11,11 @@ import com.nonoxy.d2buildhelper.domain.usecases.GetGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuideBuildUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroImageUrlByNameUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetHeroNameByIdUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetHeroDetailsByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemImageUrlByNameUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemNameByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetAdditionalImageUrlByNameUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetEachHeroDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -34,16 +35,19 @@ class GuidesScreenViewModel @Inject constructor(
     private val getHeroImageUrlByNameUseCase: GetHeroImageUrlByNameUseCase,
     private val getItemImageUrlByNameUseCase: GetItemImageUrlByNameUseCase,
     private val getAdditionalImageUrlByNameUseCase: GetAdditionalImageUrlByNameUseCase,
-    private val getHeroNameByIdUseCase: GetHeroNameByIdUseCase,
+    private val getHeroDetailsByIdUseCase: GetHeroDetailsByIdUseCase,
+    private val getEachHeroDetailsUseCase: GetEachHeroDetailsUseCase,
     private val getItemNameByIdUseCase: GetItemNameByIdUseCase,
 ): ViewModel() {
 
-    private val _state = MutableStateFlow(BuildsState())
-    val state = _state.asStateFlow()
+    private val _buildsState = MutableStateFlow(BuildsState())
+    private val _heroFilterState = MutableStateFlow(HeroFilterState())
+    val buildsState = _buildsState.asStateFlow()
+    val heroFilterState = _heroFilterState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _state.update { it.copy(
+            _buildsState.update { it.copy(
                 isLoading = true
             ) }
             Log.d("TestTime", "start getting data")
@@ -62,14 +66,14 @@ class GuidesScreenViewModel @Inject constructor(
                 heroBuilds = heroBuilds.await(),
                 itemPurchases = itemPurchases.await()) }
 
-            val inventoryChanges = async { getInventoryCharges(heroBuilds.await()) }
+            val inventoryChanges = async { getInventoryChanges(heroBuilds.await()) }
 
-            Log.d("TestTime", "start getting heroNames from api")
-            val heroNames = getHeroNameByIdUseCase.execute(guides.await().map { it.heroId.toInt() })
-            Log.d("TestTime", "end getting heroNames from api")
+            Log.d("TestTime", "start getting heroDetails from api")
+            val heroDetails = getHeroDetailsByIdUseCase.execute(guides.await().map { it.heroId.toInt() })
+            Log.d("TestTime", "end getting heroDetails from api")
 
             Log.d("TestTime", "start getting heroImages from api")
-            val heroImageUrls = async { getHeroImages(heroNames) }
+            val heroImageUrls = async { getHeroImages(heroDetails) }
             Log.d("TestTime", "end getting heroImages from api")
 
             Log.d("TestTime", "start getting item images from api")
@@ -88,12 +92,12 @@ class GuidesScreenViewModel @Inject constructor(
 
             Log.d("TestTime", "end getting data")
 
-            _state.update { it.copy(
+            _buildsState.update { it.copy(
                 guides = guides.await(),
                 heroBuilds = heroBuilds.await(),
                 itemImageUrls = itemImageUrls.await(),
                 heroImageUrls = heroImageUrls.await(),
-                heroNames = heroNames,
+                heroDetails = heroDetails,
                 additionalImageUrls = additionalImageUrls.await(),
                 itemPurchases = itemPurchases.await(),
                 inventoryChanges = inventoryChanges.await(),
@@ -104,11 +108,34 @@ class GuidesScreenViewModel @Inject constructor(
             Log.d("TestTime", "heroBuilds => ${heroBuilds.await()}")
             Log.d("TestTime", "itemImages => ${itemImageUrls.await()}")
             Log.d("TestTime", "heroImages => ${heroImageUrls.await()}")
-            Log.d("TestTime", "heroNames => $heroNames")
+            Log.d("TestTime", "heroDetails => $heroDetails")
             Log.d("TestTime", "additionalImage => ${additionalImageUrls.await()}")
             Log.d("TestTime", "itemPurchases => ${itemPurchases.await()}")
             Log.d("TestTime", "inventoryChanges => ${inventoryChanges.await()}")
             Log.d("TestTime", "sortedEndItems => ${sortedBuildEndItemsByTime.await()}")
+
+            val eachHeroDetails = async { getEachHeroDetailsUseCase.execute() }
+            val eachHeroImageUrls = async { getHeroImages(eachHeroDetails.await()) }
+
+            _heroFilterState.update { it.copy(
+                eachHeroDetails = eachHeroDetails.await(),
+                eachHeroImageUrls = eachHeroImageUrls.await()
+            ) }
+            Log.d("TestTime", "after download get all data...")
+        }
+    }
+
+    fun openHeroFilterDialog() {
+        _heroFilterState.update { it.copy(
+            expanded = true
+        )
+        }
+    }
+
+    fun dismissHeroFilterDialog() {
+        _heroFilterState.update {it.copy(
+            expanded = false
+        )
         }
     }
 
@@ -117,12 +144,19 @@ class GuidesScreenViewModel @Inject constructor(
         val heroBuilds: MutableMap<Short, HeroGuideBuild> = mutableMapOf(),
         val itemImageUrls: MutableMap<Short, String> = mutableMapOf(),
         val heroImageUrls: MutableMap<Short, String> = mutableMapOf(),
-        val heroNames: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
+        val heroDetails: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
         val additionalImageUrls: MutableMap<String, String> = mutableMapOf(),
         val itemPurchases: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
         val inventoryChanges: MutableMap<Short, List<InventoryChange>> = mutableMapOf(),
         val sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
         val isLoading: Boolean = false,
+    )
+    
+    data class HeroFilterState(
+        val heroSelected: Short? = null,
+        val eachHeroDetails: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
+        val eachHeroImageUrls: MutableMap<Short, String> = mutableMapOf(),
+        val expanded: Boolean = false
     )
 
     private suspend fun getHeroBuilds(guides: List<HeroGuideInfo>):
@@ -149,12 +183,12 @@ class GuidesScreenViewModel @Inject constructor(
     return heroBuilds
     }
 
-    private suspend fun getHeroImages(heroNames: MutableMap<Short, MutableMap<String, String>>):
+    private suspend fun getHeroImages(heroDetails: MutableMap<Short, MutableMap<String, String>>):
             MutableMap<Short, String> {
 
         val heroImageUrls = mutableMapOf<Short, String>()
         coroutineScope {
-            heroNames.map { hero ->
+            heroDetails.map { hero ->
                 async {
                     val heroId = hero.key
                     val shortName = hero.value["shortName"]?: "null"
@@ -241,7 +275,7 @@ class GuidesScreenViewModel @Inject constructor(
         return buildItemPurchases
     }
 
-    private fun getInventoryCharges(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+    private fun getInventoryChanges(heroBuilds: MutableMap<Short, HeroGuideBuild>):
             MutableMap<Short, List<InventoryChange>> {
 
         val buildInventoryChanges = mutableMapOf<Short, List<InventoryChange>>()

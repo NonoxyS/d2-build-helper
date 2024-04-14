@@ -24,14 +24,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             D2BuildHelperTheme {
                 window.statusBarColor = MaterialTheme.colorScheme.background.toArgb()
+                window.navigationBarColor = MaterialTheme.colorScheme.background.toArgb()
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
                     val viewModel = hiltViewModel<GuidesScreenViewModel>()
-                    val state by viewModel.state.collectAsState()
-                    GuidesScreen(state = state)
+                    val buildsState by viewModel.buildsState.collectAsState()
+                    val heroFilterState by viewModel.heroFilterState.collectAsState()
+                    GuidesScreen(
+                        buildsState = buildsState,
+                        heroFilterState = heroFilterState,
+                        onOpenHeroFilterDialog = viewModel::openHeroFilterDialog,
+                        onDismissHeroFilterDialog = viewModel::dismissHeroFilterDialog)
                 }
             }
         }

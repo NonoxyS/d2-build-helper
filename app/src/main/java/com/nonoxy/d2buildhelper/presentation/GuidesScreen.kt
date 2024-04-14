@@ -4,11 +4,14 @@ package com.nonoxy.d2buildhelper.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,60 +23,125 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.InventoryChange
 import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
+import com.nonoxy.d2buildhelper.presentation.util.TimeConverter
 
 @Composable
 fun GuidesScreen(
-    state: GuidesScreenViewModel.BuildsState
+    buildsState: GuidesScreenViewModel.BuildsState,
+    heroFilterState: GuidesScreenViewModel.HeroFilterState,
+    onOpenHeroFilterDialog: () -> Unit,
+    onDismissHeroFilterDialog: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading) {
+        if (buildsState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 8.dp
-                    )
-            ) {
-                items(state.guides) { guide ->
-                    GuideItem(
-                        guide = guide,
-                        build = state.heroBuilds[guide.heroId],
-                        itemImageUrls = state.itemImageUrls,
-                        heroImagesUrls = state.heroImageUrls,
-                        heroNames = state.heroNames,
-                        additionalImageUrls = state.additionalImageUrls,
-                        itemPurchases = state.itemPurchases,
-                        inventoryChanges = state.inventoryChanges,
-                        sortedBuildEndItemsByTime = state.sortedBuildEndItemsByTime,
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                    .background(color = MaterialTheme.colorScheme.primaryContainer)
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(1.dp, Color(red = 255, green = 255, blue = 255, alpha = 14))
+                    .clickable(
+                        onClick = { onOpenHeroFilterDialog() }
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Все герои",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC),
                         modifier = Modifier
-                            .fillMaxSize())
+                            .padding(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = 9.dp,
+                                bottom = 9.dp)
+                    )
+                    VerticalDivider(
+                        modifier = Modifier.fillMaxHeight(),
+                        thickness = 1.dp,
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 14))
+
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .padding(horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Rounded.KeyboardArrowDown,
+                            tint = Color(red = 255, green = 255, blue = 255, alpha = 0xCC),
+                            contentDescription = null,
+                        )
+                    }
+                }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 8.dp
+                        )
+                ) {
+                    items(buildsState.guides) { guide ->
+                        GuideItem(
+                            guide = guide,
+                            build = buildsState.heroBuilds[guide.heroId],
+                            itemImageUrls = buildsState.itemImageUrls,
+                            heroImagesUrls = buildsState.heroImageUrls,
+                            heroDetails = buildsState.heroDetails,
+                            additionalImageUrls = buildsState.additionalImageUrls,
+                            itemPurchases = buildsState.itemPurchases,
+                            inventoryChanges = buildsState.inventoryChanges,
+                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                }
+
+                if (heroFilterState.expanded) {
+                    HeroFilterDialog(
+                        heroFilterState = heroFilterState,
+                        onDismiss = onDismissHeroFilterDialog
+                    )
                 }
             }
         }
@@ -86,7 +154,7 @@ private fun GuideItem(
     build: HeroGuideBuild?,
     itemImageUrls: MutableMap<Short, String>,
     heroImagesUrls: MutableMap<Short, String>,
-    heroNames: MutableMap<Short, MutableMap<String, String>>,
+    heroDetails: MutableMap<Short, MutableMap<String, String>>,
     additionalImageUrls: MutableMap<String, String>,
     itemPurchases: MutableMap<Short, List<ItemPurchase>>,
     inventoryChanges: MutableMap<Short, List<InventoryChange>>,
@@ -133,7 +201,7 @@ private fun GuideItem(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = heroNames[guide.heroId]?.get("displayName").toString(),
+                        text = heroDetails[guide.heroId]?.get("displayName").toString(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
                     )
@@ -144,7 +212,7 @@ private fun GuideItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = convertSecondsToMinutesAndSeconds(
+                        text = TimeConverter.convertSecondsToMinutesAndSeconds(
                             seconds = build?.durationSeconds?: 0),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -224,7 +292,7 @@ private fun GuideItem(
                     )
                 }
 
-                ShowItemsRow(
+                ItemsRow(
                     guide.heroId,
                     build = build,
                     itemImageUrls = itemImageUrls,
@@ -236,7 +304,7 @@ private fun GuideItem(
 }
 
 @Composable
-fun ShowItemsRow(
+fun ItemsRow(
     heroId: Short,
     build: HeroGuideBuild?,
     itemImageUrls: MutableMap<Short, String>,
@@ -285,7 +353,7 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(0) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
@@ -333,7 +401,7 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(1) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
@@ -382,7 +450,7 @@ fun ShowItemsRow(
             }
 
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(2) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
@@ -430,7 +498,7 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(3) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
@@ -478,7 +546,7 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(4) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
@@ -526,7 +594,7 @@ fun ShowItemsRow(
                     .background(MaterialTheme.colorScheme.outline))
             }
             Text(
-                text = convertSecondsToMinutesAndSeconds(
+                text = TimeConverter.convertSecondsToMinutesAndSeconds(
                     sortedBuildEndItemsByTime[heroId]
                         ?.getOrElse(5) { null }?.time?: -404), // -404 - No item or Aegis
                 style = MaterialTheme.typography.bodySmall,
@@ -553,9 +621,94 @@ fun ShowItemsRow(
     }
 }
 
-fun convertSecondsToMinutesAndSeconds(seconds: Int): String =
-    if (seconds > 0)
-        "${ if (seconds / 60 >= 10) seconds / 60 else "0${seconds / 60}" }:" +
-                "${ if (seconds % 60 >= 10) seconds % 60 else "0${seconds % 60}" }"
-    else if (seconds == -404) ""
-    else "00:00"
+@Composable
+fun HeroFilterDialog(
+    heroFilterState: GuidesScreenViewModel.HeroFilterState,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() }
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(308.dp)
+                .border(1.dp, MaterialTheme.colorScheme.outline),
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                var searchText by remember { mutableStateOf("") }
+                OutlinedTextField(
+                    modifier = Modifier,
+                    value = searchText,
+                    onValueChange = { newText ->
+                        searchText = newText
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Фильтр героев",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontSize = 14.sp) },
+                    singleLine = true,
+                    textStyle = TextStyle(fontSize = 14.sp)
+                )
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    val filteredHeroes = heroFilterState.eachHeroDetails.filter { (_, value) ->
+                        value["displayName"]?.contains(searchText, ignoreCase = true) ?: false
+                    }
+                    items(filteredHeroes.toList()
+                        .sortedBy { (heroId, value) -> value["displayName"] }
+                        .toMap()
+                        .map { it.key } ) { heroId ->
+                        HeroFilterItem(
+                            heroId = heroId,
+                            displayName = heroFilterState.eachHeroDetails[heroId]
+                                ?.get("displayName") ?: "",
+                            imageUrl = heroFilterState.eachHeroImageUrls[heroId]?: "null"
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HeroFilterItem(
+    heroId: Short,
+    displayName: String,
+    imageUrl: String
+) {
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        GlideImage(
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = displayName,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
+        )
+    }
+}
