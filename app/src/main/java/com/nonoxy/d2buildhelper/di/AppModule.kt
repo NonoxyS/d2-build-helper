@@ -11,10 +11,11 @@ import com.nonoxy.d2buildhelper.domain.usecases.GetGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuideBuildUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroImageUrlByNameUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetHeroNameByIdUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetHeroDetailsByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemImageUrlByNameUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemNameByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetAdditionalImageUrlByNameUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetEachHeroDetailsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,8 +73,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideGetHeroNameByIdUseCase(firebaseClient: ResourceClient): GetHeroNameByIdUseCase {
-        return GetHeroNameByIdUseCase(firebaseClient)
+    fun provideGetHeroDetailsByIdUseCase(firebaseClient: ResourceClient): GetHeroDetailsByIdUseCase {
+        return GetHeroDetailsByIdUseCase(firebaseClient)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetEachHeroDetailsUseCase(firebaseClient: ResourceClient): GetEachHeroDetailsUseCase {
+        return GetEachHeroDetailsUseCase(firebaseClient)
     }
 
     @Provides

@@ -1,5 +1,6 @@
 package com.nonoxy.d2buildhelper.data.repository
 
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -10,6 +11,8 @@ import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 
 class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClient {
+
+    private var firestoreHeroesListener: ListenerRegistration? = null
     override suspend fun getItemNameById(itemIds: List<Int>): MutableMap<Short, String> {
         val itemNames = mutableMapOf<Short, String>()
         
@@ -33,10 +36,10 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
         return itemNames
     }
 
-    override suspend fun getHeroNameById(heroIds: List<Int>):
+    override suspend fun getHeroDetailsById(heroIds: List<Int>):
             MutableMap<Short, MutableMap<String, String>> {
 
-        val heroNames = mutableMapOf<Short, MutableMap<String, String>>()
+        val heroDetails = mutableMapOf<Short, MutableMap<String, String>>()
         var firestoreResult = firebaseClient.firestore.collection("heroes")
             .whereIn("id", heroIds)
             .get(Source.CACHE)
@@ -50,12 +53,11 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
         }
 
         for (document in firestoreResult) {
-            heroNames[document.get("id").toString().toShort()] =
+            heroDetails[document.get("id").toString().toShort()] =
                 mutableMapOf("displayName" to document.get("displayName").toString(),
                     "shortName" to document.get("shortName").toString())
         }
-
-        return heroNames
+        return heroDetails
     }
 
     override suspend fun getHeroImageUrlByName(heroName: String):
@@ -97,4 +99,23 @@ class FirebaseResourceClient(private val firebaseClient: Firebase): ResourceClie
             }
     }
 
+    override suspend fun getEachHeroDetails(): MutableMap<Short, MutableMap<String, String>> {
+        return suspendCancellableCoroutine { continuation ->
+            val eachHeroDetails = mutableMapOf<Short, MutableMap<String, String>>()
+            firestoreHeroesListener = firebaseClient.firestore.collection("heroes")
+                .addSnapshotListener { snapshot, _ ->
+                    if (snapshot != null) {
+                        for (document in snapshot) {
+                            eachHeroDetails[document.get("id").toString().toShort()] =
+                                mutableMapOf(
+                                    "displayName" to document.get("displayName").toString(),
+                                    "shortName" to document.get("shortName").toString()
+                                )
+                        }
+                        firestoreHeroesListener?.remove()
+                        continuation.resume(eachHeroDetails)
+                    }
+                }
+        }
+    }
 }

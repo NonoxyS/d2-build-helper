@@ -6,7 +6,7 @@ interface ResourceClient {
     suspend fun getItemNameById(itemIds: List<Int>): MutableMap<Short, String>
 
     // -> {heroId: {displayName: displayName, shortName: shortName} }
-    suspend fun getHeroNameById(heroIds: List<Int>): MutableMap<Short, MutableMap<String, String>>
+    suspend fun getHeroDetailsById(heroIds: List<Int>): MutableMap<Short, MutableMap<String, String>>
 
     // -> URL
     suspend fun getHeroImageUrlByName(heroName: String): String
@@ -16,4 +16,6 @@ interface ResourceClient {
 
     // -> URL
     suspend fun getUtilImageUrlByName(utilName: String): String
+
+    suspend fun getEachHeroDetails(): MutableMap<Short, MutableMap<String, String>>
 }
