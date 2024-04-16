@@ -23,9 +23,11 @@ class ApolloHeroBuildClient(private val apolloClient: ApolloClient) : HeroBuildC
             ?: emptyList()
     }
 
+    // Always cast Short to Int, because there is no JsonWriter adapter to serialize Short value
+    // Need to add CustomScalarAdapter to ApolloClient
     override suspend fun getHeroGuidesInfo(heroId: Short): List<HeroGuideInfo> {
         return apolloClient.query(
-            HeroGuidesInfoQuery(Optional.presentIfNotNull(heroId as Any?)))
+            HeroGuidesInfoQuery(Optional.presentIfNotNull(heroId.toInt())))
             .execute()
             .data
             ?.heroStats?.guide
