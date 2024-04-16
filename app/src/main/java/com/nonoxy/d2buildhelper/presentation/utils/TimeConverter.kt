@@ -1,4 +1,4 @@
-package com.nonoxy.d2buildhelper.presentation.util
+package com.nonoxy.d2buildhelper.presentation.utils
 
 object TimeConverter {
     fun convertSecondsToMinutesAndSeconds(seconds: Int): String =
