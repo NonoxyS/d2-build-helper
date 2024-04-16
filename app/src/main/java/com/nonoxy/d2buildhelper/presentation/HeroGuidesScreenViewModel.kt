@@ -7,15 +7,15 @@ import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.InventoryChange
 import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
+import com.nonoxy.d2buildhelper.domain.usecases.GetAdditionalImageUrlByNameUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetEachHeroDetailsUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetGuidesInfoUseCase
+import com.nonoxy.d2buildhelper.domain.usecases.GetHeroDetailsByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuideBuildUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroGuidesInfoUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetHeroImageUrlByNameUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetHeroDetailsByIdUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemImageUrlByNameUseCase
 import com.nonoxy.d2buildhelper.domain.usecases.GetItemNameByIdUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetAdditionalImageUrlByNameUseCase
-import com.nonoxy.d2buildhelper.domain.usecases.GetEachHeroDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GuidesScreenViewModel @Inject constructor(
+class HeroGuidesScreenViewModel @Inject constructor(
     private val getGuidesInfoUseCase: GetGuidesInfoUseCase,
     private val getHeroGuidesInfoUseCase: GetHeroGuidesInfoUseCase,
     private val getHeroGuideBuildUseCase: GetHeroGuideBuildUseCase,
@@ -45,23 +45,20 @@ class GuidesScreenViewModel @Inject constructor(
     val buildsState = _buildsState.asStateFlow()
     val heroFilterState = _heroFilterState.asStateFlow()
 
-    init {
-        getGuidesData()
-    }
-
-    fun getGuidesData() {
+    fun getHeroGuidesData() {
         viewModelScope.launch {
             _buildsState.update { it.copy(
                 isLoading = true
             ) }
             Log.d("TestTime", "start getting data")
 
-            Log.d("TestTime", "start getting guides from api")
-            val guides = async(Dispatchers.IO) { getGuidesInfoUseCase.execute() }
-            Log.d("TestTime", "end getting guides from api")
+            Log.d("TestTime", "start getting heroGuides from api")
+            val heroGuides = async(Dispatchers.IO) {
+                getHeroGuidesInfoUseCase.execute(_heroFilterState.value.heroSelected?: 48) }
+            Log.d("TestTime", "end getting heroGuides from api")
 
             Log.d("TestTime", "start getting heroBuilds from api")
-            val heroBuilds = async(Dispatchers.IO) { getHeroBuilds(guides.await()) }
+            val heroBuilds = async(Dispatchers.IO) { getHeroBuilds(heroGuides.await()) }
             Log.d("TestTime", "end getting heroBuilds from api")
 
             val itemPurchases = async { getItemPurchases(heroBuilds.await()) }
@@ -73,7 +70,7 @@ class GuidesScreenViewModel @Inject constructor(
             val inventoryChanges = async { getInventoryChanges(heroBuilds.await()) }
 
             Log.d("TestTime", "start getting heroDetails from api")
-            val heroDetails = getHeroDetailsByIdUseCase.execute(guides.await().map { it.heroId.toInt() })
+            val heroDetails = getHeroDetailsByIdUseCase.execute(heroGuides.await().map { it.heroId.toInt() })
             Log.d("TestTime", "end getting heroDetails from api")
 
             Log.d("TestTime", "start getting heroImages from api")
@@ -97,7 +94,7 @@ class GuidesScreenViewModel @Inject constructor(
             Log.d("TestTime", "end getting data")
 
             _buildsState.update { it.copy(
-                guides = guides.await(),
+                heroGuides = heroGuides.await(),
                 heroBuilds = heroBuilds.await(),
                 itemImageUrls = itemImageUrls.await(),
                 heroImageUrls = heroImageUrls.await(),
@@ -108,7 +105,7 @@ class GuidesScreenViewModel @Inject constructor(
                 sortedBuildEndItemsByTime = sortedBuildEndItemsByTime.await(),
                 isLoading = false
             ) }
-            Log.d("TestTime", "GUIDES => ${guides.await()}")
+            Log.d("TestTime", "GUIDES => ${heroGuides.await()}")
             Log.d("TestTime", "heroBuilds => ${heroBuilds.await()}")
             Log.d("TestTime", "itemImages => ${itemImageUrls.await()}")
             Log.d("TestTime", "heroImages => ${heroImageUrls.await()}")
@@ -144,8 +141,8 @@ class GuidesScreenViewModel @Inject constructor(
     }
 
     data class BuildsState(
-        val guides: List<HeroGuideInfo> = emptyList(),
-        val heroBuilds: MutableMap<Short, HeroGuideBuild> = mutableMapOf(),
+        val heroGuides: List<HeroGuideInfo> = emptyList(),
+        val heroBuilds: MutableMap<Short, List<HeroGuideBuild>> = mutableMapOf(),
         val itemImageUrls: MutableMap<Short, String> = mutableMapOf(),
         val heroImageUrls: MutableMap<Short, String> = mutableMapOf(),
         val heroDetails: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
@@ -163,28 +160,30 @@ class GuidesScreenViewModel @Inject constructor(
         val expanded: Boolean = false
     )
 
-    private suspend fun getHeroBuilds(guides: List<HeroGuideInfo>):
-            MutableMap<Short, HeroGuideBuild> {
+    private suspend fun getHeroBuilds(heroGuides: List<HeroGuideInfo>):
+            MutableMap<Short, List<HeroGuideBuild>> {
 
-        val heroBuilds = mutableMapOf<Short, HeroGuideBuild>()
-        coroutineScope {
-            guides.map { guide ->
-                async(Dispatchers.IO) {
-                    val firstGuideInfo = guide.guidesInfo?.firstOrNull()
-                    val heroId = guide.heroId
-                    val build = firstGuideInfo?.let { guideInfo ->
-                        getHeroGuideBuildUseCase.execute(
-                            guideInfo.matchId,
-                            guideInfo.steamAccountId
-                        )
+        val heroBuilds = mutableMapOf<Short, List<HeroGuideBuild>>()
+
+        if (heroGuides.isNotEmpty()) {
+            val heroId = heroGuides.first().heroId
+            val guidesInfo = heroGuides.first().guidesInfo ?: emptyList()
+
+            coroutineScope {
+                val buildsForHeroDeferred = guidesInfo.map { guideInfo ->
+                    async(Dispatchers.IO) {
+                        guideInfo?.let {
+                            getHeroGuideBuildUseCase.execute(it.matchId, guideInfo.steamAccountId) }
                     }
-                    heroId to build
                 }
-            }.awaitAll().forEach { (heroId, build) ->
-                if (build != null) heroBuilds[heroId] = build
+
+                val buildsForHero = buildsForHeroDeferred.awaitAll().filterNotNull()
+
+                heroBuilds[heroId] = buildsForHero
             }
         }
-    return heroBuilds
+
+        return heroBuilds
     }
 
     private suspend fun getHeroImages(heroDetails: MutableMap<Short, MutableMap<String, String>>):
@@ -206,24 +205,24 @@ class GuidesScreenViewModel @Inject constructor(
         return heroImageUrls
     }
 
-    private suspend fun getItemImages(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+    private suspend fun getItemImages(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>):
             MutableMap<Short, String> {
 
         val itemImageUrls = mutableMapOf<Short, String>()
         coroutineScope {
-            heroBuilds.forEach { build ->
+            heroBuilds.values.first().forEach { build ->
                 async {
                     val itemIds = listOfNotNull(
-                        build.value.endItem0Id,
-                        build.value.endItem1Id,
-                        build.value.endItem2Id,
-                        build.value.endItem3Id,
-                        build.value.endItem4Id,
-                        build.value.endItem5Id,
-                        build.value.endBackpack0Id,
-                        build.value.endBackpack1Id,
-                        build.value.endBackpack2Id,
-                        build.value.endNeutralItemId
+                        build.endItem0Id,
+                        build.endItem1Id,
+                        build.endItem2Id,
+                        build.endItem3Id,
+                        build.endItem4Id,
+                        build.endItem5Id,
+                        build.endBackpack0Id,
+                        build.endBackpack1Id,
+                        build.endBackpack2Id,
+                        build.endNeutralItemId
                     )
 
                     val itemNames = getItemNameByIdUseCase.execute(itemIds.map { it.toInt() })
@@ -243,16 +242,16 @@ class GuidesScreenViewModel @Inject constructor(
         return itemImageUrls
     }
 
-    private suspend fun getAdditionalImages(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+    private suspend fun getAdditionalImages(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>):
             MutableMap<String, String> {
 
         val additionalImageUrls = mutableMapOf<String, String>()
         coroutineScope {
-            heroBuilds.forEach { build ->
+            heroBuilds.values.first().forEach { build ->
                 async {
                     val additionalNames = listOfNotNull(
-                        build.value.position?.name,
-                        if (build.value.isRadiant == true) "radiant_square" else "dire_square",
+                        build.position?.name,
+                        if (build.isRadiant == true) "radiant_square" else "dire_square",
                     )
                     additionalNames.map { additionalName ->
                         async {
@@ -268,55 +267,58 @@ class GuidesScreenViewModel @Inject constructor(
         return additionalImageUrls
     }
 
-    private fun getItemPurchases(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+    private fun getItemPurchases(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>):
             MutableMap<Short, List<ItemPurchase>> {
 
         val buildItemPurchases = mutableMapOf<Short, List<ItemPurchase>>()
-        heroBuilds.map { build ->
-            buildItemPurchases[build.key] =
-                build.value.itemPurchases?.mapNotNull { it }?: emptyList()
+        var i = 0
+        heroBuilds.values.map { build ->
+            buildItemPurchases[i.toShort()] =
+                build[i++].itemPurchases?.mapNotNull { it }?: emptyList()
         }
         return buildItemPurchases
     }
 
-    private fun getInventoryChanges(heroBuilds: MutableMap<Short, HeroGuideBuild>):
+    private fun getInventoryChanges(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>):
             MutableMap<Short, List<InventoryChange>> {
 
         val buildInventoryChanges = mutableMapOf<Short, List<InventoryChange>>()
-        heroBuilds.map { build ->
-            buildInventoryChanges[build.key] =
-                build.value.inventoryChanges?.mapNotNull { it }?: emptyList()
+        heroBuilds.values.map { build ->
+            val i = heroBuilds.values.indexOf(build)
+            buildInventoryChanges[i.toShort()] =
+                build[i].inventoryChanges?.mapNotNull { it }?: emptyList()
         }
         return buildInventoryChanges
     }
 
-    private fun sortEndItemsByTime(heroBuilds: MutableMap<Short, HeroGuideBuild>,
+    private fun sortEndItemsByTime(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>,
                                    itemPurchases: MutableMap<Short, List<ItemPurchase>>):
             MutableMap<Short, List<ItemPurchase>> {
 
         val sortedBuildEndItemsByTime = mutableMapOf<Short, List<ItemPurchase>>()
-        heroBuilds.map { (heroId, build) ->
+        heroBuilds.values.map { build ->
+            val i = heroBuilds.values.indexOf(build)
             val endBuildItemIds = listOfNotNull(
-                build.endItem0Id,
-                build.endItem1Id,
-                build.endItem2Id,
-                build.endItem3Id,
-                build.endItem4Id,
-                build.endItem5Id)
+                build[i].endItem0Id,
+                build[i].endItem1Id,
+                build[i].endItem2Id,
+                build[i].endItem3Id,
+                build[i].endItem4Id,
+                build[i].endItem5Id)
 
             // Result is map of (heroId, List<ItemPurchase>) where itemPurchase contained in end
             // item build(next is EIB). First, list of itemPurchase filter by itemId contained in EIB
             // then sorting by unique itemId elements and get only item with last purchase time
             // After all, sorting the List<ItemPurchase> by time of buying item
             // P.S. i know, its pretty bad code and a bit unreadable code
-            heroId to itemPurchases[heroId]?.filter { purchase ->
+            i.toShort() to itemPurchases[i.toShort()]?.filter { purchase ->
                 purchase.itemId.toShort() in endBuildItemIds
             }?.groupBy { it.itemId.toShort() }
                 ?.mapValues { (_, purchases) ->
                     purchases.maxBy { it.time }
                 }?.values?.toList()?.sortedWith(compareBy { it.time })
-        }.forEach { (heroId, sortedEndItems) ->
-            sortedBuildEndItemsByTime[heroId] = sortedEndItems ?: emptyList()
+        }.forEach { (buildNumber, sortedEndItems) ->
+            sortedBuildEndItemsByTime[buildNumber] = sortedEndItems ?: emptyList()
         }
         return sortedBuildEndItemsByTime
     }

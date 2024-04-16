@@ -2,7 +2,6 @@
 
 package com.nonoxy.d2buildhelper.presentation
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -59,9 +57,9 @@ import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
 import com.nonoxy.d2buildhelper.presentation.utils.TimeConverter
 
 @Composable
-fun GuidesScreen(
+fun HeroGuidesScreen(
     navController: NavController,
-    buildsState: GuidesScreenViewModel.BuildsState,
+    buildsState: HeroGuidesScreenViewModel.BuildsState,
     heroFilterState: GuidesScreenViewModel.HeroFilterState,
     onOpenHeroFilterDialog: () -> Unit,
     onDismissHeroFilterDialog: () -> Unit
@@ -123,10 +121,10 @@ fun GuidesScreen(
                             top = 8.dp
                         )
                 ) {
-                    items(buildsState.guides) { guide ->
+                    items(buildsState.heroGuides) { guide ->
                         GuideItem(
                             guide = guide,
-                            build = buildsState.heroBuilds[guide.heroId],
+                            build = buildsState.heroBuilds[guide.heroId]?.first(),
                             itemImageUrls = buildsState.itemImageUrls,
                             heroImagesUrls = buildsState.heroImageUrls,
                             heroDetails = buildsState.heroDetails,
@@ -145,7 +143,7 @@ fun GuidesScreen(
                         navController = navController,
                         heroFilterState = heroFilterState,
                         onDismiss = onDismissHeroFilterDialog,
-                        onItemClick = { navController.navigate("heroGuides") }
+                        onItemClick = { }
                     )
                 }
             }
@@ -309,329 +307,9 @@ private fun GuideItem(
 }
 
 @Composable
-fun ItemsRow(
-    heroId: Short,
-    build: HeroGuideBuild?,
-    itemImageUrls: MutableMap<Short, String>,
-    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>
-) {
-    Row(
-        modifier = Modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(0)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(0) { null }?.time?: -404), // -404 - No item
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(1)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(1) { null }?.time?: -404), // -404 - No item
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(2)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(2) { null }?.time?: -404), // -404 - No item
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(3)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(3) { null }?.time?: -404), // -404 - No item
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(4)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(4) { null }?.time?: -404), // -404 - No item
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } != null) {
-                GlideImage(
-                    model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(5)?.itemId?.toShort()],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } == null)
-                and (listOf(
-                    build?.endItem0Id,
-                    build?.endItem1Id,
-                    build?.endItem2Id,
-                    build?.endItem3Id,
-                    build?.endItem4Id,
-                    build?.endItem5Id).contains(117))) // 117 - Aegis
-            {
-                GlideImage(
-                    model = itemImageUrls[117],
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-            } else {
-                Box(modifier = Modifier
-                    .width(36.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.outline))
-            }
-            Text(
-                text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(5) { null }?.time?: -404), // -404 - No item or Aegis
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-            )
-        }
-
-        if (itemImageUrls[build?.endNeutralItemId] != "null") {
-            GlideImage(
-                model = itemImageUrls[build?.endNeutralItemId],
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            Box(modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.outline))
-        }
-    }
-}
-
-@Composable
 fun HeroFilterDialog(
-    navController: NavController,
-    heroFilterState: GuidesScreenViewModel.HeroFilterState,
-    onDismiss: () -> Unit,
-    onItemClick: () -> Unit
+    heroFilterState: HeroGuidesScreenViewModel.HeroFilterState,
+    onDismiss: () -> Unit
 ) {
     Dialog(
         onDismissRequest = { onDismiss() }
@@ -685,42 +363,11 @@ fun HeroFilterDialog(
                             displayName = heroFilterState.eachHeroDetails[heroId]
                                 ?.get("displayName") ?: "",
                             imageUrl = heroFilterState.eachHeroImageUrls[heroId]?: "null",
-                            onItemClick = onItemClick
+                            onItemClick = {}
                         )
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun HeroFilterItem(
-    heroId: Short,
-    displayName: String,
-    imageUrl: String,
-    onItemClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { onItemClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        GlideImage(
-            model = imageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = displayName,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-        )
     }
 }
