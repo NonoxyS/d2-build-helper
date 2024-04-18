@@ -145,7 +145,11 @@ fun GuidesScreen(
                         navController = navController,
                         heroFilterState = heroFilterState,
                         onDismiss = onDismissHeroFilterDialog,
-                        onItemClick = { navController.navigate("heroGuides") }
+                        onItemClick = { clickedHero ->
+                            Log.d("HeroFilter", "HeroFilterDialog => clicked: $clickedHero")
+                            navController.navigate("heroGuides/$clickedHero")
+                            onDismissHeroFilterDialog()
+                        }
                     )
                 }
             }
@@ -631,7 +635,7 @@ fun HeroFilterDialog(
     navController: NavController,
     heroFilterState: GuidesScreenViewModel.HeroFilterState,
     onDismiss: () -> Unit,
-    onItemClick: () -> Unit
+    onItemClick: (Short) -> Unit
 ) {
     Dialog(
         onDismissRequest = { onDismiss() }
@@ -699,13 +703,13 @@ fun HeroFilterItem(
     heroId: Short,
     displayName: String,
     imageUrl: String,
-    onItemClick: () -> Unit
+    onItemClick: (Short) -> Unit
 ) {
     Row(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { onItemClick() },
+            .clickable { onItemClick(heroId) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         GlideImage(

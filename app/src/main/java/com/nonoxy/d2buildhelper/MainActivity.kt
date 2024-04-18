@@ -1,20 +1,25 @@
 package com.nonoxy.d2buildhelper
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavArgument
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.nonoxy.d2buildhelper.presentation.GuidesScreen
 import com.nonoxy.d2buildhelper.presentation.GuidesScreenViewModel
 import com.nonoxy.d2buildhelper.presentation.HeroGuidesScreen
@@ -52,8 +57,16 @@ class MainActivity : ComponentActivity() {
                                 onDismissHeroFilterDialog = viewModelGuides::dismissHeroFilterDialog
                             )
                         }
-                        composable(route = "heroGuides") {
-                            viewModelHeroGuides.getHeroGuidesData()
+                        composable(
+                            route = "heroGuides/{heroId}",
+                            arguments = listOf(navArgument("heroId") {
+                                    type = NavType.IntType })) { backStackEntry ->
+                            val heroId = backStackEntry.arguments?.getInt("heroId")
+                            LaunchedEffect(key1 = heroId) {
+                                Log.d("HeroFilter", "start getting data for heroId: $heroId")
+                                viewModelHeroGuides.getHeroGuidesData(
+                                    heroId = heroId?.toShort() ?: 48)
+                            }
                             HeroGuidesScreen(
                                 navController = navController,
                                 buildsState = heroGuidesBuildState,

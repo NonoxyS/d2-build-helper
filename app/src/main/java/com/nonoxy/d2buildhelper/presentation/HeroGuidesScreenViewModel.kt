@@ -45,7 +45,7 @@ class HeroGuidesScreenViewModel @Inject constructor(
     val buildsState = _buildsState.asStateFlow()
     val heroFilterState = _heroFilterState.asStateFlow()
 
-    fun getHeroGuidesData() {
+    fun getHeroGuidesData(heroId: Short) {
         viewModelScope.launch {
             _buildsState.update { it.copy(
                 isLoading = true
@@ -54,7 +54,7 @@ class HeroGuidesScreenViewModel @Inject constructor(
 
             Log.d("TestTime", "start getting heroGuides from api")
             val heroGuides = async(Dispatchers.IO) {
-                getHeroGuidesInfoUseCase.execute(_heroFilterState.value.heroSelected?: 48) }
+                getHeroGuidesInfoUseCase.execute(heroId) }
             Log.d("TestTime", "end getting heroGuides from api")
 
             Log.d("TestTime", "start getting heroBuilds from api")

@@ -2,6 +2,7 @@
 
 package com.nonoxy.d2buildhelper.presentation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -124,7 +125,7 @@ fun HeroGuidesScreen(
                     items(buildsState.heroGuides) { guide ->
                         GuideItem(
                             guide = guide,
-                            build = buildsState.heroBuilds[guide.heroId]?.first(),
+                            build = buildsState.heroBuilds[guide.heroId]?.get(buildsState.heroGuides.indexOf(guide)),
                             itemImageUrls = buildsState.itemImageUrls,
                             heroImagesUrls = buildsState.heroImageUrls,
                             heroDetails = buildsState.heroDetails,
