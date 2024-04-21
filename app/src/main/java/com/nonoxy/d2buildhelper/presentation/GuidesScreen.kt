@@ -133,7 +133,8 @@ fun GuidesScreen(
                             additionalImageUrls = buildsState.additionalImageUrls,
                             itemPurchases = buildsState.itemPurchases,
                             inventoryChanges = buildsState.inventoryChanges,
-                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime,
+                            sortedBuildEndItemsByTime = buildsState
+                                .sortedBuildEndItemsByTime[guide.heroId] ?: emptyList(),
                             modifier = Modifier
                                 .fillMaxSize()
                         )
@@ -146,7 +147,6 @@ fun GuidesScreen(
                         heroFilterState = heroFilterState,
                         onDismiss = onDismissHeroFilterDialog,
                         onItemClick = { clickedHero ->
-                            Log.d("HeroFilter", "HeroFilterDialog => clicked: $clickedHero")
                             navController.navigate("heroGuides/$clickedHero")
                             onDismissHeroFilterDialog()
                         }
@@ -167,7 +167,7 @@ private fun GuideItem(
     additionalImageUrls: MutableMap<String, String>,
     itemPurchases: MutableMap<Short, List<ItemPurchase>>,
     inventoryChanges: MutableMap<Short, List<InventoryChange>>,
-    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>,
+    sortedBuildEndItemsByTime: List<ItemPurchase>,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -317,7 +317,7 @@ fun ItemsRow(
     heroId: Short,
     build: HeroGuideBuild?,
     itemImageUrls: MutableMap<Short, String>,
-    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>
+    sortedBuildEndItemsByTime: List<ItemPurchase>
 ) {
     Row(
         modifier = Modifier,
@@ -327,17 +327,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(0) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(0)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime[0].itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(0) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(0) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -363,8 +363,9 @@ fun ItemsRow(
             }
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(0) { null }?.time?: -404), // -404 - No item
+                    sortedBuildEndItemsByTime
+                        .getOrElse(0) { null }?.time?: -404 // -404 - No item
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -375,17 +376,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(1) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(1)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime[1].itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(1) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(1) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -411,8 +412,8 @@ fun ItemsRow(
             }
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(1) { null }?.time?: -404), // -404 - No item
+                    sortedBuildEndItemsByTime
+                        .getOrElse(1) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -423,17 +424,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(2) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(2)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime.get(2).itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(2) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(2) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -460,8 +461,8 @@ fun ItemsRow(
 
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(2) { null }?.time?: -404), // -404 - No item
+                    sortedBuildEndItemsByTime
+                        .getOrElse(2) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -472,17 +473,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(3) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(3)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime[3].itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(3) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(3) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -508,8 +509,8 @@ fun ItemsRow(
             }
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(3) { null }?.time?: -404), // -404 - No item
+                    sortedBuildEndItemsByTime
+                        .getOrElse(3) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -520,17 +521,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(4) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(4)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime[4].itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(4) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(4) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -556,8 +557,8 @@ fun ItemsRow(
             }
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(4) { null }?.time?: -404), // -404 - No item
+                    sortedBuildEndItemsByTime
+                        .getOrElse(4) { null }?.time?: -404), // -404 - No item
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
@@ -568,17 +569,17 @@ fun ItemsRow(
             modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } != null) {
+            if (sortedBuildEndItemsByTime.getOrElse(5) { null } != null) {
                 GlideImage(
                     model = itemImageUrls[
-                        sortedBuildEndItemsByTime[heroId]?.get(5)?.itemId?.toShort()],
+                        sortedBuildEndItemsByTime[5].itemId.toShort()],
                     contentDescription = null,
                     modifier = Modifier
                         .width(36.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(6.dp))
                 )
-            } else if ((sortedBuildEndItemsByTime[heroId]?.getOrElse(5) { null } == null)
+            } else if ((sortedBuildEndItemsByTime.getOrElse(5) { null } == null)
                 and (listOf(
                     build?.endItem0Id,
                     build?.endItem1Id,
@@ -604,8 +605,8 @@ fun ItemsRow(
             }
             Text(
                 text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                    sortedBuildEndItemsByTime[heroId]
-                        ?.getOrElse(5) { null }?.time?: -404), // -404 - No item or Aegis
+                    sortedBuildEndItemsByTime
+                        .getOrElse(5) { null }?.time?: -404), // -404 - No item or Aegis
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 11.sp,
                 color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)

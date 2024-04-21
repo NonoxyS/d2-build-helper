@@ -51,6 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.nonoxy.d2buildhelper.domain.model.GuideInfo
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.InventoryChange
@@ -122,17 +123,21 @@ fun HeroGuidesScreen(
                             top = 8.dp
                         )
                 ) {
-                    items(buildsState.heroGuides) { guide ->
+                    Log.d("HGTestTime", "heroGuides first => ${buildsState.heroGuides.first()}")
+                    items(buildsState.heroGuides.firstNotNullOf { it.guidesInfo }) { guide ->
+                        val guideIterator = buildsState.heroGuides.firstNotNullOf {
+                            it.guidesInfo?.indexOf(guide) }
                         GuideItem(
+                            heroId = buildsState.heroGuides.first().heroId,
                             guide = guide,
-                            build = buildsState.heroBuilds[guide.heroId]?.get(buildsState.heroGuides.indexOf(guide)),
+                            build = buildsState.heroBuilds.firstNotNullOf { it.value[guideIterator] },
                             itemImageUrls = buildsState.itemImageUrls,
                             heroImagesUrls = buildsState.heroImageUrls,
                             heroDetails = buildsState.heroDetails,
                             additionalImageUrls = buildsState.additionalImageUrls,
                             itemPurchases = buildsState.itemPurchases,
                             inventoryChanges = buildsState.inventoryChanges,
-                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime,
+                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime[guideIterator.toShort()] ?: emptyList(),
                             modifier = Modifier
                                 .fillMaxSize()
                         )
@@ -154,7 +159,8 @@ fun HeroGuidesScreen(
 
 @Composable
 private fun GuideItem(
-    guide: HeroGuideInfo,
+    heroId: Short,
+    guide: GuideInfo?,
     build: HeroGuideBuild?,
     itemImageUrls: MutableMap<Short, String>,
     heroImagesUrls: MutableMap<Short, String>,
@@ -162,7 +168,7 @@ private fun GuideItem(
     additionalImageUrls: MutableMap<String, String>,
     itemPurchases: MutableMap<Short, List<ItemPurchase>>,
     inventoryChanges: MutableMap<Short, List<InventoryChange>>,
-    sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>>,
+    sortedBuildEndItemsByTime: List<ItemPurchase>,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -195,7 +201,7 @@ private fun GuideItem(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     GlideImage(
-                        model = heroImagesUrls[guide.heroId],
+                        model = heroImagesUrls[heroId],
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
@@ -205,7 +211,7 @@ private fun GuideItem(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = heroDetails[guide.heroId]?.get("displayName").toString(),
+                        text = heroDetails[heroId]?.get("displayName").toString(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
                     )
@@ -295,12 +301,11 @@ private fun GuideItem(
                             .clip(RoundedCornerShape(2.dp)),
                     )
                 }
-
                 ItemsRow(
-                    guide.heroId,
+                    heroId = heroId,
                     build = build,
                     itemImageUrls = itemImageUrls,
-                    sortedBuildEndItemsByTime
+                    sortedBuildEndItemsByTime = sortedBuildEndItemsByTime
                 )
             }
         }

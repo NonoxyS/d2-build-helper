@@ -1,6 +1,7 @@
 package com.nonoxy.d2buildhelper.presentation
 
 import android.util.Log
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
@@ -88,12 +89,6 @@ class GuidesScreenViewModel @Inject constructor(
             val additionalImageUrls = async { getAdditionalImages(heroBuilds.await()) }
             Log.d("TestTime", "end getting additional images from api")
 
-            // Получаем имена для загрузки изображений позиции игрока и за какую сторону играл
-            // Получаем имена предметов по их id для загрузки изображений
-            // Получаем ссылки для загрузки изображений позиций и сторон (radiant/dire)
-            // Получаем ссылки для загрузки изображений предметов
-            // Ожидаем завершения всех асинхронных операций
-
             Log.d("TestTime", "end getting data")
 
             _buildsState.update { it.copy(
@@ -143,6 +138,7 @@ class GuidesScreenViewModel @Inject constructor(
         }
     }
 
+    @Stable
     data class BuildsState(
         val guides: List<HeroGuideInfo> = emptyList(),
         val heroBuilds: MutableMap<Short, HeroGuideBuild> = mutableMapOf(),
@@ -156,6 +152,7 @@ class GuidesScreenViewModel @Inject constructor(
         val isLoading: Boolean = false,
     )
 
+    @Stable
     data class HeroFilterState(
         val heroSelected: Short? = null,
         val eachHeroDetails: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),

@@ -1,6 +1,7 @@
 package com.nonoxy.d2buildhelper.presentation
 
 import android.util.Log
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
@@ -50,16 +51,16 @@ class HeroGuidesScreenViewModel @Inject constructor(
             _buildsState.update { it.copy(
                 isLoading = true
             ) }
-            Log.d("TestTime", "start getting data")
+            Log.d("HGTestTime", "start getting data")
 
-            Log.d("TestTime", "start getting heroGuides from api")
+            Log.d("HGTestTime", "start getting heroGuides from api")
             val heroGuides = async(Dispatchers.IO) {
                 getHeroGuidesInfoUseCase.execute(heroId) }
-            Log.d("TestTime", "end getting heroGuides from api")
+            Log.d("HGTestTime", "end getting heroGuides from api")
 
-            Log.d("TestTime", "start getting heroBuilds from api")
+            Log.d("HGTestTime", "start getting heroBuilds from api")
             val heroBuilds = async(Dispatchers.IO) { getHeroBuilds(heroGuides.await()) }
-            Log.d("TestTime", "end getting heroBuilds from api")
+            Log.d("HGTestTime", "end getting heroBuilds from api")
 
             val itemPurchases = async { getItemPurchases(heroBuilds.await()) }
 
@@ -69,21 +70,21 @@ class HeroGuidesScreenViewModel @Inject constructor(
 
             val inventoryChanges = async { getInventoryChanges(heroBuilds.await()) }
 
-            Log.d("TestTime", "start getting heroDetails from api")
+            Log.d("HGTestTime", "start getting heroDetails from api")
             val heroDetails = getHeroDetailsByIdUseCase.execute(heroGuides.await().map { it.heroId.toInt() })
-            Log.d("TestTime", "end getting heroDetails from api")
+            Log.d("HGTestTime", "end getting heroDetails from api")
 
-            Log.d("TestTime", "start getting heroImages from api")
+            Log.d("HGTestTime", "start getting heroImages from api")
             val heroImageUrls = async { getHeroImages(heroDetails) }
-            Log.d("TestTime", "end getting heroImages from api")
+            Log.d("HGTestTime", "end getting heroImages from api")
 
-            Log.d("TestTime", "start getting item images from api")
+            Log.d("HGTestTime", "start getting item images from api")
             val itemImageUrls = async { getItemImages(heroBuilds.await()) }
-            Log.d("TestTime", "end getting item images from api")
+            Log.d("HGTestTime", "end getting item images from api")
 
-            Log.d("TestTime", "start getting additional images from api")
+            Log.d("HGTestTime", "start getting additional images from api")
             val additionalImageUrls = async { getAdditionalImages(heroBuilds.await()) }
-            Log.d("TestTime", "end getting additional images from api")
+            Log.d("HGTestTime", "end getting additional images from api")
 
             // Получаем имена для загрузки изображений позиции игрока и за какую сторону играл
             // Получаем имена предметов по их id для загрузки изображений
@@ -91,7 +92,7 @@ class HeroGuidesScreenViewModel @Inject constructor(
             // Получаем ссылки для загрузки изображений предметов
             // Ожидаем завершения всех асинхронных операций
 
-            Log.d("TestTime", "end getting data")
+            Log.d("HGTestTime", "end getting data")
 
             _buildsState.update { it.copy(
                 heroGuides = heroGuides.await(),
@@ -105,15 +106,15 @@ class HeroGuidesScreenViewModel @Inject constructor(
                 sortedBuildEndItemsByTime = sortedBuildEndItemsByTime.await(),
                 isLoading = false
             ) }
-            Log.d("TestTime", "GUIDES => ${heroGuides.await()}")
-            Log.d("TestTime", "heroBuilds => ${heroBuilds.await()}")
-            Log.d("TestTime", "itemImages => ${itemImageUrls.await()}")
-            Log.d("TestTime", "heroImages => ${heroImageUrls.await()}")
-            Log.d("TestTime", "heroDetails => $heroDetails")
-            Log.d("TestTime", "additionalImage => ${additionalImageUrls.await()}")
-            Log.d("TestTime", "itemPurchases => ${itemPurchases.await()}")
-            Log.d("TestTime", "inventoryChanges => ${inventoryChanges.await()}")
-            Log.d("TestTime", "sortedEndItems => ${sortedBuildEndItemsByTime.await()}")
+            Log.d("HGTestTime", "GUIDES => ${heroGuides.await()}")
+            Log.d("HGTestTime", "heroBuilds => ${heroBuilds.await()}")
+            Log.d("HGTestTime", "itemImages => ${itemImageUrls.await()}")
+            Log.d("HGTestTime", "heroImages => ${heroImageUrls.await()}")
+            Log.d("HGTestTime", "heroDetails => $heroDetails")
+            Log.d("HGTestTime", "additionalImage => ${additionalImageUrls.await()}")
+            Log.d("HGTestTime", "itemPurchases => ${itemPurchases.await()}")
+            Log.d("HGTestTime", "inventoryChanges => ${inventoryChanges.await()}")
+            Log.d("HGTestTime", "sortedEndItems => ${sortedBuildEndItemsByTime.await()}")
 
             val eachHeroDetails = async { getEachHeroDetailsUseCase.execute() }
             val eachHeroImageUrls = async { getHeroImages(eachHeroDetails.await()) }
@@ -122,7 +123,7 @@ class HeroGuidesScreenViewModel @Inject constructor(
                 eachHeroDetails = eachHeroDetails.await(),
                 eachHeroImageUrls = eachHeroImageUrls.await()
             ) }
-            Log.d("TestTime", "after download get all data...")
+            Log.d("HGTestTime", "after download get all data...")
         }
     }
 
@@ -140,6 +141,7 @@ class HeroGuidesScreenViewModel @Inject constructor(
         }
     }
 
+    @Stable
     data class BuildsState(
         val heroGuides: List<HeroGuideInfo> = emptyList(),
         val heroBuilds: MutableMap<Short, List<HeroGuideBuild>> = mutableMapOf(),
@@ -150,9 +152,10 @@ class HeroGuidesScreenViewModel @Inject constructor(
         val itemPurchases: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
         val inventoryChanges: MutableMap<Short, List<InventoryChange>> = mutableMapOf(),
         val sortedBuildEndItemsByTime: MutableMap<Short, List<ItemPurchase>> = mutableMapOf(),
-        val isLoading: Boolean = false,
+        val isLoading: Boolean = true,
     )
 
+    @Stable
     data class HeroFilterState(
         val heroSelected: Short? = null,
         val eachHeroDetails: MutableMap<Short, MutableMap<String, String>> = mutableMapOf(),
@@ -176,10 +179,8 @@ class HeroGuidesScreenViewModel @Inject constructor(
                             getHeroGuideBuildUseCase.execute(it.matchId, guideInfo.steamAccountId) }
                     }
                 }
-
-                val buildsForHero = buildsForHeroDeferred.awaitAll().filterNotNull()
-
-                heroBuilds[heroId] = buildsForHero
+                heroBuilds[heroId] = buildsForHeroDeferred.awaitAll().filterNotNull()
+                Log.d("HGTestTime", "heroBuilds => ${buildsForHeroDeferred.awaitAll().size}")
             }
         }
 
