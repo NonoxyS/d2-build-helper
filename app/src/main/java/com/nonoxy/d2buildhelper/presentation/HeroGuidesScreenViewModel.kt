@@ -272,10 +272,10 @@ class HeroGuidesScreenViewModel @Inject constructor(
             MutableMap<Short, List<ItemPurchase>> {
 
         val buildItemPurchases = mutableMapOf<Short, List<ItemPurchase>>()
-        var i = 0
-        heroBuilds.values.map { build ->
+        heroBuilds.values.first().map { build ->
+            val i = heroBuilds.values.first().indexOf(build)
             buildItemPurchases[i.toShort()] =
-                build[i++].itemPurchases?.mapNotNull { it }?: emptyList()
+                build.itemPurchases?.mapNotNull { it }?: emptyList()
         }
         return buildItemPurchases
     }
@@ -295,17 +295,18 @@ class HeroGuidesScreenViewModel @Inject constructor(
     private fun sortEndItemsByTime(heroBuilds: MutableMap<Short, List<HeroGuideBuild>>,
                                    itemPurchases: MutableMap<Short, List<ItemPurchase>>):
             MutableMap<Short, List<ItemPurchase>> {
-
+        Log.e("HeroBuilds", "keys => ${heroBuilds.keys} builds => ${heroBuilds.values.first().size}")
+        Log.e("HeroBuilds", "itemPurchases => ${heroBuilds.keys} builds => ${heroBuilds.values.first().size}")
         val sortedBuildEndItemsByTime = mutableMapOf<Short, List<ItemPurchase>>()
-        heroBuilds.values.map { build ->
-            val i = heroBuilds.values.indexOf(build)
+        heroBuilds.values.first().map { build ->
+            val i = heroBuilds.values.first().indexOf(build)
             val endBuildItemIds = listOfNotNull(
-                build[i].endItem0Id,
-                build[i].endItem1Id,
-                build[i].endItem2Id,
-                build[i].endItem3Id,
-                build[i].endItem4Id,
-                build[i].endItem5Id)
+                build.endItem0Id,
+                build.endItem1Id,
+                build.endItem2Id,
+                build.endItem3Id,
+                build.endItem4Id,
+                build.endItem5Id)
 
             // Result is map of (heroId, List<ItemPurchase>) where itemPurchase contained in end
             // item build(next is EIB). First, list of itemPurchase filter by itemId contained in EIB
