@@ -14,16 +14,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavArgument
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.nonoxy.d2buildhelper.presentation.GuidesScreen
-import com.nonoxy.d2buildhelper.presentation.GuidesScreenViewModel
-import com.nonoxy.d2buildhelper.presentation.HeroGuidesScreen
-import com.nonoxy.d2buildhelper.presentation.HeroGuidesScreenViewModel
+import com.nonoxy.d2buildhelper.presentation.guides.GuidesScreen
+import com.nonoxy.d2buildhelper.presentation.guides.GuidesScreenViewModel
+import com.nonoxy.d2buildhelper.presentation.filterview.HeroFilterViewModel
+import com.nonoxy.d2buildhelper.presentation.hero_guides.HeroGuidesScreen
+import com.nonoxy.d2buildhelper.presentation.hero_guides.HeroGuidesScreenViewModel
 import com.nonoxy.d2buildhelper.ui.theme.D2BuildHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,9 +42,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val viewModelGuides = hiltViewModel<GuidesScreenViewModel>()
                     val viewModelHeroGuides = hiltViewModel<HeroGuidesScreenViewModel>()
+                    val viewModelHeroFilter = hiltViewModel<HeroFilterViewModel>()
                     val heroGuidesBuildState by viewModelHeroGuides.buildsState.collectAsState()
                     val guidesBuildsState by viewModelGuides.buildsState.collectAsState()
-                    val heroFilterState by viewModelGuides.heroFilterState.collectAsState()
+                    val heroFilterState by viewModelHeroFilter.heroFilterState.collectAsState()
 
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "guides") {
@@ -53,8 +54,6 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 buildsState = guidesBuildsState,
                                 heroFilterState = heroFilterState,
-                                onOpenHeroFilterDialog = viewModelGuides::openHeroFilterDialog,
-                                onDismissHeroFilterDialog = viewModelGuides::dismissHeroFilterDialog
                             )
                         }
                         composable(
@@ -70,9 +69,7 @@ class MainActivity : ComponentActivity() {
                             HeroGuidesScreen(
                                 navController = navController,
                                 buildsState = heroGuidesBuildState,
-                                heroFilterState = heroFilterState,
-                                onOpenHeroFilterDialog = viewModelHeroGuides::openHeroFilterDialog,
-                                onDismissHeroFilterDialog = viewModelHeroGuides::dismissHeroFilterDialog
+                                heroFilterState = heroFilterState
                             )
                         }
                     }

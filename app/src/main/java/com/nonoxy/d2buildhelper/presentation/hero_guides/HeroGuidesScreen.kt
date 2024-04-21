@@ -1,6 +1,4 @@
-@file:OptIn(ExperimentalGlideComposeApi::class)
-
-package com.nonoxy.d2buildhelper.presentation
+package com.nonoxy.d2buildhelper.presentation.hero_guides
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -25,46 +23,42 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.nonoxy.d2buildhelper.domain.model.GuideInfo
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
-import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.InventoryChange
 import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
+import com.nonoxy.d2buildhelper.presentation.filterview.HeroFilterDialog
+import com.nonoxy.d2buildhelper.presentation.filterview.HeroFilterViewModel
+import com.nonoxy.d2buildhelper.presentation.guides.ItemsRow
 import com.nonoxy.d2buildhelper.presentation.utils.TimeConverter
 
 @Composable
 fun HeroGuidesScreen(
     navController: NavController,
     buildsState: HeroGuidesScreenViewModel.BuildsState,
-    heroFilterState: GuidesScreenViewModel.HeroFilterState,
-    onOpenHeroFilterDialog: () -> Unit,
-    onDismissHeroFilterDialog: () -> Unit
+    heroFilterState: HeroFilterViewModel.HeroFilterState,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (buildsState.isLoading) {
@@ -73,6 +67,7 @@ fun HeroGuidesScreen(
             )
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
+                var expanded by remember { mutableStateOf(false) }
                 Row(modifier = Modifier
                     .height(IntrinsicSize.Min)
                     .padding(start = 16.dp, end = 16.dp, top = 8.dp)
@@ -80,7 +75,7 @@ fun HeroGuidesScreen(
                     .clip(RoundedCornerShape(4.dp))
                     .border(1.dp, Color(red = 255, green = 255, blue = 255, alpha = 14))
                     .clickable(
-                        onClick = { onOpenHeroFilterDialog() }
+                        onClick = { expanded = !expanded }
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -93,12 +88,14 @@ fun HeroGuidesScreen(
                                 start = 8.dp,
                                 end = 8.dp,
                                 top = 9.dp,
-                                bottom = 9.dp)
+                                bottom = 9.dp
+                            )
                     )
                     VerticalDivider(
                         modifier = Modifier.fillMaxHeight(),
                         thickness = 1.dp,
-                        color = Color(red = 255, green = 255, blue = 255, alpha = 14))
+                        color = Color(red = 255, green = 255, blue = 255, alpha = 14)
+                    )
 
                     Box(
                         modifier = Modifier
@@ -126,7 +123,8 @@ fun HeroGuidesScreen(
                     Log.d("HGTestTime", "heroGuides first => ${buildsState.heroGuides.first()}")
                     items(buildsState.heroGuides.firstNotNullOf { it.guidesInfo }) { guide ->
                         val guideIterator = buildsState.heroGuides.firstNotNullOf {
-                            it.guidesInfo?.indexOf(guide) }
+                            it.guidesInfo?.indexOf(guide)
+                        }
                         GuideItem(
                             heroId = buildsState.heroGuides.first().heroId,
                             guide = guide,
@@ -137,19 +135,22 @@ fun HeroGuidesScreen(
                             additionalImageUrls = buildsState.additionalImageUrls,
                             itemPurchases = buildsState.itemPurchases,
                             inventoryChanges = buildsState.inventoryChanges,
-                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime[guideIterator.toShort()] ?: emptyList(),
+                            sortedBuildEndItemsByTime = buildsState.sortedBuildEndItemsByTime[guideIterator.toShort()]
+                                ?: emptyList(),
                             modifier = Modifier
                                 .fillMaxSize()
                         )
                     }
                 }
 
-                if (heroFilterState.expanded) {
+                if (expanded) {
                     HeroFilterDialog(
-                        navController = navController,
                         heroFilterState = heroFilterState,
-                        onDismiss = onDismissHeroFilterDialog,
-                        onItemClick = { }
+                        onDismiss = { expanded = false },
+                        onItemClick = { clickedHero ->
+                            navController.navigate("heroGuides/$clickedHero")
+                            expanded = false
+                        }
                     )
                 }
             }
@@ -157,6 +158,7 @@ fun HeroGuidesScreen(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun GuideItem(
     heroId: Short,
@@ -223,7 +225,8 @@ private fun GuideItem(
                 ) {
                     Text(
                         text = TimeConverter.convertSecondsToMinutesAndSeconds(
-                            seconds = build?.durationSeconds?: 0),
+                            seconds = build?.durationSeconds ?: 0
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
                     )
@@ -307,72 +310,6 @@ private fun GuideItem(
                     itemImageUrls = itemImageUrls,
                     sortedBuildEndItemsByTime = sortedBuildEndItemsByTime
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun HeroFilterDialog(
-    heroFilterState: HeroGuidesScreenViewModel.HeroFilterState,
-    onDismiss: () -> Unit
-) {
-    Dialog(
-        onDismissRequest = { onDismiss() }
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(308.dp)
-                .border(1.dp, MaterialTheme.colorScheme.outline),
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                var searchText by remember { mutableStateOf("") }
-                OutlinedTextField(
-                    modifier = Modifier,
-                    value = searchText,
-                    onValueChange = { newText ->
-                        searchText = newText
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Фильтр героев",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 14.sp) },
-                    singleLine = true,
-                    textStyle = TextStyle(fontSize = 14.sp)
-                )
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    val filteredHeroes = heroFilterState.eachHeroDetails.filter { (_, value) ->
-                        value["displayName"]?.contains(searchText, ignoreCase = true) ?: false
-                    }
-                    items(filteredHeroes.toList()
-                        .sortedBy { (heroId, value) -> value["displayName"] }
-                        .toMap()
-                        .map { it.key } ) { heroId ->
-                        HeroFilterItem(
-                            heroId = heroId,
-                            displayName = heroFilterState.eachHeroDetails[heroId]
-                                ?.get("displayName") ?: "",
-                            imageUrl = heroFilterState.eachHeroImageUrls[heroId]?: "null",
-                            onItemClick = {}
-                        )
-                    }
-                }
             }
         }
     }

@@ -1,8 +1,7 @@
 @file:OptIn(ExperimentalGlideComposeApi::class)
 
-package com.nonoxy.d2buildhelper.presentation
+package com.nonoxy.d2buildhelper.presentation.guides
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -56,15 +55,15 @@ import com.nonoxy.d2buildhelper.domain.model.HeroGuideBuild
 import com.nonoxy.d2buildhelper.domain.model.HeroGuideInfo
 import com.nonoxy.d2buildhelper.domain.model.InventoryChange
 import com.nonoxy.d2buildhelper.domain.model.ItemPurchase
+import com.nonoxy.d2buildhelper.presentation.filterview.HeroFilterDialog
+import com.nonoxy.d2buildhelper.presentation.filterview.HeroFilterViewModel
 import com.nonoxy.d2buildhelper.presentation.utils.TimeConverter
 
 @Composable
 fun GuidesScreen(
     navController: NavController,
     buildsState: GuidesScreenViewModel.BuildsState,
-    heroFilterState: GuidesScreenViewModel.HeroFilterState,
-    onOpenHeroFilterDialog: () -> Unit,
-    onDismissHeroFilterDialog: () -> Unit
+    heroFilterState: HeroFilterViewModel.HeroFilterState,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (buildsState.isLoading) {
@@ -73,6 +72,7 @@ fun GuidesScreen(
             )
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
+                var expanded by remember { mutableStateOf(false) }
                 Row(modifier = Modifier
                     .height(IntrinsicSize.Min)
                     .padding(start = 16.dp, end = 16.dp, top = 8.dp)
@@ -80,7 +80,7 @@ fun GuidesScreen(
                     .clip(RoundedCornerShape(4.dp))
                     .border(1.dp, Color(red = 255, green = 255, blue = 255, alpha = 14))
                     .clickable(
-                        onClick = { onOpenHeroFilterDialog() }
+                        onClick = { expanded = !expanded }
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -141,14 +141,13 @@ fun GuidesScreen(
                     }
                 }
 
-                if (heroFilterState.expanded) {
+                if (expanded) {
                     HeroFilterDialog(
-                        navController = navController,
                         heroFilterState = heroFilterState,
-                        onDismiss = onDismissHeroFilterDialog,
+                        onDismiss = { expanded = false },
                         onItemClick = { clickedHero ->
                             navController.navigate("heroGuides/$clickedHero")
-                            onDismissHeroFilterDialog()
+                            expanded = false
                         }
                     )
                 }
@@ -628,104 +627,5 @@ fun ItemsRow(
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.outline))
         }
-    }
-}
-
-@Composable
-fun HeroFilterDialog(
-    navController: NavController,
-    heroFilterState: GuidesScreenViewModel.HeroFilterState,
-    onDismiss: () -> Unit,
-    onItemClick: (Short) -> Unit
-) {
-    Dialog(
-        onDismissRequest = { onDismiss() }
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(308.dp)
-                .border(1.dp, MaterialTheme.colorScheme.outline),
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                var searchText by remember { mutableStateOf("") }
-                OutlinedTextField(
-                    modifier = Modifier,
-                    value = searchText,
-                    onValueChange = { newText ->
-                        searchText = newText
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Фильтр героев",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 14.sp) },
-                    singleLine = true,
-                    textStyle = TextStyle(fontSize = 14.sp)
-                )
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    val filteredHeroes = heroFilterState.eachHeroDetails.filter { (_, value) ->
-                        value["displayName"]?.contains(searchText, ignoreCase = true) ?: false
-                    }
-                    items(filteredHeroes.toList()
-                        .sortedBy { (heroId, value) -> value["displayName"] }
-                        .toMap()
-                        .map { it.key } ) { heroId ->
-                        HeroFilterItem(
-                            heroId = heroId,
-                            displayName = heroFilterState.eachHeroDetails[heroId]
-                                ?.get("displayName") ?: "",
-                            imageUrl = heroFilterState.eachHeroImageUrls[heroId]?: "null",
-                            onItemClick = onItemClick
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun HeroFilterItem(
-    heroId: Short,
-    displayName: String,
-    imageUrl: String,
-    onItemClick: (Short) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { onItemClick(heroId) },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        GlideImage(
-            model = imageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = displayName,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC)
-        )
     }
 }
