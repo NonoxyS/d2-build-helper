@@ -283,6 +283,7 @@ class GuidesScreenViewModel @Inject constructor(
                 build.endItem5Id
             )
 
+            val itemCountMap = endBuildItemIds.groupingBy { it }.eachCount()
             // Result is map of (heroId, List<ItemPurchase>) where itemPurchase contained in end
             // item build(next is EIB). First, list of itemPurchase filter by itemId contained in EIB
             // then sorting by unique itemId elements and get only item with last purchase time
@@ -291,9 +292,10 @@ class GuidesScreenViewModel @Inject constructor(
             heroId to itemPurchases[heroId]?.filter { purchase ->
                 purchase.itemId.toShort() in endBuildItemIds
             }?.groupBy { it.itemId.toShort() }
-                ?.mapValues { (_, purchases) ->
-                    purchases.maxBy { it.time }
-                }?.values?.toList()?.sortedWith(compareBy { it.time })
+                ?.flatMap { (itemId, purchases) ->
+                    val itemCount = itemCountMap[itemId] ?: 0
+                    purchases.sortedByDescending { it.time }.take(itemCount)
+                }?.toList()?.sortedWith(compareBy { it.time })
         }.forEach { (heroId, sortedEndItems) ->
             sortedBuildEndItemsByTime[heroId] = sortedEndItems ?: emptyList()
         }

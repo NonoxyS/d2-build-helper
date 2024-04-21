@@ -295,12 +295,14 @@ class HeroGuidesScreenViewModel @Inject constructor(
             // then sorting by unique itemId elements and get only item with last purchase time
             // After all, sorting the List<ItemPurchase> by time of buying item
             // P.S. i know, its pretty bad code and a bit unreadable code
+            val itemCountMap = endBuildItemIds.groupingBy { it }.eachCount()
             i.toShort() to itemPurchases[i.toShort()]?.filter { purchase ->
                 purchase.itemId.toShort() in endBuildItemIds
             }?.groupBy { it.itemId.toShort() }
-                ?.mapValues { (_, purchases) ->
-                    purchases.maxBy { it.time }
-                }?.values?.toList()?.sortedWith(compareBy { it.time })
+                ?.flatMap { (itemId, purchases) ->
+                    val itemCount = itemCountMap[itemId] ?: 0
+                    purchases.sortedByDescending { it.time }.take(itemCount)
+                }?.toList()?.sortedWith(compareBy { it.time })
         }.forEach { (buildNumber, sortedEndItems) ->
             sortedBuildEndItemsByTime[buildNumber] = sortedEndItems ?: emptyList()
         }
