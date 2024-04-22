@@ -1,5 +1,6 @@
 package com.nonoxy.d2buildhelper.presentation.filterview
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,9 +38,11 @@ class HeroFilterViewModel @Inject constructor(
     }
 
     fun selectHero(heroId: Short?) {
+        Log.d("HeroFilter", "Before update: ${_heroFilterState.value.heroSelected}")
         _heroFilterState.update { it.copy(
             heroSelected = heroId
         ) }
+        Log.d("HeroFilter", "After update: ${_heroFilterState.value.heroSelected}")
     }
 
     @Stable

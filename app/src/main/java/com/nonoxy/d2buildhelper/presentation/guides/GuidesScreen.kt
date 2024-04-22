@@ -2,6 +2,7 @@
 
 package com.nonoxy.d2buildhelper.presentation.guides
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +65,7 @@ fun GuidesScreen(
     navController: NavController,
     buildsState: GuidesScreenViewModel.BuildsState,
     heroFilterState: HeroFilterViewModel.HeroFilterState,
+    onSelectHero: (Short) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (buildsState.isLoading) {
@@ -146,8 +148,13 @@ fun GuidesScreen(
                         heroFilterState = heroFilterState,
                         onDismiss = { expanded = false },
                         onItemClick = { clickedHero ->
-                            navController.navigate("heroGuides/$clickedHero")
+                            Log.d("HeroFilter", "GS | Clicked hero => $clickedHero")
+                            onSelectHero(clickedHero)
                             expanded = false
+                            navController.navigate("heroGuides/$clickedHero") {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
                 }

@@ -59,6 +59,7 @@ fun HeroGuidesScreen(
     navController: NavController,
     buildsState: HeroGuidesScreenViewModel.BuildsState,
     heroFilterState: HeroFilterViewModel.HeroFilterState,
+    onSelectHero: (Short) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (buildsState.isLoading) {
@@ -148,8 +149,13 @@ fun HeroGuidesScreen(
                         heroFilterState = heroFilterState,
                         onDismiss = { expanded = false },
                         onItemClick = { clickedHero ->
-                            navController.navigate("heroGuides/$clickedHero")
+                            Log.d("HeroFilter", "HGS | Clicked hero => $clickedHero")
+                            onSelectHero(clickedHero)
                             expanded = false
+                            navController.navigate("heroGuides/$clickedHero") {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
                 }

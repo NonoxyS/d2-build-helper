@@ -54,22 +54,27 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 buildsState = guidesBuildsState,
                                 heroFilterState = heroFilterState,
+                                onSelectHero = viewModelHeroFilter::selectHero
                             )
                         }
                         composable(
                             route = "heroGuides/{heroId}",
                             arguments = listOf(navArgument("heroId") {
                                     type = NavType.IntType })) { backStackEntry ->
-                            val heroId = backStackEntry.arguments?.getInt("heroId")
+                            val heroId = backStackEntry.arguments?.getInt("heroId")?.toShort()
+                            Log.d("HeroFilter", "in navigate")
                             LaunchedEffect(key1 = heroId) {
-                                Log.d("HeroFilter", "start getting data for heroId: $heroId")
+                                Log.d("HeroFilter", "LAUNCHED EFFECT: $heroId")
                                 viewModelHeroGuides.getHeroGuidesData(
-                                    heroId = heroId?.toShort() ?: 48)
+                                    heroId = heroId ?: 48)
                             }
+
+                            Log.d("HeroFilter", "start copy data")
                             HeroGuidesScreen(
                                 navController = navController,
                                 buildsState = heroGuidesBuildState,
-                                heroFilterState = heroFilterState
+                                heroFilterState = heroFilterState,
+                                onSelectHero = viewModelHeroFilter::selectHero,
                             )
                         }
                     }

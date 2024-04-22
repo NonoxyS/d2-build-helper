@@ -44,6 +44,12 @@ class HeroGuidesScreenViewModel @Inject constructor(
     private val _buildsState = MutableStateFlow(BuildsState())
     val buildsState = _buildsState.asStateFlow()
 
+    fun startLoading() {
+        _buildsState.update { it.copy(
+            isLoading = true
+        ) }
+    }
+
     fun getHeroGuidesData(heroId: Short) {
         viewModelScope.launch {
             _buildsState.update {

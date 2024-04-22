@@ -70,7 +70,9 @@ fun HeroFilterDialog(
                         Text(
                             text = "Фильтр героев",
                             style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 14.sp) },
+                            fontSize = 14.sp
+                        )
+                    },
                     singleLine = true,
                     textStyle = TextStyle(fontSize = 14.sp)
                 )
@@ -87,12 +89,12 @@ fun HeroFilterDialog(
                     items(filteredHeroes.toList()
                         .sortedBy { (heroId, value) -> value["displayName"] }
                         .toMap()
-                        .map { it.key } ) { heroId ->
+                        .map { it.key }) { heroId ->
                         HeroFilterItem(
                             heroId = heroId,
                             displayName = heroFilterState.eachHeroDetails[heroId]
                                 ?.get("displayName") ?: "",
-                            imageUrl = heroFilterState.eachHeroImageUrls[heroId]?: "null",
+                            imageUrl = heroFilterState.eachHeroImageUrls[heroId] ?: "null",
                             onItemClick = onItemClick
                         )
                     }
