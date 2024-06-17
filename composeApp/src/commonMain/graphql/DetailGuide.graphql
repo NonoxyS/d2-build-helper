@@ -1,0 +1,74 @@
+query HeroBuild($matchId: Long!, $steamAccountId: Long) {
+    match(id: $matchId) {
+        durationSeconds
+        players(steamAccountId: $steamAccountId) {
+            matchId
+            steamAccountId
+            position
+            isRadiant
+            kills
+            deaths
+            assists
+            imp
+            item0Id
+            item1Id
+            item2Id
+            item3Id
+            item4Id
+            item5Id
+            backpack0Id
+            backpack1Id
+            backpack2Id
+            neutral0Id
+            stats {
+                itemPurchases {
+                    itemId
+                    time
+                }
+                inventoryReport {
+                    item0 {
+                        itemId
+                        charges
+                    }
+                    item1 {
+                        itemId
+                        charges
+                    }
+                    item2 {
+                        itemId
+                        charges
+                    }
+                    item3 {
+                        itemId
+                        charges
+                    }
+                    item4 {
+                        itemId
+                        charges
+                    }
+                    item5 {
+                        itemId
+                        charges
+                    }
+                    backPack0 {
+                        itemId
+                    }
+                    backPack1 {
+                        itemId
+                    }
+                    backPack2 {
+                        itemId
+                    }
+                }
+            }
+            playbackData {
+                abilityLearnEvents {
+                    abilityId
+                    level
+                    levelObtained
+                    isTalent
+                }
+            }
+        }
+    }
+}
