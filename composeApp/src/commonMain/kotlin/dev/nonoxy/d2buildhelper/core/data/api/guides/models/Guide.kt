@@ -1,11 +1,17 @@
 package dev.nonoxy.d2buildhelper.core.data.api.guides.models
 
 data class Guide(
-    val heroId: Short,
+    val hero: Hero,
     val steamAccountId: Long,
     val matchId: Long,
     val durationSeconds: Int,
     val playerStats: PlayerStats
+)
+
+data class Hero(
+    val heroId: Short,
+    val shortName: String,
+    val displayName: String
 )
 
 data class PlayerStats(

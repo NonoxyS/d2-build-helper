@@ -6,6 +6,10 @@ query Guides {
                 matchId
                 steamAccountId
                 matchPlayer {
+                    hero {
+                        displayName
+                        shortName
+                    }
                     position
                     isRadiant
                     kills

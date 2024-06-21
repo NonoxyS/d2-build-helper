@@ -4,6 +4,7 @@ import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack0
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack1
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack2
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Hero
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.InventoryChange
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item0
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item1
@@ -18,11 +19,15 @@ import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 
 fun GuidesQuery.Guide1.toGuide(): Guide {
     return Guide(
-        heroId = heroId.toString().toShort(),
+        hero = Hero(
+            heroId = heroId.toString().toShort(),
+            shortName = matchPlayer?.hero?.shortName ?: "",
+            displayName = matchPlayer?.hero?.displayName ?: "",
+        ),
         steamAccountId = steamAccountId.toString().toLong(),
         matchId = matchId.toString().toLong(),
         durationSeconds = this.match?.durationSeconds ?: 0,
-        playerStats = matchPlayer!!.toPlayerStats() // todo Нужно добавить пустое значение
+        playerStats = matchPlayer!!.toPlayerStats()
     )
 }
 
