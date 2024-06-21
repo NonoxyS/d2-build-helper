@@ -74,7 +74,7 @@ private val DarkColorScheme = darkColorScheme(
 internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 
 @Composable
-internal fun AppTheme(
+internal fun D2BuildHelperTheme(
     content: @Composable() () -> Unit
 ) {
     val systemIsDark = isSystemInDarkTheme()
