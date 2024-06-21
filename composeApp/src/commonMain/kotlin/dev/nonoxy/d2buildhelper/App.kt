@@ -13,11 +13,11 @@ import dev.nonoxy.d2buildhelper.features.guides.GuidesScreen
 import dev.nonoxy.d2buildhelper.features.heroGuides.HeroGuidesScreen
 import dev.nonoxy.d2buildhelper.navigation.AppScreens
 import dev.nonoxy.d2buildhelper.navigation.LocalNavHost
-import dev.nonoxy.d2buildhelper.theme.AppTheme
+import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 
 @Composable
-internal fun App() = AppTheme {
-
+internal fun App() = D2BuildHelperTheme {
+    D2BuildHelperApp()
 }
 
 @Composable
