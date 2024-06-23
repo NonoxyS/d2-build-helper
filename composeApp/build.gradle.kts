@@ -1,6 +1,7 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import com.android.build.api.dsl.ManagedVirtualDevice
+import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
@@ -66,6 +67,9 @@ kotlin {
 
             implementation(libs.compose.viewmodel)
             implementation(libs.compose.navigation)
+
+            implementation(libs.supabase.storage)
+            implementation(libs.supabase.database)
         }
 
         commonTest.dependencies {
@@ -79,14 +83,17 @@ kotlin {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.ktor.client.cio)
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.ktor.client.cio)
         }
 
         iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
 
     }
@@ -149,8 +156,32 @@ buildConfig {
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").inputStream())
 
+    val SUPABASE_BASE_URL = "https://ojxuhaplumzopsbihjkf.supabase.co"
+
+    buildConfigField(
+        "String",
+        "STORAGE_HERO_ICONS_FOLDER_URL",
+        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/hero_icons/\""
+    )
+    buildConfigField(
+        "String",
+        "STORAGE_ITEM_ICONS_FOLDER_URL",
+        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/item_icons/\""
+    )
+    buildConfigField(
+        "String",
+        "STORAGE_ABILITY_ICONS_FOLDER_URL",
+        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/ability_icons/\""
+    )
+    buildConfigField(
+        "String",
+        "STORAGE_ADDITIONAL_ICONS_FOLDER_URL",
+        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/additional_icons/\""
+    )
+    buildConfigField("String", "SUPABASE_BASE_URL", "\"$SUPABASE_BASE_URL\"")
+    buildConfigField("String", "SUPABASE_API_KEY", "\"${localProperties.getProperty("SUPABASE_API_KEY")}\"")
     buildConfigField("String", "API_BASE_URL", "\"https://api.stratz.com/graphql\"")
-    buildConfigField("String", "API_KEY", "\"${localProperties.getProperty("API_KEY")}\"")
+    buildConfigField("String", "STRATZ_API_KEY", "\"${localProperties.getProperty("STRATZ_API_KEY")}\"")
 }
 
 apollo {

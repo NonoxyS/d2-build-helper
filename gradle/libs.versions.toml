@@ -12,6 +12,8 @@ kotlinx-serialization = "1.7.0"
 apollo = "4.0.0-beta.6"
 compose-viewmodel = "2.8.2"
 compose-navigation = "2.8.0-alpha02"
+ktor = "2.3.11"
+supabase = "2.5.0"
 
 
 [libraries]
@@ -32,6 +34,12 @@ apollo-runtime = { module = "com.apollographql.apollo3:apollo-runtime", version.
 
 compose-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "compose-viewmodel"}
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation"}
+
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+
+supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabase" }
+supabase-database = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "supabase" }
 
 [plugins]
 
