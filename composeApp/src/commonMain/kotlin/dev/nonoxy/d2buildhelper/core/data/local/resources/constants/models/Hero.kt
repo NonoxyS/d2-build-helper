@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class Hero(
     val id: Short,
-    val shortName: String,
-    val displayName: String
+    val shortName: String = "",
+    val displayName: String = ""
 )

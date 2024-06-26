@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 class Ability(
     val id: Short,
-    val name: String
+    val name: String = ""
 )
