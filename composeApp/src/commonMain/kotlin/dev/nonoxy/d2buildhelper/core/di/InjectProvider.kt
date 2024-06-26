@@ -1,10 +1,18 @@
 package dev.nonoxy.d2buildhelper.core.di
 
 import Dota___Build_Helper.composeApp.BuildConfig
+import androidx.compose.runtime.Composable
+import coil3.ImageLoader
+import coil3.compose.LocalPlatformContext
+import coil3.request.crossfade
 import com.apollographql.apollo3.ApolloClient
+import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesDataSource
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResourcesDataSource
+import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
+import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
+import dev.nonoxy.d2buildhelper.features.guides.domain.GetGuidesAndImagesUseCase
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import kotlin.reflect.KClass
 
@@ -14,6 +22,7 @@ object InjectProvider {
     init {
         addDependency(type = ApolloClient::class, dependency = createApolloClient())
         addDependency(type = SupabaseClient::class, dependency = createSupabaseClient())
+        addDependency(type = GetGuidesAndImagesUseCase::class, dependency = createGetGuidesAndImagesUseCase())
     }
 
     fun addDependency(type: KClass<*>, dependency: Any) {
@@ -43,7 +52,24 @@ object InjectProvider {
             supabaseKey = BuildConfig.SUPABASE_API_KEY
         ) {
             install(Storage)
-            install(Postgrest)
         }
+    }
+
+    private fun createGetGuidesAndImagesUseCase(): GetGuidesAndImagesUseCase {
+        return GetGuidesAndImagesUseCase(
+            guidesRepository = GuidesRepository(),
+            resourcesRepository = ResourcesRepository(
+                imageResourcesDataSource = ImageResourcesDataSource(),
+                constantResourcesDataSource = ConstantResourcesDataSource()
+            )
+        )
+    }
+
+    @Composable
+    fun createCoinImageLoader(): ImageLoader {
+        return ImageLoader
+            .Builder(LocalPlatformContext.current)
+            .crossfade(true)
+            .build()
     }
 }
