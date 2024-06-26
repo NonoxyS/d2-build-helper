@@ -1,7 +1,6 @@
+import com.android.build.api.dsl.ManagedVirtualDevice
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import com.android.build.api.dsl.ManagedVirtualDevice
-import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
@@ -69,7 +68,6 @@ kotlin {
             implementation(libs.compose.navigation)
 
             implementation(libs.supabase.storage)
-            implementation(libs.supabase.database)
         }
 
         commonTest.dependencies {
@@ -156,32 +154,44 @@ buildConfig {
     val localProperties = Properties()
     localProperties.load(project.rootProject.file("local.properties").inputStream())
 
-    val SUPABASE_BASE_URL = "https://ojxuhaplumzopsbihjkf.supabase.co"
+    val supabaseBaseUrl = "https://ojxuhaplumzopsbihjkf.supabase.co"
+    val supabaseApiKey = localProperties.getProperty("SUPABASE_API_KEY")
+    val stratzBaseUrl = "https://api.stratz.com/graphql"
+    val stratzApiKey = localProperties.getProperty("STRATZ_API_KEY")
+
+    require(supabaseApiKey.isNotBlank()) {
+        "Register your api key from supabase.com and place it in local.properties as `SUPABASE_API_KEY`" +
+                "and configure Storage and Database"
+    }
+
+    require(stratzApiKey.isNotBlank()) {
+        "Register your api key from stratz.com/api and place it in local.properties as `STRATZ_API_KEY`"
+    }
 
     buildConfigField(
         "String",
         "STORAGE_HERO_ICONS_FOLDER_URL",
-        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/hero_icons/\""
+        "\"$supabaseBaseUrl/storage/v1/object/public/d2bh_images/hero_icons/\""
     )
     buildConfigField(
         "String",
         "STORAGE_ITEM_ICONS_FOLDER_URL",
-        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/item_icons/\""
+        "\"$supabaseBaseUrl/storage/v1/object/public/d2bh_images/item_icons/\""
     )
     buildConfigField(
         "String",
         "STORAGE_ABILITY_ICONS_FOLDER_URL",
-        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/ability_icons/\""
+        "\"$supabaseBaseUrl/storage/v1/object/public/d2bh_images/ability_icons/\""
     )
     buildConfigField(
         "String",
         "STORAGE_ADDITIONAL_ICONS_FOLDER_URL",
-        "\"$SUPABASE_BASE_URL/storage/v1/object/public/d2bh_images/additional_icons/\""
+        "\"$supabaseBaseUrl/storage/v1/object/public/d2bh_images/additional_icons/\""
     )
-    buildConfigField("String", "SUPABASE_BASE_URL", "\"$SUPABASE_BASE_URL\"")
-    buildConfigField("String", "SUPABASE_API_KEY", "\"${localProperties.getProperty("SUPABASE_API_KEY")}\"")
-    buildConfigField("String", "API_BASE_URL", "\"https://api.stratz.com/graphql\"")
-    buildConfigField("String", "STRATZ_API_KEY", "\"${localProperties.getProperty("STRATZ_API_KEY")}\"")
+    buildConfigField("String", "SUPABASE_BASE_URL", "\"$supabaseBaseUrl\"")
+    buildConfigField("String", "SUPABASE_API_KEY", "\"$supabaseApiKey\"")
+    buildConfigField("String", "API_BASE_URL", "\"$stratzBaseUrl\"")
+    buildConfigField("String", "STRATZ_API_KEY", "\"$stratzApiKey\"")
 }
 
 apollo {
