@@ -1,20 +1,6 @@
 package dev.nonoxy.d2buildhelper.core.data.repository.guides.mappers
 
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack0
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack1
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Backpack2
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.InventoryChange
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item0
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item1
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item2
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item3
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item4
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Item5
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.MatchPlayerPositionType
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStats
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 
 fun GuidesQuery.Guide1.toGuide(): Guide {
@@ -54,10 +40,10 @@ fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
                 ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
             }
         },
-        inventoryChanges = stats?.inventoryReport?.map { inventoryReport -> inventoryReport?.toInventoryChange() }
         )
 }
 
+/*
 fun GuidesQuery.InventoryReport.toInventoryChange(): InventoryChange {
     return InventoryChange(
         item0 = item0?.run {
@@ -112,4 +98,4 @@ fun GuidesQuery.InventoryReport.toInventoryChange(): InventoryChange {
             )
         },
     )
-}
+}*/
