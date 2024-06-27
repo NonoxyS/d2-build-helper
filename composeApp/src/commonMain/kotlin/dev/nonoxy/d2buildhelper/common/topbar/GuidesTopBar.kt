@@ -1,25 +1,14 @@
 package dev.nonoxy.d2buildhelper.common.topbar
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
@@ -27,14 +16,19 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun GuidesTopBar() {
+    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        HeroSelect()
+    }
+}
+
+@Composable
+private fun HeroSelect() {
     Row(
         modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp)
             .height(IntrinsicSize.Min)
-            .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = Color(red = 255, green = 255, blue = 255),
+                color = Color.White.copy(alpha = .14f),
                 shape = RoundedCornerShape(4.dp)
             )
     ) {
@@ -46,14 +40,14 @@ fun GuidesTopBar() {
                 .padding(
                     start = 8.dp,
                     end = 8.dp,
-                    top = 9.dp,
-                    bottom = 9.dp
+                    top = 8.dp,
+                    bottom = 8.dp
                 )
         )
         VerticalDivider(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = Modifier.fillMaxHeight().padding(vertical = 1.dp),
             thickness = 1.dp,
-            color = Color(red = 255, green = 255, blue = 255)
+            color = Color.White.copy(alpha = .14f)
         )
 
         Box(

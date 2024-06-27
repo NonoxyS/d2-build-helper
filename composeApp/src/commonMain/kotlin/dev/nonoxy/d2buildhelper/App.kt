@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen
-import dev.nonoxy.d2buildhelper.features.guides.GuidesScreen
+import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.GuidesScreen
 import dev.nonoxy.d2buildhelper.features.heroGuides.HeroGuidesScreen
 import dev.nonoxy.d2buildhelper.navigation.AppScreens
 import dev.nonoxy.d2buildhelper.navigation.LocalNavHost
