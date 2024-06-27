@@ -11,6 +11,7 @@ data class D2BuildHelperColors(
     val secondaryText: Color,
     val secondaryBackground: Color,
     val tintColor: Color,
+    val outline: Color,
 )
 
 object D2BuildHelperTheme {

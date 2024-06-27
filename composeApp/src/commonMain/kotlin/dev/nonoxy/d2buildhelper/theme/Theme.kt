@@ -1,11 +1,15 @@
 package dev.nonoxy.d2buildhelper.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 
 internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 
@@ -18,7 +22,11 @@ internal fun D2BuildHelperTheme(
     CompositionLocalProvider(
         LocalThemeIsDark provides isDarkState,
         LocalD2BuildHelperColor provides darkPalette,
-        content = content
+        content = {
+            Box(modifier = Modifier.fillMaxSize().background(D2BuildHelperTheme.colors.primaryBackground)) {
+                content.invoke()
+            }
+        }
     )
 }
 
