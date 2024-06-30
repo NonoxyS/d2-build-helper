@@ -15,19 +15,29 @@ internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 
 @Composable
 internal fun D2BuildHelperTheme(
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val isDarkState = remember { mutableStateOf(systemIsDark) }
     CompositionLocalProvider(
         LocalThemeIsDark provides isDarkState,
         LocalD2BuildHelperColor provides darkPalette,
+        LocalD2BuildHelperTypography provides D2BuildHelperTypography(),
         content = {
             Box(modifier = Modifier.fillMaxSize().background(D2BuildHelperTheme.colors.primaryBackground)) {
                 content.invoke()
             }
         }
     )
+}
+
+object D2BuildHelperTheme {
+    val colors: D2BuildHelperColors
+        @Composable
+        get() = LocalD2BuildHelperColor.current
+    val typography: D2BuildHelperTypography
+        @Composable
+        get() = LocalD2BuildHelperTypography.current
 }
 
 @Composable
