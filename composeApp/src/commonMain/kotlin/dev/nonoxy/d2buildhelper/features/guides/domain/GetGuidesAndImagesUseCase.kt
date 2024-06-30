@@ -1,12 +1,17 @@
 package dev.nonoxy.d2buildhelper.features.guides.domain
 
+import androidx.compose.ui.util.fastLastOrNull
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStats
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
 import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.*
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.GuideUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchaseUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPositionType
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStatsUI
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesViewState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,14 +32,14 @@ class GetGuidesAndImagesUseCase(
         ) { guidesResult, heroImagesResult, itemImagesResult, additionalImagesResult ->
             when {
                 guidesResult is RequestResult.Error ||
-                    heroImagesResult is RequestResult.Error ||
-                    itemImagesResult is RequestResult.Error ||
-                    additionalImagesResult is RequestResult.Error -> GuidesViewState.Error
+                        heroImagesResult is RequestResult.Error ||
+                        itemImagesResult is RequestResult.Error ||
+                        additionalImagesResult is RequestResult.Error -> GuidesViewState.Error
 
                 guidesResult is RequestResult.InProgress ||
-                    heroImagesResult is RequestResult.InProgress ||
-                    itemImagesResult is RequestResult.InProgress ||
-                    additionalImagesResult is RequestResult.InProgress -> GuidesViewState.Loading
+                        heroImagesResult is RequestResult.InProgress ||
+                        itemImagesResult is RequestResult.InProgress ||
+                        additionalImagesResult is RequestResult.InProgress -> GuidesViewState.Loading
 
                 else -> {
                     val guides = (guidesResult as RequestResult.Success).data.map { it.toGuideUi() }
@@ -59,7 +64,7 @@ class GetGuidesAndImagesUseCase(
 
 internal fun Guide.toGuideUi(): GuideUI {
     return GuideUI(
-        hero = Hero(
+        hero = HeroUI(
             heroId = hero.heroId,
             shortName = hero.shortName,
             displayName = hero.displayName
@@ -72,7 +77,17 @@ internal fun Guide.toGuideUi(): GuideUI {
 }
 
 internal fun PlayerStats.toPlayerStatsUi(): PlayerStatsUI {
-    val endItemIds = listOfNotNull(endItem0Id, endItem1Id, endItem2Id, endItem3Id, endItem4Id, endItem5Id)
+    val endItemIds =
+        listOfNotNull(endItem0Id, endItem1Id, endItem2Id, endItem3Id, endItem4Id, endItem5Id)
+    // Ищем itemPurchase для каждого предмета в финальной сборке.
+    // Т.к. в АПИ могут быть предметы в финальной сборке, но не отображаться в списке itemPurchases,
+    // то мы просто добавляем недостающие элементы со значением time = null и сортируем
+    // полученный список по времени, все элементы с time = null будут располагаться в конце.
+    val sortedEndItemPurchases = endItemIds.map { endItemId ->
+        itemPurchases?.fastLastOrNull { it?.itemId?.toShort() == endItemId }?.let { itemPurchase ->
+            ItemPurchaseUI(itemId = itemPurchase.itemId.toShort(), time = itemPurchase.time)
+        } ?: ItemPurchaseUI(itemId = endItemId, time = null)
+    }.sortedWith(compareBy(nullsLast()) { it.time })
 
     return PlayerStatsUI(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
@@ -81,22 +96,7 @@ internal fun PlayerStats.toPlayerStatsUi(): PlayerStatsUI {
         deaths = deaths,
         assists = assists,
         impact = impact ?: 25,
-        endItem0Id = endItem0Id,
-        endItem1Id = endItem1Id,
-        endItem2Id = endItem2Id,
-        endItem3Id = endItem3Id,
-        endItem4Id = endItem4Id,
-        endItem5Id = endItem5Id,
-        endBackpack0Id = endBackpack0Id,
-        endBackpack1Id = endBackpack1Id,
-        endBackpack2Id = endBackpack2Id,
         endNeutralItemId = endNeutralItemId,
-        sortedEndItemPurchases = itemPurchases?.mapNotNull { itemPurchase ->
-            itemPurchase?.let { ItemPurchase(itemId = it.itemId, time = itemPurchase.time) }
-        } ?: emptyList<ItemPurchase>().filter { itemPurchase ->
-            itemPurchase.itemId.toShort() in endItemIds
-        }.sortedBy { itemPurchase ->
-            itemPurchase.time
-        }
+        sortedEndItemPurchases = sortedEndItemPurchases
     )
 }

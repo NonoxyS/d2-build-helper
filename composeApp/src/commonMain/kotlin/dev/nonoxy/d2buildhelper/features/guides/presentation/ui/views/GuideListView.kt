@@ -2,6 +2,7 @@ package dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -16,10 +17,10 @@ internal fun GuideListView(
     imageResources: ImageResources
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items = guides, key = { it.matchId }) { guide ->
+        items(items = guides) { guide ->
             GuideItemView(
                 guide = guide,
                 imageResources = imageResources

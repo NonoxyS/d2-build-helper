@@ -1,15 +1,24 @@
 package dev.nonoxy.d2buildhelper.common.topbar
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -25,17 +34,19 @@ fun GuidesTopBar() {
 private fun HeroSelect() {
     Row(
         modifier = Modifier
+            .background(D2BuildHelperTheme.colors.primaryContainer)
             .height(IntrinsicSize.Min)
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = .14f),
+                color = D2BuildHelperTheme.colors.outline,
                 shape = RoundedCornerShape(4.dp)
-            )
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Все герои",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(red = 255, green = 255, blue = 255, alpha = 0xCC),
+            color = D2BuildHelperTheme.colors.primaryText,
+            style = D2BuildHelperTheme.typography.bodySmall,
             modifier = Modifier
                 .padding(
                     start = 8.dp,
@@ -47,7 +58,7 @@ private fun HeroSelect() {
         VerticalDivider(
             modifier = Modifier.fillMaxHeight().padding(vertical = 1.dp),
             thickness = 1.dp,
-            color = Color.White.copy(alpha = .14f)
+            color = D2BuildHelperTheme.colors.outline
         )
 
         Box(
@@ -58,7 +69,7 @@ private fun HeroSelect() {
         ) {
             Icon(
                 imageVector = Icons.Rounded.KeyboardArrowDown,
-                tint = Color(red = 255, green = 255, blue = 255, alpha = 0xCC),
+                tint = D2BuildHelperTheme.colors.primaryText,
                 contentDescription = null,
             )
         }

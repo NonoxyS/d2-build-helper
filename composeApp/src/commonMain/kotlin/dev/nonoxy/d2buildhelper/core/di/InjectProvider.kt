@@ -1,9 +1,8 @@
 package dev.nonoxy.d2buildhelper.core.di
 
 import Dota___Build_Helper.composeApp.BuildConfig
-import androidx.compose.runtime.Composable
 import coil3.ImageLoader
-import coil3.compose.LocalPlatformContext
+import coil3.PlatformContext
 import coil3.request.crossfade
 import com.apollographql.apollo3.ApolloClient
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesDataSource
@@ -65,10 +64,9 @@ object InjectProvider {
         )
     }
 
-    @Composable
-    fun createCoinImageLoader(): ImageLoader {
+    fun createCoinImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader
-            .Builder(LocalPlatformContext.current)
+            .Builder(context)
             .crossfade(true)
             .build()
     }
