@@ -6,9 +6,9 @@ import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 fun GuidesQuery.Guide1.toGuide(): Guide {
     return Guide(
         hero = Hero(
-            heroId = heroId.toString().toShort(),
+            heroId = matchPlayer?.hero?.id.toString().toShort(),
             shortName = matchPlayer?.hero?.shortName ?: "",
-            displayName = matchPlayer?.hero?.displayName ?: "",
+            displayName = matchPlayer?.hero?.displayName ?: "Unknown",
         ),
         steamAccountId = steamAccountId.toString().toLong(),
         matchId = matchId.toString().toLong(),
@@ -21,9 +21,9 @@ fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
     return PlayerStats(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
-        kills = kills.toString().toByte(),
-        deaths = deaths.toString().toByte(),
-        assists = assists.toString().toByte(),
+        kills = kills?.toString()?.toByte() ?: 0,
+        deaths = deaths?.toString()?.toByte() ?: 0,
+        assists = assists?.toString()?.toByte() ?: 0,
         impact = imp?.toString()?.toShortOrNull(),
         endItem0Id = item0Id?.toString()?.toShortOrNull(),
         endItem1Id = item1Id?.toString()?.toShortOrNull(),

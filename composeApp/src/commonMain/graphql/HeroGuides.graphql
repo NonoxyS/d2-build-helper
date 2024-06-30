@@ -2,10 +2,14 @@ query HeroGuides($heroId: Short) {
     heroStats {
         guide(heroId: $heroId) {
             guides {
-                heroId
                 matchId
                 steamAccountId
                 matchPlayer {
+                    hero {
+                        id
+                        displayName
+                        shortName
+                    }
                     position
                     isRadiant
                     kills
@@ -26,41 +30,6 @@ query HeroGuides($heroId: Short) {
                         itemPurchases {
                             itemId
                             time
-                        }
-                        inventoryReport {
-                            item0 {
-                                itemId
-                                charges
-                            }
-                            item1 {
-                                itemId
-                                charges
-                            }
-                            item2 {
-                                itemId
-                                charges
-                            }
-                            item3 {
-                                itemId
-                                charges
-                            }
-                            item4 {
-                                itemId
-                                charges
-                            }
-                            item5 {
-                                itemId
-                                charges
-                            }
-                            backPack0 {
-                                itemId
-                            }
-                            backPack1 {
-                                itemId
-                            }
-                            backPack2 {
-                                itemId
-                            }
                         }
                     }
                 }

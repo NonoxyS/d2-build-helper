@@ -2,11 +2,11 @@ query Guides {
     heroStats {
         guide {
             guides(take: 1) {
-                heroId
                 matchId
                 steamAccountId
                 matchPlayer {
                     hero {
+                        id
                         displayName
                         shortName
                     }
