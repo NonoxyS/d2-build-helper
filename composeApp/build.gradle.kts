@@ -148,6 +148,10 @@ compose.desktop {
     }
 }
 
+composeCompiler {
+    enableStrongSkippingMode = true
+}
+
 buildConfig {
     // https://github.com/gmazzo/gradle-buildconfig-plugin#usage-in-kts
 
