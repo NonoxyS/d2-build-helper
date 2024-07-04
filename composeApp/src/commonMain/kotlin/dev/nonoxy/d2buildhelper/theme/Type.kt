@@ -19,7 +19,8 @@ fun NotoSansFontFamily() = FontFamily(
 
 data class D2BuildHelperTypography(
     val bodyLarge: TextStyle,
-    val bodySmall: TextStyle
+    val bodyMedium: TextStyle,
+    val bodySmall: TextStyle,
 )
 
 @Composable
@@ -29,6 +30,13 @@ fun D2BuildHelperTypography() = D2BuildHelperTypography(
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
         lineHeight = 24.sp,
+        letterSpacing = 0.1.sp,
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = NotoSansFontFamily(),
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.1.sp,
     ),
     bodySmall = TextStyle(
