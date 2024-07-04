@@ -1,3 +1,5 @@
 <resources>
-
+    <string name="all_heroes">Все герои</string>
+    <string name="hero_filter">Фильтр героев</string>
+    <string name="app_name">D2 Build Helper</string>
 </resources>
