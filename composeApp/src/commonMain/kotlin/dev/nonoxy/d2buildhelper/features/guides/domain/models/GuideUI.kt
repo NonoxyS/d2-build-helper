@@ -8,7 +8,7 @@ class GuideUI(
     val playerStats: PlayerStatsUI
 )
 
-class HeroUI(
+data class HeroUI(
     val heroId: Short,
     val shortName: String,
     val displayName: String

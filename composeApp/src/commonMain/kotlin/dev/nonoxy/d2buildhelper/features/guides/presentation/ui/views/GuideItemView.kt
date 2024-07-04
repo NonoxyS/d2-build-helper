@@ -43,7 +43,10 @@ internal fun GuideItemView(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(D2BuildHelperTheme.colors.primaryContainer)
+            .background(
+                color = D2BuildHelperTheme.colors.primaryContainer,
+                shape = RoundedCornerShape(4.dp)
+            )
             .border(
                 width = 1.dp,
                 color = D2BuildHelperTheme.colors.outline,
@@ -54,8 +57,9 @@ internal fun GuideItemView(
     ) {
         HeroNameRow(
             hero = guide.hero,
-            heroImageUrl = imageResources.heroImages[guide.hero.heroId] ?: "",
-            positionImageUrl = imageResources.additionalImages[guide.playerStats.position.title] ?: ""
+            heroImageUrl = imageResources.heroImages[guide.hero] ?: "",
+            positionImageUrl = imageResources.additionalImages[guide.playerStats.position.title]
+                ?: ""
         )
         MatchStatsRow(
             guide = guide,
@@ -280,7 +284,11 @@ private fun GuideItemView_Preview() {
             ),
             imageResources = ImageResources(
                 heroImages = mapOf(
-                    1.toShort() to "https://ojxuhaplumzopsbihjkf.supabase.co/storage/v1/object/public/d2bh_images/hero_icons/antimage_minimap_icon.png"
+                    HeroUI(
+                        heroId = 1,
+                        shortName = "antimage",
+                        "Anti-Mage"
+                    ) to "https://ojxuhaplumzopsbihjkf.supabase.co/storage/v1/object/public/d2bh_images/hero_icons/antimage_minimap_icon.png"
                 ),
                 itemImages = emptyMap(),
                 abilityImages = emptyMap(),

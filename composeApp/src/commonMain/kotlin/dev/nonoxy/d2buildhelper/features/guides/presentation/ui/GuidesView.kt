@@ -24,7 +24,9 @@ internal fun GuidesView(
         modifier = Modifier.systemBarsPadding().fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        GuidesTopBar()
+        GuidesTopBar(
+            onSearchHeroClick = { eventHandler(GuidesEvent.HeroSearchDialogClicked) }
+        )
         GuideListView(
             guides = viewState.guides,
             imageResources = viewState.imageResources
@@ -38,6 +40,8 @@ private fun GuidesView_Preview() {
     D2BuildHelperTheme {
         GuidesView(
             viewState = GuidesViewState.Display(
+                heroSearchValue = "",
+                heroSearchFiltered = emptyMap(),
                 guides = emptyList(),
                 imageResources = ImageResources(
                     heroImages = emptyMap(),

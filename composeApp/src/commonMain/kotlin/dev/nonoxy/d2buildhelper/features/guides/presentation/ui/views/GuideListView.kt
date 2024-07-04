@@ -20,7 +20,7 @@ internal fun GuideListView(
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items = guides) { guide ->
+        items(items = guides, key = { Pair(it.matchId, it.steamAccountId) }) { guide ->
             GuideItemView(
                 guide = guide,
                 imageResources = imageResources

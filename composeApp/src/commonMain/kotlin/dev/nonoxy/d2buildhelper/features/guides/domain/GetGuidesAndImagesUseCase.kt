@@ -49,12 +49,25 @@ class GetGuidesAndImagesUseCase(
 
                     val imageResources =
                         ImageResources(
-                            heroImages = heroImages.mapKeys { it.key.id },
+                            heroImages = heroImages.mapKeys {
+                                HeroUI(
+                                    heroId = it.key.id,
+                                    shortName = it.key.shortName,
+                                    displayName = it.key.displayName
+                                )
+                            },
                             itemImages = itemImages.mapKeys { it.key.id },
                             abilityImages = emptyMap(),
                             additionalImages = additionalImages
                         )
-                    GuidesViewState.Display(guides = guides, imageResources = imageResources)
+                    GuidesViewState.Display(
+                        guides = guides,
+                        imageResources = imageResources,
+                        heroSearchFiltered = imageResources.heroImages.toList()
+                            .sortedBy { (hero, _) ->
+                                hero.displayName
+                            }.toMap()
+                    )
                 }
             }
         }.flowOn(Dispatchers.Default)
