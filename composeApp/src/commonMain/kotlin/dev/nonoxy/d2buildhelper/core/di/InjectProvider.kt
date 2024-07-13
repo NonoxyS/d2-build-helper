@@ -7,9 +7,8 @@ import coil3.request.crossfade
 import com.apollographql.apollo3.ApolloClient
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesDataSource
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResourcesDataSource
-import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
+import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesDataSource
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
-import dev.nonoxy.d2buildhelper.features.guides.domain.GetGuidesAndImagesUseCase
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
@@ -21,7 +20,8 @@ object InjectProvider {
     init {
         addDependency(type = ApolloClient::class, dependency = createApolloClient())
         addDependency(type = SupabaseClient::class, dependency = createSupabaseClient())
-        addDependency(type = GetGuidesAndImagesUseCase::class, dependency = createGetGuidesAndImagesUseCase())
+        addDependency(type = ResourcesRepository::class, dependency = createResourcesRepository())
+        addDependency(type = GuidesDataSource::class, dependency = GuidesDataSource())
     }
 
     fun addDependency(type: KClass<*>, dependency: Any) {
@@ -54,13 +54,10 @@ object InjectProvider {
         }
     }
 
-    private fun createGetGuidesAndImagesUseCase(): GetGuidesAndImagesUseCase {
-        return GetGuidesAndImagesUseCase(
-            guidesRepository = GuidesRepository(),
-            resourcesRepository = ResourcesRepository(
-                imageResourcesDataSource = ImageResourcesDataSource(),
-                constantResourcesDataSource = ConstantResourcesDataSource()
-            )
+    private fun createResourcesRepository(): ResourcesRepository {
+        return ResourcesRepository(
+            imageResourcesDataSource = ImageResourcesDataSource(),
+            constantResourcesDataSource = ConstantResourcesDataSource()
         )
     }
 

@@ -1,7 +1,9 @@
 package dev.nonoxy.d2buildhelper.navigation
 
-import kotlinx.serialization.Serializable
-
-enum class AppScreens(val title: String) {
-    Guides("guides"), HeroGuides("heroGuides"), DetailGuide("detailGuide")
+sealed class AppScreens(val route: String) {
+    data object Guides : AppScreens(route = "guides")
+    data object HeroGuides : AppScreens(route = "heroGuides/{heroId}") {
+        fun passHeroId(heroId: Short) = "heroGuides/$heroId"
+    }
+    data object DetailGuide : AppScreens(route = "detailGuide")
 }

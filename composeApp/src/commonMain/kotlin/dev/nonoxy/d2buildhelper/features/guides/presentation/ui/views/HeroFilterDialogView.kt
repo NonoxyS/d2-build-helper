@@ -1,7 +1,7 @@
-package dev.nonoxy.d2buildhelper.common.topbar
+package dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,7 +43,7 @@ internal fun HeroFilterDialog(
     heroSearchValue: String,
     onSearchValueChanged: (String) -> Unit,
     onDismiss: () -> Unit,
-    onHeroSelect: () -> Unit
+    onHeroSelect: (Short) -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismiss
@@ -51,9 +51,9 @@ internal fun HeroFilterDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
-                .border(width = 1.dp, color = D2BuildHelperTheme.colors.outline),
-            shape = RoundedCornerShape(4.dp)
+                .height(300.dp),
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(width = 1.dp, color = D2BuildHelperTheme.colors.outline)
         ) {
             Column(
                 modifier = Modifier
@@ -101,7 +101,10 @@ internal fun HeroFilterDialog(
                         HeroFilterItem(
                             hero = hero,
                             imageUrl = url,
-                            onItemClick = { TODO() }
+                            onItemClick = {
+                                onHeroSelect(it)
+                                onDismiss()
+                            }
                         )
                     }
                 }

@@ -1,7 +1,8 @@
-package dev.nonoxy.d2buildhelper.core.data.repository.guides.mappers
+package dev.nonoxy.d2buildhelper.core.data.api.guides.mappers
 
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
+import dev.nonoxy.d2buildhelper.graphql.HeroGuidesQuery
 
 fun GuidesQuery.Guide1.toGuide(): Guide {
     return Guide(
@@ -41,6 +42,46 @@ fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
             }
         },
         )
+}
+
+fun HeroGuidesQuery.Guide1.toGuide(): Guide {
+    return Guide(
+        hero = Hero(
+            heroId = matchPlayer?.hero?.id.toString().toShort(),
+            shortName = matchPlayer?.hero?.shortName ?: "",
+            displayName = matchPlayer?.hero?.displayName ?: "Unknown",
+        ),
+        steamAccountId = steamAccountId.toString().toLong(),
+        matchId = matchId.toString().toLong(),
+        durationSeconds = this.match?.durationSeconds ?: 0,
+        playerStats = matchPlayer!!.toPlayerStats()
+    )
+}
+
+fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
+    return PlayerStats(
+        position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
+        isRadiant = isRadiant,
+        kills = kills?.toString()?.toByte() ?: 0,
+        deaths = deaths?.toString()?.toByte() ?: 0,
+        assists = assists?.toString()?.toByte() ?: 0,
+        impact = imp?.toString()?.toShortOrNull(),
+        endItem0Id = item0Id?.toString()?.toShortOrNull(),
+        endItem1Id = item1Id?.toString()?.toShortOrNull(),
+        endItem2Id = item2Id?.toString()?.toShortOrNull(),
+        endItem3Id = item3Id?.toString()?.toShortOrNull(),
+        endItem4Id = item4Id?.toString()?.toShortOrNull(),
+        endItem5Id = item5Id?.toString()?.toShortOrNull(),
+        endBackpack0Id = backpack0Id?.toString()?.toShortOrNull(),
+        endBackpack1Id = backpack1Id?.toString()?.toShortOrNull(),
+        endBackpack2Id = backpack2Id?.toString()?.toShortOrNull(),
+        endNeutralItemId = neutral0Id?.toString()?.toShortOrNull(),
+        itemPurchases = stats?.itemPurchases?.map { itemPurchase ->
+            itemPurchase?.run {
+                ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
+            }
+        },
+    )
 }
 
 /*

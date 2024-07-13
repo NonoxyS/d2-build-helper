@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.common.topbar
+package dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
