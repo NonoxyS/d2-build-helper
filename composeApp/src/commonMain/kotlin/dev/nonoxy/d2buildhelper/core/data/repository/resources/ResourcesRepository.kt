@@ -1,8 +1,8 @@
 package dev.nonoxy.d2buildhelper.core.data.repository.resources
 
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesDataSource
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResourcesDataSource
+import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesApi
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResources
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class ResourcesRepository(
-    private val imageResourcesDataSource: ImageResourcesDataSource,
-    private val constantResourcesDataSource: ConstantResourcesDataSource
+    private val imageResourcesDataSource: ImageResourcesApi,
+    private val constantResourcesDataSource: ConstantResources
 ) {
     private var heroList: List<Hero>? = null
     private var itemList: List<Item>? = null
