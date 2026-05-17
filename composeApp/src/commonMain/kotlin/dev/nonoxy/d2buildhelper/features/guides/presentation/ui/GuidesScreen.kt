@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.nonoxy.d2buildhelper.features.guides.presentation.GuidesViewModel
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesAction
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesEvent
@@ -15,10 +14,11 @@ import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesErro
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesLoadingView
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.HeroFilterDialog
 import dev.nonoxy.d2buildhelper.navigation.LocalNavHost
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun GuidesScreen(
-    guidesViewModel: GuidesViewModel = viewModel { GuidesViewModel() }
+    guidesViewModel: GuidesViewModel = koinViewModel()
 ) {
     val externalNavHost = LocalNavHost.current
     val viewState by guidesViewModel.viewStates().collectAsState()

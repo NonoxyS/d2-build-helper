@@ -1,5 +1,5 @@
 ---
-description: Current architecture — BaseViewModel, InjectProvider, Compose Navigation
+description: Current architecture — BaseViewModel, Koin DI, Compose Navigation
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
@@ -32,20 +32,32 @@ Rules:
 - State updates only via `_viewStates.value = ...` (or `update { ... }`).
 - Actions emitted only via `_viewActions.emit(...)` from a coroutine on the ViewModel's scope.
 - All UI inputs go through `obtainEvent(...)`. No direct method calls on the ViewModel from the UI.
-- ViewModels are constructed at the Screen entry point (`{Feature}Screen.kt`) with dependencies resolved from `InjectProvider`.
+- ViewModels are resolved at the Screen entry point via `koinViewModel<T>()`. Their constructors take dependencies as regular parameters (no defaults).
 
-## InjectProvider (service locator)
+## Koin DI
 
-`core/di/InjectProvider` is a singleton holding a `HashMap<String, Any>` of pre-built dependencies (Apollo `ApolloClient`, Supabase `SupabaseClient`, `ResourcesRepository`, data sources, image loader). Construction happens once at app start.
+All bindings live in `core/di/AppModule.kt`:
 
-Rules while this pattern remains:
-- Read dependencies via `InjectProvider.getDependency<T>()` only inside object construction (ViewModel `init`, factory functions). Never inside composables or business logic methods.
-- Do not call `addDependency` after initialization. The map is mutable for setup, not for runtime injection.
-- Do not introduce new dependencies into `InjectProvider` without considering whether they belong in a feature module (see `mobile-roadmap.mdc` — Koin migration is the planned exit).
+- `single<T> { ... }` for clients (Apollo, Supabase), datasources, repositories.
+- `factoryOf(::UseCase)` for use-cases.
+- `viewModelOf(::SomeViewModel)` for view-models (via `koin-compose-viewmodel`).
+- `bind X::class` after `singleOf(::Impl)` to expose an `Api` interface.
+
+Resolve dependencies:
+- In classes (datasources, repos, use-cases, view-models): via **constructor parameters**. Koin wires them automatically. No `get()` inside class bodies.
+- In composables: `val vm: GuidesViewModel = koinViewModel()`.
+- Avoid `KoinPlatform.getKoin()` / `get()` outside DI module — that re-introduces service-locator pattern.
+
+`core/di/Koin.kt#initKoin(appDeclaration)` is the single entry point. It is idempotent (`KoinPlatform.getKoinOrNull()` guard). Called from:
+- `AndroidApp.onCreate` with `androidContext(this)`.
+- `jvmMain/main.kt` before `application { }`.
+- iOS `MainViewController` factory inside `ComposeUIViewController(configure = { initKoin() })`.
+
+`ImageLoader` (Coil 3) is **not** in Koin — it requires `PlatformContext` from Compose and is built inside `App.kt` then exposed via `LocalImageLoader`.
 
 ## Compose Navigation
 
-`navigation/AppScreens.kt` defines a sealed class with `route: String` per screen. Navigation uses `compose-navigation`'s `NavHost` + `NavController` (alpha API).
+`navigation/AppScreens.kt` defines a sealed class with `route: String` per screen. Navigation uses `compose-navigation`'s `NavHost` + `NavController`.
 
 ```kotlin
 sealed class AppScreens(val route: String) {
@@ -56,4 +68,4 @@ sealed class AppScreens(val route: String) {
 
 `LocalNavHost` is a `staticCompositionLocalOf<NavHostController>` so descendants can navigate without prop drilling. Avoid passing `NavController` through composables when `LocalNavHost.current` is sufficient.
 
-When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage on Compose 1.6.x.
+When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage.

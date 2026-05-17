@@ -5,7 +5,6 @@ import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
-import dev.nonoxy.d2buildhelper.core.di.InjectProvider
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.withContext
 
 class ImageResourcesDataSource(
-    private val supabaseClient: SupabaseClient = InjectProvider.getDependency(SupabaseClient::class)
+    private val supabaseClient: SupabaseClient
 ) : ImageResourcesApi {
     private val supabaseImageStorage = supabaseClient.storage.from(IMAGES_BUCKET_ID)
 

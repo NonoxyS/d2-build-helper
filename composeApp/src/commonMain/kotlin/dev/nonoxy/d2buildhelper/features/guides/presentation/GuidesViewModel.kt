@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class GuidesViewModel(
-    private val getGuidesUseCase: GetGuidesUseCase = GetGuidesUseCase(),
-    private val getImagesUseCase: GetImagesUseCase = GetImagesUseCase(),
+    private val getGuidesUseCase: GetGuidesUseCase,
+    private val getImagesUseCase: GetImagesUseCase,
 ) : BaseViewModel<GuidesViewState, GuidesAction, GuidesEvent>(initialState = GuidesViewState.Loading) {
 
     init {

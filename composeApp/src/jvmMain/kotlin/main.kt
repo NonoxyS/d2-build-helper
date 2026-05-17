@@ -3,12 +3,15 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import dev.nonoxy.d2buildhelper.App
+import dev.nonoxy.d2buildhelper.core.di.initKoin
 import dota_2_build_helper.composeapp.generated.resources.Res
 import dota_2_build_helper.composeapp.generated.resources.app_name
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
 
-fun main() = application {
+fun main() {
+    initKoin()
+    application {
     Window(
         title = stringResource(Res.string.app_name),
         state = rememberWindowState(width = 800.dp, height = 600.dp),
@@ -16,5 +19,6 @@ fun main() = application {
     ) {
         window.minimumSize = Dimension(350, 600)
         App()
+    }
     }
 }

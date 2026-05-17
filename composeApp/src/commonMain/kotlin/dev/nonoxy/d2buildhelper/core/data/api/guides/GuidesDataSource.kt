@@ -1,13 +1,12 @@
 package dev.nonoxy.d2buildhelper.core.data.api.guides
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Optional
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuide
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
 import dev.nonoxy.d2buildhelper.core.data.api.guides.mappers.toGuide
 import dev.nonoxy.d2buildhelper.core.data.toRequestResult
-import dev.nonoxy.d2buildhelper.core.di.InjectProvider
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 import dev.nonoxy.d2buildhelper.graphql.HeroGuidesQuery
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +22,7 @@ import kotlinx.coroutines.flow.merge
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GuidesDataSource(
-    private val apolloClient: ApolloClient = InjectProvider.getDependency(type = ApolloClient::class)
+    private val apolloClient: ApolloClient
 ) : GuidesApi {
     override fun getGuides(): Flow<RequestResult<List<Guide>>> {
         val apiRequest = flow {

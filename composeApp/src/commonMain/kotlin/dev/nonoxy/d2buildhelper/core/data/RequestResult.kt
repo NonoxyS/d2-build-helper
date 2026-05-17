@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.core.data
 
-import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.Operation
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Operation
 
 sealed class RequestResult<out E: Any>(open val data: E? = null) {
 

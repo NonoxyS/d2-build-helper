@@ -8,7 +8,6 @@
     <ID>ArgumentListWrapping:HeroFilterDialogView.kt$( items = filteredHeroImageUrls.toList(), key = { (hero, _) -&gt; hero.heroId })</ID>
     <ID>CommentSpacing:App.ios.kt$//UIApplication.sharedApplication.openURL(nsUrl)</ID>
     <ID>CommentSpacing:App.ios.kt$//val nsUrl = url?.let { NSURL.URLWithString(it) } ?: return</ID>
-    <ID>CommentSpacing:main.kt$//fun MainViewController(): UIViewController = ComposeUIViewController { App() }</ID>
     <ID>ComposableEventParameterNaming:GuidesView.kt$eventHandler: (GuidesEvent) -&gt; Unit</ID>
     <ID>ComposableEventParameterNaming:HeroFilterDialogView.kt$onSearchValueChanged: (String) -&gt; Unit</ID>
     <ID>ComposableFunctionName:App.kt$@Composable internal fun App()</ID>
@@ -23,7 +22,6 @@
     <ID>FinalNewline:App.android.kt$dev.nonoxy.d2buildhelper.App.android.kt</ID>
     <ID>FinalNewline:App.ios.kt$dev.nonoxy.d2buildhelper.App.ios.kt</ID>
     <ID>FinalNewline:App.jvm.kt$dev.nonoxy.d2buildhelper.App.jvm.kt</ID>
-    <ID>FinalNewline:App.kt$dev.nonoxy.d2buildhelper.App.kt</ID>
     <ID>FinalNewline:AppScreens.kt$dev.nonoxy.d2buildhelper.navigation.AppScreens.kt</ID>
     <ID>FinalNewline:BaseViewModel.kt$dev.nonoxy.d2buildhelper.base.BaseViewModel.kt</ID>
     <ID>FinalNewline:DetailGuide.kt$dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuide.kt</ID>
@@ -68,14 +66,12 @@
     <ID>MultiLineIfElse:GuideItemView.kt$"dire_square"</ID>
     <ID>MultiLineIfElse:GuideItemView.kt$"radiant_square"</ID>
     <ID>MultiLineIfElse:GuidesScreen.kt$guidesViewModel.clearAction()</ID>
-    <ID>MultiLineIfElse:InjectProvider.kt$InjectProvider$throw IllegalArgumentException("Local and anonymous can not be added")</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$""</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"${if (seconds / 60 &gt;= 10) seconds / 60 else "0${seconds / 60}"}:" + "${if (seconds % 60 &gt;= 10) seconds % 60 else "0${seconds % 60}"}"</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"00:00"</ID>
     <ID>NoBlankLineBeforeRbrace:DetailGuideScreen.kt$ </ID>
     <ID>NoBlankLineBeforeRbrace:GuidesErrorView.kt$ </ID>
     <ID>NoConsecutiveBlankLines:App.ios.kt$ </ID>
-    <ID>NoUnusedImports:main.kt$.main.kt</ID>
     <ID>NoWildcardImports:GuideMappers.kt$import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*</ID>
     <ID>SpacingAroundColon:RequestResult.kt$:</ID>
     <ID>SpacingAroundColon:RequestResult.kt$RequestResult$:</ID>
