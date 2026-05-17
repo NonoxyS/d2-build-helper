@@ -68,10 +68,13 @@ All current "one-shot" remote / local fetches collapse to plain `suspend` functi
 - `ResourcesRepository` — now an interface, current concrete becomes `ResourcesRepositoryImpl` (consistent with `GuidesRepository`/`Impl` and KMMTemplate convention):
   ```kotlin
   interface ResourcesRepository {
-      suspend fun getImageResources(): Result<ImageResources>
+      suspend fun getHeroImages(): Result<Map<Hero, String>>
+      suspend fun getItemImages(): Result<Map<Item, String>>
+      suspend fun getAbilityImages(): Result<Map<Ability, String>>
+      suspend fun getAdditionalImages(): Result<Map<String, String>>
   }
   ```
-  Impl orchestrates the four sub-fetches (`hero/item/ability/additional`) in parallel via `coroutineScope { async/async + awaitAll }`, keeps the in-memory cache (the same four nullable fields), maps to domain types at the boundary. The "conditional fetch" booleans of the old `GetImagesUseCase` are dropped — the only live caller wanted all four, so the conditional combinatorics weren't paying for themselves.
+  Granular methods replace the old aggregate `getImageResources(isNeedHeroImages, ...)` with its `Boolean` flag combinatorics: the feature that needs three of four images calls those three directly; the future DetailGuide screen that needs ability images calls `getAbilityImages()`. The repository owns the in-memory cache (same four nullable fields) and the DTO→domain mapping at the boundary. Aggregation into an `ImageResources` bundle is the feature's responsibility — `ImageResources` data class moves to `features/guides/domain/models/ImageResources.kt` (it's the consumer of this aggregate; if DetailGuide later needs a different bundle shape, it builds its own without affecting Guides).
 - `GuidesApi` / `GuidesDataSource` — `suspend fun (): Result<List<GuideDto>>`. The `flow { … merge(start, … ) }` ceremony goes away because there is no `InProgress` emission to keep.
 
 ### Type renames (clean DTO↔domain border)
@@ -82,7 +85,7 @@ All current "one-shot" remote / local fetches collapse to plain `suspend` functi
 | data DTO | `Item`, `Ability`, `Hero`, `PlayerStats`, `DetailGuide`, `ImageResources`, `ItemPurchase` (all in `core/data/...`) | `*Dto` (`internal`) |
 | domain | `features/guides/domain/models/GuideUI` | `Guide` |
 | domain | `HeroUI`, `ItemPurchaseUI`, `PlayerStatsUI`, `MatchPlayerPositionType` | `Hero`, `ItemPurchase`, `PlayerStats`, `MatchPlayerPosition` |
-| domain | `ImageResources` (currently mixes domain Hero + data Hero) | `ImageResources` in `features/guides/domain/models`, keyed by domain `Hero` |
+| domain | `ImageResources` (currently in `core/data/api/resources/image/models/`, mixes domain Hero + data Hero) | `ImageResources` in `features/guides/domain/models/`, keyed by domain `Hero` — owned by the consuming feature, not the repo |
 | presentation | n/a (current code reuses `*UI` directly in `ViewState`) | `UiGuidesState`, `UiGuidesLabel` |
 
 The `Ui` prefix is reserved for the presentation layer where it now means something. Domain types drop the `UI` suffix because they are no longer "UI-shaped" — they are the canonical model.
@@ -190,13 +193,18 @@ interface GuidesStore : Store<GuidesStore.Intent, GuidesStore.State, GuidesStore
 `GuidesExecutor`:
 - Holds `private val searchValue = MutableStateFlow("")`.
 - In `executeAction`:
-  - `LoadInitial`: `dispatch(SetLoading(true))`, `dispatch(SetError(false))`, awaits both repository calls in parallel (`coroutineScope { async/async + awaitAll }`), dispatches `SetGuides`/`SetImageResources` on success, `SetError(true)` on any failure, finally `SetLoading(false)`. Also seeds `searchValue.collect.debounce(SEARCH_DEBOUNCE_MS)` into `dispatch(FilterHeroes(...))` once.
-  - `FilterHeroes`: computes filtered map on `dispatchers.default`, dispatches `SetHeroSearchFiltered`.
+  - `LoadInitial`:
+    1. `dispatch(SetLoading(true))`, `dispatch(SetError(false))`.
+    2. `coroutineScope { val guidesDef = async { repository.getGuides() }; val heroesDef = async { resources.getHeroImages() }; val itemsDef = async { resources.getItemImages() }; val extraDef = async { resources.getAdditionalImages() } ... }` — calls four in parallel, awaits all.
+    3. On any `Result.failure` → `dispatch(SetError(true))`; on all success → build `ImageResources(...)` from the three image maps, `dispatch(SetGuides(...))`, `dispatch(SetImageResources(...))`, and seed `heroSearchFiltered` with all heroes (sorted) via `dispatch(SetHeroSearchFiltered(...))`.
+    4. `dispatch(SetLoading(false))`.
+    5. Once per executor lifetime, wire the debounce pipeline: `searchValue.debounce(SEARCH_DEBOUNCE_MS).onEach { suspendExecuteAction(Action.FilterHeroes(it)) }.launchIn(scope)`. Done inside `LoadInitial` after success so the filter has heroes to filter against.
+  - `FilterHeroes(value)`: read `state()` (Executor has access via `state: () -> State`), compute filtered map of `imageResources.heroImages` on `dispatchers.default` (filter by `hero.displayName.contains(value, ignoreCase = true)`, sort by name), `dispatch(SetHeroSearchFiltered(...))`.
 - In `executeIntent`:
-  - `OnHeroSearchValueChange(v)` → `dispatch(SetHeroSearchValue(v))` + `searchValue.value = v` (UI sees text instantly; filtering is debounced).
+  - `OnHeroSearchValueChange(v)` → `dispatch(SetHeroSearchValue(v))` *and* `searchValue.value = v`. The dispatch keeps Store.State authoritative (programmatic resets work); the StateFlow feeds the debounce pipeline. UI does not depend on either for fast rendering — see *UI search input* below.
   - `OnHeroSearchDialogClick` → `publish(Label.ShowHeroSearchDialog)`.
-  - `OnHeroSelect(id)` → re-fetch via `getHeroGuides(id)` with the same loading/error pattern.
-  - `OnRetry` → re-dispatch `LoadInitial`.
+  - `OnHeroSelect(id)` → re-fetch via `repository.getHeroGuides(id)` with the same loading/error pattern; on success `dispatch(SetGuides(...))` only.
+  - `OnRetry` → `suspendExecuteAction(Action.LoadInitial)`.
 
 `GuidesReducer`: straight `when (msg)` → `state.copy(...)`.
 
@@ -259,6 +267,34 @@ internal class GuidesStoreFactory(
   ```
   Old `clearAction()` / `viewActions().collectAsState(null)` ceremony is gone — Label is observed once via `LaunchedEffect`.
 - `GuidesView.kt`, `GuidesTopBarView.kt`, `HeroFilterDialogView.kt`, `GuideListView.kt`, `GuideItemView.kt`, `GuidesErrorView.kt` — accept `UiGuidesState` (or its slices) directly. No business logic shifts; this is signature plumbing.
+
+#### UI search input — local-mirror pattern (toir-mobile convention)
+
+The hero search `TextField` in `HeroFilterDialog` must render every keystroke instantly even though `Intent.OnHeroSearchValueChange → Store.State.heroSearchValue` introduces at least one frame of latency (and the filtering pipeline is debounced by `SEARCH_DEBOUNCE_MS`). Pattern, ported from `toir-mobile`'s `TextChecklistItem`:
+
+```kotlin
+@Composable
+internal fun HeroFilterDialog(
+    heroSearchValue: String,
+    onSearchValueChanged: (String) -> Unit,
+    /* ... */
+) {
+    var input by remember(heroSearchValue) { mutableStateOf(heroSearchValue) }
+
+    OutlinedTextField(
+        value = input,
+        onValueChange = { newValue ->
+            input = newValue                // 1) local — renders next frame
+            onSearchValueChanged(newValue)  // 2) → vm → Intent → Store
+        },
+        /* ... */
+    )
+}
+```
+
+- `remember(heroSearchValue) { mutableStateOf(heroSearchValue) }` reseeds local state when the Store-side value changes underneath us (e.g., programmatic reset after `OnHeroSelect`). When the Store value catches up to what we just typed, the `remember` key bounces to the same value and recreates `mutableStateOf` with the same content — no visible glitch.
+- Local state isolates rendering from Store latency; the filter pipeline still runs off the Store-side debounce.
+- Apply the same pattern wherever a text field's perceived input speed could lag a Store round-trip (none beyond `HeroFilterDialog` in this PR, but the convention is now project-wide and should be documented in `mobile-compose.mdc`).
 
 ## DI wiring
 
@@ -341,6 +377,7 @@ moko-mvvm-flow         = { module = "dev.icerock.moko:mvvm-flow",               
 - `.claude/rules/mobile-architecture.mdc` — rewrite the VM section: `BaseViewModel<State, Label>` + `BaseExecutor` + Store/Reducer/Factory + Ui mappers. Reference the package layout.
 - `.claude/rules/mobile-data-layer.mdc` — replace `RequestResult<T>` references with `Result<T>` and `suspend fun` repositories; drop the `RequestResult.Success | InProgress | Error` matrix; note that DTO→domain mapping is repository responsibility.
 - `.claude/rules/mobile-error-handling.mdc` — `coRunCatching` is the suspend-context norm; `runCatching` only in non-suspend code.
+- `.claude/rules/mobile-compose.mdc` — add the local-mirror text-input pattern (mutableStateOf inside composable + propagate to Store) for any field where Store round-trip could lag the cursor.
 - `CLAUDE.md` —
   - Stack: add MVIKotlin 4.4.0, Napier 2.7.1, moko-mvvm 0.16.1.
   - Architecture: new per-feature package layout (`api/impl/presentation`).
