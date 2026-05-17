@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} cat {})",
+      "Bash(xargs cat:*)"
+    ]
+  }
+}

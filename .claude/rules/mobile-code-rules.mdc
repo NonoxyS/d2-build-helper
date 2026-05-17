@@ -1,0 +1,60 @@
+---
+description: General code rules — access modifiers, member ordering, NPE-safety
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Code Rules
+
+## Access Modifiers
+
+Default to the narrowest visibility. Recommended defaults in a single-module project:
+
+| Entity | Modifier | Note |
+| --- | --- | --- |
+| ViewModel | `public` (constructor `internal` when injected) | Resolved via `InjectProvider` today, will be `internal constructor` when Koin lands |
+| UseCase | `internal` | Wired inside a feature, not consumed across modules |
+| Repository interface | `internal` | Public API of a feature's data layer |
+| Repository / DataSource impl | `internal` | Implementations are not part of the contract |
+| Mapper extension function | `internal` | Free-standing `fun ApolloType.toDomain(): DomainType` |
+| Composable Screen | `internal` | Entry point for a navigation route |
+| Composable View | `internal` | Re-used inside a feature |
+| Preview composable | `private` | Never leaks |
+| UI ViewState / Action / Event | `public` | Forms part of the ViewModel contract |
+| Local JSON model (`Hero`, `Item`, `Ability`) | `public` | Used across features |
+| `BaseViewModel` itself | `abstract` | In `base/` package, no further restriction |
+
+When multi-module split lands, revisit this — features will expose only `api` types as `public`.
+
+## Member Ordering
+
+```kotlin
+class SomeFeatureViewModel {
+    // 1. companion object — top, when present and used as namespace for constants
+    // 2. Properties (private MutableStateFlows / dependencies)
+    // 3. init blocks
+    // 4. override methods (e.g., obtainEvent)
+    // 5. public functions (none for a ViewModel — UI uses obtainEvent)
+    // 6. internal functions
+    // 7. private functions
+}
+```
+
+Companion objects holding only constants may also sit at the bottom — pick one style per file and stay consistent.
+
+## NPE-safety
+
+- Forbid `!!`. If you cannot recover from null, throw `IllegalStateException("explanation")` explicitly.
+- Forbid `list.first()` / `list.last()` when emptiness is plausible. Use `firstOrNull()` / `lastOrNull()` / `getOrNull(index)`.
+- Apollo-generated types can have nullable fields; do not unwrap them with `!!` — handle `null` in the mapper.
+- `String?` defaults: prefer `.orEmpty()` over `?: ""` for readability.
+
+## Composables
+
+- `Modifier` is the first optional parameter and default `Modifier`.
+- No business logic in composables — delegate to ViewModel via `obtainEvent`.
+- `@Composable` functions are never `suspend`.
+
+## Comments
+
+Default: no comments. Only add when the *why* is non-obvious (a hidden invariant, a workaround for an SDK bug, a reason that diverges from the rule). Never narrate what the code does — names already do that.

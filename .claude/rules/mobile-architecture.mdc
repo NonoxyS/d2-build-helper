@@ -1,0 +1,59 @@
+---
+description: Current architecture — BaseViewModel, InjectProvider, Compose Navigation
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Architecture
+
+## BaseViewModel<State, Action, Event>
+
+Custom unidirectional pattern (not MVIKotlin). Three roles:
+
+- **State** — sealed class (or data class) for what the UI renders. Examples: `GuidesViewState.Loading`, `GuidesViewState.Error`, `GuidesViewState.Display(...)`.
+- **Action** — sealed interface for one-time side effects to the UI (dialogs, navigation triggers). Examples: `GuidesAction.ShowHeroSearchDialog`.
+- **Event** — sealed interface for user/UI inputs that the ViewModel should react to. Examples: `GuidesEvent.HeroSearchValueChanged`, `GuidesEvent.SelectHeroInSearchDialog`.
+
+Contract (from `base/BaseViewModel.kt`):
+
+```kotlin
+abstract class BaseViewModel<State, Action, Event> {
+    protected val _viewStates: MutableStateFlow<State> = MutableStateFlow(initialState)
+    val viewStates: StateFlow<State> = _viewStates.asStateFlow()
+
+    protected val _viewActions: MutableSharedFlow<Action> = MutableSharedFlow()
+    val viewActions: SharedFlow<Action> = _viewActions.asSharedFlow()
+
+    abstract fun obtainEvent(event: Event)
+}
+```
+
+Rules:
+- State updates only via `_viewStates.value = ...` (or `update { ... }`).
+- Actions emitted only via `_viewActions.emit(...)` from a coroutine on the ViewModel's scope.
+- All UI inputs go through `obtainEvent(...)`. No direct method calls on the ViewModel from the UI.
+- ViewModels are constructed at the Screen entry point (`{Feature}Screen.kt`) with dependencies resolved from `InjectProvider`.
+
+## InjectProvider (service locator)
+
+`core/di/InjectProvider` is a singleton holding a `HashMap<String, Any>` of pre-built dependencies (Apollo `ApolloClient`, Supabase `SupabaseClient`, `ResourcesRepository`, data sources, image loader). Construction happens once at app start.
+
+Rules while this pattern remains:
+- Read dependencies via `InjectProvider.getDependency<T>()` only inside object construction (ViewModel `init`, factory functions). Never inside composables or business logic methods.
+- Do not call `addDependency` after initialization. The map is mutable for setup, not for runtime injection.
+- Do not introduce new dependencies into `InjectProvider` without considering whether they belong in a feature module (see `mobile-roadmap.mdc` — Koin migration is the planned exit).
+
+## Compose Navigation
+
+`navigation/AppScreens.kt` defines a sealed class with `route: String` per screen. Navigation uses `compose-navigation`'s `NavHost` + `NavController` (alpha API).
+
+```kotlin
+sealed class AppScreens(val route: String) {
+    data object Guides : AppScreens("guides")
+    data object DetailGuide : AppScreens("detail_guide/{guideId}")
+}
+```
+
+`LocalNavHost` is a `staticCompositionLocalOf<NavHostController>` so descendants can navigate without prop drilling. Avoid passing `NavController` through composables when `LocalNavHost.current` is sufficient.
+
+When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage on Compose 1.6.x.

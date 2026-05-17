@@ -1,0 +1,101 @@
+---
+description: Compose — recomposition optimization, composable splitting, Preview rules
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Compose
+
+## Recomposition Optimization
+
+### @Immutable for UI state
+
+Annotate `data class` UI state types with `@Immutable` so Compose treats them as stable:
+
+```kotlin
+@Immutable
+data class GuidesViewState.Display(
+    val heroSearchValue: String,
+    val guides: List<GuideUI>,
+    val imageResources: ImageResources,
+)
+```
+
+Strong skipping mode is already enabled in `composeApp/build.gradle.kts` (`composeCompiler { enableStrongSkippingMode = true }`). Even so, prefer `@Immutable` for clarity and forward compatibility.
+
+### rememberUpdatedState for callbacks inside effects
+
+```kotlin
+@Composable
+private fun WatchGuideSelection(onSelect: (String) -> Unit) {
+    val currentOnSelect by rememberUpdatedState(onSelect)
+    LaunchedEffect(Unit) { /* use currentOnSelect() */ }
+}
+```
+
+### derivedStateOf for derived state
+
+```kotlin
+val showScrollToTop by remember {
+    derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }
+}
+```
+
+### key in LazyColumn
+
+Always:
+
+```kotlin
+LazyColumn {
+    items(items = guides, key = { it.matchId }) { guide -> GuideItemView(guide) }
+}
+```
+
+## Composable Splitting
+
+### Pass minimum required data
+
+```kotlin
+// ✅
+GuideItemView(
+    heroName = guide.heroName,
+    role = guide.role,
+    icon = imageResources.heroes[guide.heroId],
+)
+
+// ❌
+GuideItemView(guide = guide, imageResources = imageResources)
+```
+
+This keeps the recomposition surface small and the composable testable.
+
+### Modifier as the first optional parameter
+
+Required composable parameter shape:
+
+```kotlin
+@Composable
+internal fun GuideItemView(
+    heroName: String,
+    role: MatchPlayerPositionType,
+    modifier: Modifier = Modifier,
+)
+```
+
+### Effects at the top of the composable
+
+`LaunchedEffect`, `DisposableEffect`, `SideEffect` go before UI content. Extract complex effects into separate `@Composable private fun` helpers (no UI).
+
+## Preview Rules
+
+Every reusable composable in `features/.../ui/views/` should have a `@Preview` in the same file:
+
+- Name: `Preview` + composable name (e.g., `PreviewGuideItemView`).
+- `@Preview(showBackground = true)`.
+- Wrapped in the project theme (`D2BuildHelperTheme { ... }` — see `theme/Theme.kt`).
+- For multi-state composables, render variants in a `Column { ... }`.
+- `private fun` — previews never leak as public API.
+
+## CompositionLocals
+
+`LocalImageLoader` and `LocalNavHost` are the only CompositionLocals in the project. Do not introduce new ones without good reason — they hide dependencies and complicate testing.
