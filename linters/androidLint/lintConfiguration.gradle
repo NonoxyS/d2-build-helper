@@ -1,0 +1,20 @@
+import java.util.function.Function
+
+String applicationPluginId = libs.plugins.androidApplication.get().pluginId
+String androidPluginId = libs.plugins.androidLibrary.get().pluginId
+
+private static <T, R> R with(T receiver, Function<T, R> block) {
+    return block.apply(receiver);
+}
+
+subprojects { project ->
+    project.afterEvaluate { evaluatedProject ->
+        with(evaluatedProject.pluginManager) { pm ->
+            if (pm.hasPlugin(applicationPluginId) || pm.hasPlugin(androidPluginId)) {
+                android.lintOptions {
+                    lintConfig file("$rootDir/linters/androidLint/config.xml")
+                }
+            }
+        }
+    }
+}
