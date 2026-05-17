@@ -39,6 +39,11 @@ supabase = "3.1.0"
 # Images
 coil = "3.2.0"
 
+# MVI / Logging / Multiplatform helpers
+mvikotlin = "4.4.0"
+napier = "2.7.1"
+moko-mvvm = "0.16.1"
+
 # Linting
 detekt = "1.23.8"
 detekt-compose-kode = "1.4.0"
@@ -92,6 +97,18 @@ supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt", versi
 # Images
 coil = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+
+# MVIKotlin
+mvikotlin-core       = { module = "com.arkivanov.mvikotlin:mvikotlin",                       version.ref = "mvikotlin" }
+mvikotlin-main       = { module = "com.arkivanov.mvikotlin:mvikotlin-main",                  version.ref = "mvikotlin" }
+mvikotlin-logging    = { module = "com.arkivanov.mvikotlin:mvikotlin-logging",               version.ref = "mvikotlin" }
+mvikotlin-coroutines = { module = "com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines", version.ref = "mvikotlin" }
+
+# Logging
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+
+# moko-mvvm (CFlow/CStateFlow)
+moko-mvvm-flow = { module = "dev.icerock.moko:mvvm-flow", version.ref = "moko-mvvm" }
 
 # Detekt plugins
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
