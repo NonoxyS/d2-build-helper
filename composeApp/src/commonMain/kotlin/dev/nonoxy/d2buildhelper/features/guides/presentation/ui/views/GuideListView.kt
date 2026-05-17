@@ -9,11 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.GuideUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
 
 @Composable
 internal fun GuideListView(
-    guides: List<GuideUI>,
+    guides: List<Guide>,
     imageResources: ImageResources
 ) {
     LazyColumn(

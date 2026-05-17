@@ -3,8 +3,8 @@ package dev.nonoxy.d2buildhelper.core.data.api.guides
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuide
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuideDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.GuideDto
 import dev.nonoxy.d2buildhelper.core.data.api.guides.mappers.toGuide
 import dev.nonoxy.d2buildhelper.core.data.toRequestResult
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
@@ -21,10 +21,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GuidesDataSource(
+internal class GuidesDataSource(
     private val apolloClient: ApolloClient
 ) : GuidesApi {
-    override fun getGuides(): Flow<RequestResult<List<Guide>>> {
+    override fun getGuides(): Flow<RequestResult<List<GuideDto>>> {
         val apiRequest = flow {
             emit(apolloClient.query(GuidesQuery()).execute())
         }.flowOn(Dispatchers.IO)
@@ -46,12 +46,12 @@ class GuidesDataSource(
                 }
             }.flowOn(Dispatchers.Default)
 
-        val start = flowOf<RequestResult<List<Guide>>>(RequestResult.InProgress())
+        val start = flowOf<RequestResult<List<GuideDto>>>(RequestResult.InProgress())
 
         return merge(apiRequest, start)
     }
 
-    override fun getHeroGuides(heroId: Short): Flow<RequestResult<List<Guide>>> {
+    override fun getHeroGuides(heroId: Short): Flow<RequestResult<List<GuideDto>>> {
         val apiRequest = flow {
             emit(apolloClient.query(HeroGuidesQuery(heroId = Optional.present(heroId.toInt()))).execute())
         }.flowOn(Dispatchers.IO)
@@ -73,7 +73,7 @@ class GuidesDataSource(
                 }
             }.flowOn(Dispatchers.Default)
 
-        val start = flowOf<RequestResult<List<Guide>>>(RequestResult.InProgress())
+        val start = flowOf<RequestResult<List<GuideDto>>>(RequestResult.InProgress())
 
         return merge(apiRequest, start)
     }
@@ -81,7 +81,7 @@ class GuidesDataSource(
     override fun getDetailGuide(
         matchId: Long,
         steamAccountId: Long
-    ): Flow<RequestResult<DetailGuide>> {
+    ): Flow<RequestResult<DetailGuideDto>> {
         TODO("Not yet implemented")
     }
 }

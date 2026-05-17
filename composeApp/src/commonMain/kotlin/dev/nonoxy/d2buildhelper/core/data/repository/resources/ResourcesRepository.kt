@@ -3,24 +3,24 @@ package dev.nonoxy.d2buildhelper.core.data.repository.resources
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesApi
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResources
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-class ResourcesRepository(
+internal class ResourcesRepository(
     private val imageResourcesDataSource: ImageResourcesApi,
     private val constantResourcesDataSource: ConstantResources
 ) {
-    private var heroList: List<Hero>? = null
-    private var itemList: List<Item>? = null
-    private var abilityList: List<Ability>? = null
+    private var heroList: List<HeroDto>? = null
+    private var itemList: List<ItemDto>? = null
+    private var abilityList: List<AbilityDto>? = null
 
-    private var heroImageUrls: Map<Hero, String>? = null
-    private var itemImageUrls: Map<Item, String>? = null
-    private var abilityImageUrls: Map<Ability, String>? = null
+    private var heroImageUrls: Map<HeroDto, String>? = null
+    private var itemImageUrls: Map<ItemDto, String>? = null
+    private var abilityImageUrls: Map<AbilityDto, String>? = null
     private var additionalImageUrls: Map<String, String>? = null
 
     private suspend fun fetchAllConstantsDataIfNeeded() {
@@ -41,7 +41,7 @@ class ResourcesRepository(
         }
     }
 
-    fun getHeroImages(): Flow<RequestResult<Map<Hero, String>>> {
+    fun getHeroImages(): Flow<RequestResult<Map<HeroDto, String>>> {
         return flow {
             emit(RequestResult.InProgress())
 
@@ -65,7 +65,7 @@ class ResourcesRepository(
         }.catch { e -> emit(RequestResult.Error(e)) }
     }
 
-    fun getItemImages(): Flow<RequestResult<Map<Item, String>>> {
+    fun getItemImages(): Flow<RequestResult<Map<ItemDto, String>>> {
         return flow {
             emit(RequestResult.InProgress())
 
@@ -90,7 +90,7 @@ class ResourcesRepository(
         }.catch { e -> emit(RequestResult.Error(e)) }
     }
 
-    fun getAbilityImages(): Flow<RequestResult<Map<Ability, String>>> {
+    fun getAbilityImages(): Flow<RequestResult<Map<AbilityDto, String>>> {
         return flow {
             emit(RequestResult.InProgress())
 

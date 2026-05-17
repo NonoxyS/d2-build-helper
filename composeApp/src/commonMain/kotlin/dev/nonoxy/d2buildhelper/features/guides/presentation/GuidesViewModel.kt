@@ -3,7 +3,7 @@ package dev.nonoxy.d2buildhelper.features.guides.presentation
 import androidx.lifecycle.viewModelScope
 import dev.nonoxy.d2buildhelper.base.BaseViewModel
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetGuidesUseCase
 import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetImagesUseCase
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesAction
@@ -99,7 +99,7 @@ internal class GuidesViewModel(
         }
     }
 
-    private suspend fun filterHeroSearch(state: GuidesViewState.Display): Map<HeroUI, String> {
+    private suspend fun filterHeroSearch(state: GuidesViewState.Display): Map<Hero, String> {
         val filteredHeroes = viewModelScope.async(Dispatchers.Default) {
             state.imageResources.heroImages.filter { (hero, _) ->
                 hero.displayName.contains(state.heroSearchValue.trim(), ignoreCase = true)

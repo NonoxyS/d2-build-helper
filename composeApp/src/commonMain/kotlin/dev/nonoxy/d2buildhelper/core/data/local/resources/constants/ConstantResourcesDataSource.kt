@@ -1,8 +1,8 @@
 package dev.nonoxy.d2buildhelper.core.data.local.resources.constants
 
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
 import dota_2_build_helper.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -13,23 +13,23 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 @OptIn(ExperimentalResourceApi::class)
-class ConstantResourcesDataSource : ConstantResources {
+internal class ConstantResourcesDataSource : ConstantResources {
     val json = Json { coerceInputValues = true }
-    override fun getHeroConstants(): Flow<List<Hero>> {
+    override fun getHeroConstants(): Flow<List<HeroDto>> {
         return flow {
-            emit(json.decodeFromString<List<Hero>>(Res.readBytes(HEROES_JSON_PATH).decodeToString()))
+            emit(json.decodeFromString<List<HeroDto>>(Res.readBytes(HEROES_JSON_PATH).decodeToString()))
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun getItemConstants(): Flow<List<Item>> {
+    override fun getItemConstants(): Flow<List<ItemDto>> {
         return flow {
-            emit(json.decodeFromString<List<Item>>(Res.readBytes(ITEMS_JSON_PATH).decodeToString()))
+            emit(json.decodeFromString<List<ItemDto>>(Res.readBytes(ITEMS_JSON_PATH).decodeToString()))
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun getAbilityConstants(): Flow<List<Ability>> {
+    override fun getAbilityConstants(): Flow<List<AbilityDto>> {
         return flow {
-            emit(json.decodeFromString<List<Ability>>(Res.readBytes(ABILITIES_JSON_PATH).decodeToString()))
+            emit(json.decodeFromString<List<AbilityDto>>(Res.readBytes(ABILITIES_JSON_PATH).decodeToString()))
         }.flowOn(Dispatchers.IO)
     }
 

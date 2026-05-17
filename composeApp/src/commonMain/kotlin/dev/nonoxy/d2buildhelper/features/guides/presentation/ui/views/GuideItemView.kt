@@ -27,17 +27,17 @@ import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.base.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.GuideUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchaseUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPositionType
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStatsUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchase
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStats
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 internal fun GuideItemView(
-    guide: GuideUI,
+    guide: Guide,
     imageResources: ImageResources
 ) {
     Column(
@@ -76,7 +76,7 @@ internal fun GuideItemView(
 
 @Composable
 private fun HeroNameRow(
-    hero: HeroUI,
+    hero: Hero,
     heroImageUrl: String,
     positionImageUrl: String
 ) {
@@ -109,7 +109,7 @@ private fun HeroNameRow(
 
 @Composable
 private fun MatchStatsRow(
-    guide: GuideUI,
+    guide: Guide,
     sideImageUrl: String
 ) {
     Row(
@@ -195,7 +195,7 @@ private fun MatchStatsRow(
 
 @Composable
 private fun ItemRow(
-    guide: GuideUI,
+    guide: Guide,
     itemImageUrls: Map<Short, String>
 ) {
     Row(
@@ -226,7 +226,7 @@ private fun ItemRow(
 
 @Composable
 private fun ItemWithBuyTime(
-    itemPurchase: ItemPurchaseUI?,
+    itemPurchase: ItemPurchase?,
     itemImageUrl: String
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -259,8 +259,8 @@ private fun ItemWithBuyTime(
 private fun GuideItemView_Preview() {
     D2BuildHelperTheme {
         GuideItemView(
-            guide = GuideUI(
-                hero = HeroUI(
+            guide = Guide(
+                hero = Hero(
                     heroId = 1,
                     shortName = "antimage",
                     displayName = "Anti-Mage"
@@ -268,8 +268,8 @@ private fun GuideItemView_Preview() {
                 steamAccountId = 76561197960287930,
                 matchId = 1234567890,
                 durationSeconds = 3600,
-                playerStats = PlayerStatsUI(
-                    position = MatchPlayerPositionType.POSITION_1,
+                playerStats = PlayerStats(
+                    position = MatchPlayerPosition.POSITION_1,
                     isRadiant = true,
                     kills = 10,
                     deaths = 2,
@@ -277,14 +277,14 @@ private fun GuideItemView_Preview() {
                     impact = 38,
                     endNeutralItemId = 10,
                     sortedEndItemPurchases = listOf(
-                        ItemPurchaseUI(itemId = 1, time = 0),
-                        ItemPurchaseUI(itemId = 2, time = 600)
+                        ItemPurchase(itemId = 1, time = 0),
+                        ItemPurchase(itemId = 2, time = 600)
                     )
                 )
             ),
             imageResources = ImageResources(
                 heroImages = mapOf(
-                    HeroUI(
+                    Hero(
                         heroId = 1,
                         shortName = "antimage",
                         "Anti-Mage"

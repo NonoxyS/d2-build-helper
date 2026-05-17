@@ -1,14 +1,14 @@
 package dev.nonoxy.d2buildhelper.core.data.local.resources.constants
 
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
 import kotlinx.coroutines.flow.Flow
 
-interface ConstantResources {
-    fun getHeroConstants(): Flow<List<Hero>>
+internal interface ConstantResources {
+    fun getHeroConstants(): Flow<List<HeroDto>>
 
-    fun getItemConstants(): Flow<List<Item>>
+    fun getItemConstants(): Flow<List<ItemDto>>
 
-    fun getAbilityConstants(): Flow<List<Ability>>
+    fun getAbilityConstants(): Flow<List<AbilityDto>>
 }

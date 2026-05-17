@@ -3,7 +3,7 @@ package dev.nonoxy.d2buildhelper.features.guides.domain.usecases
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -62,7 +62,7 @@ internal class GetImagesUseCase(
                     val imageResources =
                         ImageResources(
                             heroImages = heroImages.mapKeys {
-                                HeroUI(
+                                Hero(
                                     heroId = it.key.id,
                                     shortName = it.key.shortName,
                                     displayName = it.key.displayName

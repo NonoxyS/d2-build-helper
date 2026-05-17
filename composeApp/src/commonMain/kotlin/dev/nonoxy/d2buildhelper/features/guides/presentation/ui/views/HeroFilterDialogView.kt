@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.base.LocalImageLoader
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 import dota_2_build_helper.composeapp.generated.resources.Res
 import dota_2_build_helper.composeapp.generated.resources.hero_filter
@@ -39,7 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun HeroFilterDialog(
-    filteredHeroImageUrls: Map<HeroUI, String>,
+    filteredHeroImageUrls: Map<Hero, String>,
     heroSearchValue: String,
     onSearchValueChanged: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -115,7 +115,7 @@ internal fun HeroFilterDialog(
 
 @Composable
 private fun HeroFilterItem(
-    hero: HeroUI,
+    hero: Hero,
     imageUrl: String,
     onItemClick: (Short) -> Unit
 ) {

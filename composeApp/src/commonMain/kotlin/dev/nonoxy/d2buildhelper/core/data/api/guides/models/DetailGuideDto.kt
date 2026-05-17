@@ -1,14 +1,14 @@
 package dev.nonoxy.d2buildhelper.core.data.api.guides.models
 
-class DetailGuide(
-    val hero: Hero,
+internal class DetailGuideDto(
+    val hero: HeroDto,
     val steamAccountId: Long,
     val matchId: Long,
     val durationSeconds: Int,
-    val playerStats: DetailPlayerStats
+    val playerStats: DetailPlayerStatsDto
 )
 
-class DetailPlayerStats(
+internal class DetailPlayerStatsDto(
     val position: MatchPlayerPositionType?,
     val isRadiant: Boolean?,
     val kills: Byte,
@@ -25,66 +25,66 @@ class DetailPlayerStats(
     val endBackpack1Id: Short?,
     val endBackpack2Id: Short?,
     val endNeutralItemId: Short?,
-    val itemPurchases: List<ItemPurchase?>?,
-    val inventoryChanges: List<InventoryChange?>?,
-    val abilityLearnEvents: List<AbilityLearnEvent?>?
+    val itemPurchases: List<ItemPurchaseDto?>?,
+    val inventoryChanges: List<InventoryChangeDto?>?,
+    val abilityLearnEvents: List<AbilityLearnEventDto?>?
 )
 
-class InventoryChange(
-    val item0: Item0?,
-    val item1: Item1?,
-    val item2: Item2?,
-    val item3: Item3?,
-    val item4: Item4?,
-    val item5: Item5?,
-    val backpack0: Backpack0?,
-    val backpack1: Backpack1?,
-    val backpack2: Backpack2?
+internal class InventoryChangeDto(
+    val item0: Item0Dto?,
+    val item1: Item1Dto?,
+    val item2: Item2Dto?,
+    val item3: Item3Dto?,
+    val item4: Item4Dto?,
+    val item5: Item5Dto?,
+    val backpack0: Backpack0Dto?,
+    val backpack1: Backpack1Dto?,
+    val backpack2: Backpack2Dto?
 )
 
-class Item0(
+internal class Item0Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Item1(
+internal class Item1Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Item2(
+internal class Item2Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Item3(
+internal class Item3Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Item4(
+internal class Item4Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Item5(
+internal class Item5Dto(
     val itemId: Int,
     val charges: Int?
 )
 
-class Backpack0(
+internal class Backpack0Dto(
     val itemId: Int
 )
 
-class Backpack1(
+internal class Backpack1Dto(
     val itemId: Int
 )
 
-class Backpack2(
+internal class Backpack2Dto(
     val itemId: Int
 )
 
-class AbilityLearnEvent(
+internal class AbilityLearnEventDto(
     val abilityId: Short,
     val levelAbility: Int,
     val levelObtained: Int,

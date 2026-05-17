@@ -4,9 +4,9 @@ import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 import dev.nonoxy.d2buildhelper.graphql.HeroGuidesQuery
 
-fun GuidesQuery.Guide1.toGuide(): Guide {
-    return Guide(
-        hero = Hero(
+internal fun GuidesQuery.Guide1.toGuide(): GuideDto {
+    return GuideDto(
+        hero = HeroDto(
             heroId = matchPlayer?.hero?.id.toString().toShort(),
             shortName = matchPlayer?.hero?.shortName ?: "",
             displayName = matchPlayer?.hero?.displayName ?: "Unknown",
@@ -18,8 +18,8 @@ fun GuidesQuery.Guide1.toGuide(): Guide {
     )
 }
 
-fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
-    return PlayerStats(
+internal fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStatsDto {
+    return PlayerStatsDto(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
         kills = kills?.toString()?.toByte() ?: 0,
@@ -38,15 +38,15 @@ fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
         endNeutralItemId = neutral0Id?.toString()?.toShortOrNull(),
         itemPurchases = stats?.itemPurchases?.map { itemPurchase ->
             itemPurchase?.run {
-                ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
+                ItemPurchaseDto(itemId = itemPurchase.itemId, time = itemPurchase.time)
             }
         },
         )
 }
 
-fun HeroGuidesQuery.Guide1.toGuide(): Guide {
-    return Guide(
-        hero = Hero(
+internal fun HeroGuidesQuery.Guide1.toGuide(): GuideDto {
+    return GuideDto(
+        hero = HeroDto(
             heroId = matchPlayer?.hero?.id.toString().toShort(),
             shortName = matchPlayer?.hero?.shortName ?: "",
             displayName = matchPlayer?.hero?.displayName ?: "Unknown",
@@ -58,8 +58,8 @@ fun HeroGuidesQuery.Guide1.toGuide(): Guide {
     )
 }
 
-fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
-    return PlayerStats(
+internal fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStatsDto {
+    return PlayerStatsDto(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
         kills = kills?.toString()?.toByte() ?: 0,
@@ -78,7 +78,7 @@ fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
         endNeutralItemId = neutral0Id?.toString()?.toShortOrNull(),
         itemPurchases = stats?.itemPurchases?.map { itemPurchase ->
             itemPurchase?.run {
-                ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
+                ItemPurchaseDto(itemId = itemPurchase.itemId, time = itemPurchase.time)
             }
         },
     )

@@ -3,14 +3,14 @@ package dev.nonoxy.d2buildhelper.features.guides.domain.usecases
 import androidx.compose.ui.util.fastLastOrNull
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesApi
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStats
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.GuideDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStatsDto
 import dev.nonoxy.d2buildhelper.core.data.map
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.GuideUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchaseUI
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPositionType
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStatsUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchase
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 internal class GetGuidesUseCase(
     private val guidesDataSource: GuidesApi
 ) {
-    internal fun getGuides(): Flow<RequestResult<List<GuideUI>>> {
+    internal fun getGuides(): Flow<RequestResult<List<Guide>>> {
         return guidesDataSource.getGuides().map { result ->
             result.map { guides ->
                 guides.map { guide ->
@@ -29,7 +29,7 @@ internal class GetGuidesUseCase(
         }.flowOn(Dispatchers.Default)
     }
 
-    internal fun getHeroGuides(heroId: Short): Flow<RequestResult<List<GuideUI>>> {
+    internal fun getHeroGuides(heroId: Short): Flow<RequestResult<List<Guide>>> {
         return guidesDataSource.getHeroGuides(heroId).map { result ->
             result.map { guides ->
                 guides.map { guide ->
@@ -40,9 +40,9 @@ internal class GetGuidesUseCase(
     }
 }
 
-internal fun Guide.toGuideUi(): GuideUI {
-    return GuideUI(
-        hero = HeroUI(
+internal fun GuideDto.toGuideUi(): Guide {
+    return Guide(
+        hero = Hero(
             heroId = hero.heroId,
             shortName = hero.shortName,
             displayName = hero.displayName
@@ -54,7 +54,7 @@ internal fun Guide.toGuideUi(): GuideUI {
     )
 }
 
-internal fun PlayerStats.toPlayerStatsUi(): PlayerStatsUI {
+internal fun PlayerStatsDto.toPlayerStatsUi(): PlayerStats {
     val endItemIds =
         listOfNotNull(endItem0Id, endItem1Id, endItem2Id, endItem3Id, endItem4Id, endItem5Id)
     // Ищем itemPurchase для каждого предмета в финальной сборке.
@@ -63,12 +63,12 @@ internal fun PlayerStats.toPlayerStatsUi(): PlayerStatsUI {
     // полученный список по времени, все элементы с time = null будут располагаться в конце.
     val sortedEndItemPurchases = endItemIds.map { endItemId ->
         itemPurchases?.fastLastOrNull { it?.itemId?.toShort() == endItemId }?.let { itemPurchase ->
-            ItemPurchaseUI(itemId = itemPurchase.itemId.toShort(), time = itemPurchase.time)
-        } ?: ItemPurchaseUI(itemId = endItemId, time = null)
+            ItemPurchase(itemId = itemPurchase.itemId.toShort(), time = itemPurchase.time)
+        } ?: ItemPurchase(itemId = endItemId, time = null)
     }.sortedWith(compareBy(nullsLast()) { it.time })
 
-    return PlayerStatsUI(
-        position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
+    return PlayerStats(
+        position = MatchPlayerPosition.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant ?: true,
         kills = kills,
         deaths = deaths,

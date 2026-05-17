@@ -2,9 +2,9 @@ package dev.nonoxy.d2buildhelper.core.data.api.resources.image
 
 import Dota___Build_Helper.composeApp.BuildConfig
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
@@ -18,13 +18,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.withContext
 
-class ImageResourcesDataSource(
+internal class ImageResourcesDataSource(
     private val supabaseClient: SupabaseClient
 ) : ImageResourcesApi {
     private val supabaseImageStorage = supabaseClient.storage.from(IMAGES_BUCKET_ID)
 
-    override fun getHeroImageUrls(heroConstants: List<Hero>): Flow<RequestResult<Map<Hero, String>>> {
-        val heroToUrl: MutableMap<Hero, String> = mutableMapOf()
+    override fun getHeroImageUrls(heroConstants: List<HeroDto>): Flow<RequestResult<Map<HeroDto, String>>> {
+        val heroToUrl: MutableMap<HeroDto, String> = mutableMapOf()
         val request = flow {
             supabaseImageStorage.list(HERO_IMAGES_FOLDER_PATH) { limit = 200 }
                 .onEach { bucketItem ->
@@ -41,15 +41,15 @@ class ImageResourcesDataSource(
             emit(heroToUrl.toMap())
         }.flowOn(Dispatchers.IO)
             .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<Hero, String>>(e) }
+            .catch { e -> RequestResult.Error<Map<HeroDto, String>>(e) }
 
-        val start = flowOf<RequestResult<Map<Hero, String>>>(RequestResult.InProgress())
+        val start = flowOf<RequestResult<Map<HeroDto, String>>>(RequestResult.InProgress())
 
         return merge(request, start)
     }
 
-    override fun getItemImageUrls(itemConstants: List<Item>): Flow<RequestResult<Map<Item, String>>> {
-        val itemToUrl: MutableMap<Item, String> = mutableMapOf()
+    override fun getItemImageUrls(itemConstants: List<ItemDto>): Flow<RequestResult<Map<ItemDto, String>>> {
+        val itemToUrl: MutableMap<ItemDto, String> = mutableMapOf()
         val request = flow {
             supabaseImageStorage.list(ITEM_IMAGES_FOLDER_PATH) { limit = 500 }
                 .onEach { bucketItem ->
@@ -66,15 +66,15 @@ class ImageResourcesDataSource(
             emit(itemToUrl.toMap())
         }.flowOn(Dispatchers.IO)
             .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<Item, String>>(e) }
+            .catch { e -> RequestResult.Error<Map<ItemDto, String>>(e) }
 
-        val start = flowOf<RequestResult<Map<Item, String>>>(RequestResult.InProgress())
+        val start = flowOf<RequestResult<Map<ItemDto, String>>>(RequestResult.InProgress())
 
         return merge(request, start)
     }
 
-    override fun getAbilityImageUrls(abilityConstants: List<Ability>): Flow<RequestResult<Map<Ability, String>>> {
-        val abilityToUrl: MutableMap<Ability, String> = mutableMapOf()
+    override fun getAbilityImageUrls(abilityConstants: List<AbilityDto>): Flow<RequestResult<Map<AbilityDto, String>>> {
+        val abilityToUrl: MutableMap<AbilityDto, String> = mutableMapOf()
         val request = flow {
             supabaseImageStorage.list(ABILITY_IMAGES_FOLDER_PATH) { limit = 2000 }
                 .onEach { bucketItem ->
@@ -91,9 +91,9 @@ class ImageResourcesDataSource(
             emit(abilityToUrl.toMap())
         }.flowOn(Dispatchers.IO)
             .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<Ability, String>>(e) }
+            .catch { e -> RequestResult.Error<Map<AbilityDto, String>>(e) }
 
-        val start = flowOf<RequestResult<Map<Ability, String>>>(RequestResult.InProgress())
+        val start = flowOf<RequestResult<Map<AbilityDto, String>>>(RequestResult.InProgress())
 
         return merge(request, start)
     }
