@@ -2,6 +2,8 @@ package dev.nonoxy.d2buildhelper.core.di
 
 import Dota___Build_Helper.composeApp.BuildConfig
 import com.apollographql.apollo.ApolloClient
+import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
+import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchersImpl
 import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesApi
 import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesDataSource
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesApi
@@ -22,6 +24,8 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
+    single<CoroutineDispatchers> { CoroutineDispatchersImpl() }
+
     single<ApolloClient> {
         ApolloClient.Builder()
             .serverUrl(BuildConfig.API_BASE_URL)
