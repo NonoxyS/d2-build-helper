@@ -1,0 +1,56 @@
+---
+description: Network layer — Apollo, Supabase, Ktor engines, BuildConfig keys
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Network
+
+## Apollo (Stratz GraphQL)
+
+- GraphQL queries: `composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/core/graphql/*.graphql`.
+- Schema: `core/graphql/schema.graphqls` (Stratz dump, ~252 KB).
+- Apollo config in `composeApp/build.gradle.kts`:
+  ```kotlin
+  apollo {
+      service("api") {
+          packageName.set("dev.nonoxy.d2buildhelper.graphql")
+      }
+  }
+  ```
+- Generated client code lands in `dev.nonoxy.d2buildhelper.graphql.*`.
+- `ApolloClient` is constructed once in `InjectProvider` with the Stratz endpoint and bearer token from `BuildConfig`.
+- Auth: `Authorization: Bearer ${BuildConfig.STRATZ_API_KEY}` (set from `local.properties` → `STRATZ_API_KEY`).
+- Beta version (`4.0.0-beta.6`): API can move between minor versions. Pin the version in `libs.versions.toml`. Coordinate upgrades carefully.
+
+## Supabase Storage
+
+- Used only for static icon hosting (hero, item, ability, additional icons).
+- Storage bucket URL prefixes are exposed via `BuildConfig`:
+  - `STORAGE_HERO_ICONS_FOLDER_URL`
+  - `STORAGE_ITEM_ICONS_FOLDER_URL`
+  - `STORAGE_ABILITY_ICONS_FOLDER_URL`
+  - `STORAGE_ADDITIONAL_ICONS_FOLDER_URL`
+- API key: `BuildConfig.SUPABASE_API_KEY` (from `local.properties` → `SUPABASE_API_KEY`).
+- The Supabase Postgres dependency has been removed (see commit `65109d0`). Do not reintroduce database access — if persistent storage is needed, evaluate DataStore / SQLDelight first.
+
+## Ktor Engines
+
+- `androidMain`: `ktor-client-cio`.
+- `jvmMain`: `ktor-client-cio` (`coroutines-swing` for Compose Desktop).
+- `iosMain`: `ktor-client-darwin`.
+
+Keep this matrix consistent — adding a new platform target requires picking the right engine. The `Compose-aware HttpClient { }` lives indirectly through Apollo / Supabase SDKs; the project does not own a `HttpClient` singleton today.
+
+## BuildConfig and local.properties
+
+`local.properties` (gitignored) must contain:
+
+```
+SUPABASE_API_KEY=...
+STRATZ_API_KEY=...
+```
+
+`composeApp/build.gradle.kts` validates non-blank values via `require(...)` at configuration time. Build fails fast if a key is missing.
+
+Do **not** check API keys into git. Do **not** print them. Do **not** read `local.properties` outside the build script.

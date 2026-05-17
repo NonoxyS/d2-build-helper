@@ -1,0 +1,49 @@
+---
+description: Resources — composeResources strings, fonts, JSON constants
+globs: **/*.{kt,kts,xml,json}
+alwaysApply: false
+---
+
+# Resources
+
+Resources live under `composeApp/src/commonMain/composeResources/`. Generated accessor: `dev.nonoxy.d2buildhelper.resources.Res`.
+
+## Strings
+
+`composeResources/values/strings.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="guides_top_bar_title">Guides</string>
+    <string name="guides_filter_hero">Hero</string>
+</resources>
+```
+
+Usage:
+
+```kotlin
+import dev.nonoxy.d2buildhelper.resources.Res
+import dev.nonoxy.d2buildhelper.resources.guides_top_bar_title
+import org.jetbrains.compose.resources.stringResource
+
+Text(text = stringResource(Res.string.guides_top_bar_title))
+```
+
+Naming: `{feature}_{element}_{description}`. Shared strings: `{element}_{description}`.
+
+No hardcoded user-facing strings in composables. Logs and debug text are allowed inline.
+
+## Fonts
+
+`composeResources/font/` holds custom typeface files. Loaded via `Font(Res.font.{name})` in `theme/Type.kt`.
+
+## JSON Constants
+
+`composeResources/files/constants/{heroes,items,abilities}.json` ship statically with the app. Read at runtime via `Res.readBytes("files/constants/heroes.json")`, then decode with `kotlinx.serialization.json.Json` configured in `ConstantResourcesDataSource`.
+
+If a JSON file grows past a few hundred KB or starts to need frequent updates, move it to Supabase Storage (similar to icons) — bundling large blobs slows down the build and bloats every release.
+
+## Migration note
+
+The project does **not** use moko-resources today; do not import `dev.icerock.moko.resources.*` types. A migration to moko-resources is planned (see `mobile-roadmap.mdc`). Until then, all resource access goes through Compose's `Res.*` API.

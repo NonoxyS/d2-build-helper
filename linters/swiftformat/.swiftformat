@@ -1,0 +1,127 @@
+## File options
+
+--exclude ../../iosApp/Pods
+--exclude ../../**/Generated
+--swiftversion 5
+
+
+## Enabled rules
+--enable indent
+--enable andOperator
+--enable anyObjectProtocol
+--enable blankLineAfterImports
+--enable blankLinesAroundMark
+--enable blankLinesAtEndOfScope
+--enable blankLinesAtStartOfScope
+--enable blankLinesBetweenScopes
+--enable braces
+--enable consecutiveBlankLines
+--enable consecutiveSpaces
+--enable duplicateimports
+--enable elseOnSameLine
+--enable emptybraces
+--enable enumnamespaces
+--enable extensionAccessControl
+--enable fileHeader
+--enable genericExtensions
+--enable headerFileName
+--enable hoistPatternLet
+--enable initcoderunavailable
+--enable isEmpty
+--enable leadingdelimiters
+--enable linebreakAtEndOfFile
+--enable modifierOrder
+--enable numberFormatting
+--enable opaqueGenericParameters
+--enable preferkeypath
+--enable redundantbackticks
+--enable redundantextensionacl
+--enable redundantfileprivate
+--enable redundantGet
+--enable redundantInit
+--enable redundantInternal
+--enable redundantlet
+--enable redundantnilinit
+--enable redundantobjc
+--enable redundantOptionalBinding
+--enable redundantparens
+--enable redundantpattern
+--enable redundantrawvalues
+--enable redundantReturn
+--enable redundanttype
+--enable redundantvoidreturntype
+--enable semicolons
+--enable sortImports
+--enable spacearoundbraces
+--enable spacearoundbrackets
+--enable spacearoundcomments
+--enable spacearoundgenerics
+--enable spacearoundoperators
+--enable spacearoundparens
+--enable spaceinsidebraces
+--enable spaceinsidebrackets
+--enable spaceinsidecomments
+--enable spaceinsidegenerics
+--enable spaceinsideparens
+--enable todos
+--enable trailingclosures
+--enable trailingCommas
+--enable trailingSpace
+--enable typeSugar
+--enable void
+--enable unusedArguments
+--enable wrapArguments
+--enable wrapAttributes
+--enable wrapenumcases
+--enable wrapSingleLineComments
+--enable yodaconditions
+
+## Configuration of specific rules
+### Number formatting
+--decimalgrouping 3
+--hexgrouping 4,8
+--binarygrouping 4
+
+### Wrap
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections after-first
+--wrapconditions preserve
+--closingparen balanced
+--wrapeffects preserve
+--wraptypealiases after-first
+
+### Attributes
+--funcattributes prev-line
+--typeattributes prev-line
+--varattributes same-line
+
+### Else
+--elseposition same-line
+--guardelse auto
+
+### Others
+--commas inline
+--indent 4
+--ifdef noindent
+--xcodeindentation enabled
+--linebreaks lf ##default
+--maxwidth 120
+--patternlet hoist ##default
+--self remove
+--semicolons inline
+--stripunusedargs closure-only
+--trimwhitespace always
+--voidtype void
+--extensionacl on-declarations
+--header \n {file}\n\n D2BuildHelper-iOS\n
+--typeblanklines preserve
+
+
+## Disabled rules
+--disable wrapMultilineStatementBraces
+--disable wrap
+--disable docComments
+--disable preferForLoop
+--disable redundantself
+--disable redundantClosure

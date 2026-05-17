@@ -4,6 +4,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
+import utils.AppVersion
 import java.util.Properties
 
 plugins {
@@ -12,8 +13,8 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.android.application)
     alias(libs.plugins.buildConfig)
-    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.apollo)
+    id("json-serialization")
 }
 
 kotlin {
@@ -26,7 +27,7 @@ kotlin {
                 }
             }
         }
-        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
+        // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         instrumentedTestVariant {
             sourceSetTree.set(KotlinSourceSetTree.test)
@@ -61,7 +62,6 @@ kotlin {
             implementation(libs.coil)
             implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.serialization.json)
             implementation(libs.apollo.runtime)
 
             implementation(libs.compose.viewmodel)
@@ -93,7 +93,6 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
-
     }
 }
 
@@ -106,8 +105,8 @@ android {
         targetSdk = 34
 
         applicationId = "dev.nonoxy.d2buildhelper.androidApp"
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = AppVersion.getVersionCode(project).get()
+        versionName = AppVersion.getVersionName(project).get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -115,7 +114,7 @@ android {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
         res.srcDirs("src/androidMain/res")
     }
-    //https://developer.android.com/studio/test/gradle-managed-devices
+    // https://developer.android.com/studio/test/gradle-managed-devices
     @Suppress("UnstableApiUsage")
     testOptions {
         managedDevices.devices {
@@ -131,7 +130,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildFeatures {
-        //enables a Compose tooling support in the AndroidStudio
+        // enables a Compose tooling support in the AndroidStudio
         compose = true
     }
 }

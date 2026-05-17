@@ -1,0 +1,69 @@
+---
+description: Error handling — RequestResult, runCatching discipline, cancellation safety
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Error Handling
+
+## Repository contract
+
+Repositories return `Flow<RequestResult<T>>` (see `mobile-data-layer.mdc`). They never throw to the caller.
+
+```kotlin
+override fun getGuides(): Flow<RequestResult<List<Guide>>> = flow {
+    emit(RequestResult.InProgress)
+    runCatching { apolloClient.query(...).execute().dataOrThrow() }
+        .onSuccess { emit(RequestResult.Success(it.toDomain())) }
+        .onFailure { emit(RequestResult.Error(it)) }
+}
+```
+
+## runCatching discipline
+
+`runCatching` swallows `CancellationException`, which breaks structured concurrency in suspend contexts. Two rules:
+
+1. **Never wrap a suspend block with `runCatching` and silently emit an error.** If you must, rethrow `CancellationException`:
+   ```kotlin
+   try { ... } catch (ce: CancellationException) {
+       throw ce
+   } catch (t: Throwable) {
+       emit(RequestResult.Error(t))
+   }
+   ```
+2. **A `coRunCatching` helper is planned** (`common/extensions/CoroutineExtensions.kt`). Once added, replace all current `runCatching` usages in suspend / `flow {}` blocks. Track this in `mobile-roadmap.mdc`.
+
+## UseCase layer
+
+UseCases pass through `RequestResult` and map success payloads. They do not catch — let the repository own error surfacing.
+
+```kotlin
+fun invoke(): Flow<RequestResult<List<GuideUI>>> = repository.getGuides()
+    .map { result ->
+        when (result) {
+            is RequestResult.Success -> RequestResult.Success(result.data.map { it.toGuideUI() })
+            is RequestResult.Error -> result
+            RequestResult.InProgress -> result
+        }
+    }
+```
+
+## ViewModel layer
+
+ViewModels reduce `RequestResult` into `ViewState`:
+
+```kotlin
+useCase.invoke().collect { result ->
+    _viewStates.value = when (result) {
+        RequestResult.InProgress -> GuidesViewState.Loading
+        is RequestResult.Error -> GuidesViewState.Error
+        is RequestResult.Success -> GuidesViewState.Display(...)
+    }
+}
+```
+
+ViewModels never log errors — logging is a repository responsibility (and currently absent, see roadmap).
+
+## Logging
+
+There is no logging library wired up yet. `println()` was removed in commit `64ce5e9` and must not be reintroduced. Add Napier (or similar) when introducing crash reporting; until then, errors surface only through `RequestResult.Error`.

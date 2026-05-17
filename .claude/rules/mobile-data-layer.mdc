@@ -1,0 +1,55 @@
+---
+description: Data layer — Remote / Domain / UI entities, RequestResult, mappers, repository cache
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# Data Layer
+
+## Three Layers
+
+| Layer | Location | Purpose |
+| --- | --- | --- |
+| Remote DTO | `core/data/api/{topic}/models/` and Apollo-generated classes under `core/graphql/` | Wire format (GraphQL responses, Supabase storage payloads) |
+| Domain / UI model | `features/{feature}/domain/models/` (`*UI.kt`) | UI-ready shape, formatted, with display-friendly types |
+| (No separate UI model layer) | — | The "UI" suffix on `GuideUI`, `HeroUI` indicates these are already the model the screen renders |
+
+Rules:
+- Apollo-generated types live in `dev.nonoxy.d2buildhelper.graphql.*` and are treated as DTOs. They never leak into UI code directly.
+- `core/data/api/.../models/` houses hand-written DTOs (when an Apollo type needs reshaping or wrapping).
+- The `*UI` suffix in `features/.../domain/models/` may be renamed to plain `*` once the project gains a true domain layer; for now keep the suffix consistent with the rest of the codebase.
+
+## RequestResult<T>
+
+Defined in `core/data/RequestResult.kt`:
+
+```kotlin
+sealed interface RequestResult<out T> {
+    data class Success<T>(val data: T) : RequestResult<T>
+    data object InProgress : RequestResult<Nothing>
+    data class Error(val error: Any? = null) : RequestResult<Nothing>
+}
+```
+
+Repositories return `Flow<RequestResult<T>>`. UseCases consume that flow, map success payloads to UI/domain models, and emit further `Flow<RequestResult<T_UI>>`. ViewModels collect the flow and reduce it into `GuidesViewState`.
+
+Do not use `kotlin.Result<T>` in the data layer (`runCatching` semantics differ; see `mobile-error-handling.mdc`).
+
+## Mappers
+
+Mappers live next to the data they convert. For Apollo → domain conversion: `core/data/api/{topic}/mappers/{Topic}Mappers.kt`. For other conversions, prefer extension functions colocated with the target type.
+
+Style: free-standing `internal fun ApolloType.toDomain(): DomainType = ...`. No `Mapper<From, To>` interface for now — the project has not adopted DI for mappers. When the Koin migration lands (see roadmap) introduce the interface + Koin-bound `internal class ...Impl` pattern.
+
+## Repository Cache
+
+`ResourcesRepository` (`core/data/repository/resources/`) aggregates remote and local sources and caches them in memory.
+
+Rules:
+- Cache keys live inside the repository as private constants.
+- No TTL today. If you add one, document it in the repository file and surface it in the constructor (e.g., `ttl: Duration = 1.hours`).
+- Repositories never throw to the caller; wrap exceptions in `RequestResult.Error`.
+
+## Local JSON Constants
+
+`composeApp/src/commonMain/composeResources/files/constants/{heroes,items,abilities}.json` ships with the app. `core/data/local/resources/constants/ConstantResourcesDataSource` reads them via `Res.readBytes(...)` and deserializes with `kotlinx.serialization`. These models (`Hero`, `Item`, `Ability`) are domain entities, not DTOs — they are consumed as-is by features.

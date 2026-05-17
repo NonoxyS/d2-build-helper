@@ -1,0 +1,78 @@
+---
+description: General project info — tech stack, package layout, naming conventions
+globs: **/*.{kt,kts}
+alwaysApply: false
+---
+
+# d2-build-helper — Overview
+
+## Tech Stack
+
+- Kotlin 2.0.0 + Compose Multiplatform 1.6.11
+- AGP 8.3.0, Android minSdk 24 / targetSdk 34 / compileSdk 34
+- Java target 1.8
+- Apollo Kotlin 4.0.0-beta.6 — Stratz GraphQL
+- Supabase Storage 2.5.0 — hero/item/ability icons
+- Ktor 2.3.11 — CIO on Android+JVM, Darwin on iOS
+- Coil 3.0.0-alpha06 — image loading
+- kotlinx.coroutines 1.9.0-RC, kotlinx.serialization 1.7.0
+- compose-viewmodel 2.8.2, compose-navigation 2.8.0-alpha02
+
+Several core deps are pinned to alpha/beta/RC releases. Before upgrading or adding deps, check the compatibility matrix in `mobile-roadmap.mdc`.
+
+## Module Layout
+
+Single module: `:composeApp`. Targets `androidTarget()`, `jvm()`, `iosX64()`, `iosArm64()`, `iosSimulatorArm64()`. Multi-module split is planned but out of scope for current work.
+
+```
+composeApp/src/
+├── commonMain/kotlin/dev/nonoxy/d2buildhelper/
+│   ├── App.kt
+│   ├── theme/
+│   ├── base/
+│   ├── core/
+│   │   ├── di/
+│   │   ├── data/
+│   │   └── graphql/
+│   ├── common/utils/
+│   ├── features/
+│   └── navigation/
+├── commonMain/composeResources/
+│   ├── values/strings.xml
+│   ├── files/constants/{heroes,items,abilities}.json
+│   └── font/
+├── androidMain/kotlin/...
+├── iosMain/kotlin/...
+├── jvmMain/kotlin/...
+└── commonTest/kotlin/...
+```
+
+`build-logic/` is a composite build with shared Gradle utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`). It exists so future convention plugins land in one place; feature build scripts currently apply gradle plugins directly via aliases.
+
+## Naming Conventions
+
+Package root: `dev.nonoxy.d2buildhelper`.
+
+| Entity | Pattern | Example |
+| --- | --- | --- |
+| ViewModel | `{Feature}ViewModel` | `GuidesViewModel` |
+| Screen composable | `{Feature}Screen` | `GuidesScreen` |
+| View composable | `{Feature}View` | `GuidesView` |
+| Sub-views directory | `views/` | `guides/presentation/ui/views/` |
+| ViewState sealed class | `{Feature}ViewState` | `GuidesViewState` |
+| Action sealed class | `{Feature}Action` | `GuidesAction` |
+| Event sealed class | `{Feature}Event` | `GuidesEvent` |
+| UseCase | `{Verb}{Subject}UseCase` | `GetGuidesUseCase`, `GetImagesUseCase` |
+| Remote DTO (GraphQL) | `{Entity}` in `core/data/api/{topic}/models/` | `Guide`, `DetailGuide` |
+| UI/domain model | `{Entity}UI` in `features/{feature}/domain/models/` | `GuideUI`, `HeroUI` |
+| Repository | `{Topic}Repository` | `ResourcesRepository` |
+| DataSource interface | `{Topic}Api` | `GuidesApi`, `ImageResourcesApi` |
+| DataSource impl | `{Topic}DataSource` | `GuidesDataSource`, `ImageResourcesDataSource` |
+| Mapper file | `{Topic}Mappers.kt` | `GuideMappers.kt` |
+
+## Existing Features
+
+- `features/guides/` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
+- `features/detailGuide/` — placeholder screen for a single build, not yet implemented.
+
+Navigation routes are declared in `navigation/AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.

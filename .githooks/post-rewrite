@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# colors
+RED='\033[0;31m'
+GREEN='\033[92m'
+YELLOW='\033[93m'
+NC='\033[0m' # No Color
+
+if [[ $(git reflog --pretty=%gs -1) == *"rebase"* ]]; then
+   # swiftFormat
+   echo ""
+   echo "SwiftFormat start"
+   if which swiftformat > /dev/null; then
+       echo $(swiftformat --version)
+       swiftformat --config $PWD/linters/swiftformat/.swiftformat .
+       echo "SwiftFormat finish"
+   else
+       echo "${RED}SwiftFormat is not installed. Use command '${NC}brew install swiftformat${RED}' to install${NC}"
+       exit 1
+   fi
+
+   # swiftLint
+   echo ""
+   echo "SwiftLint start"
+   if which swiftlint > /dev/null; then
+       # Run for staged files
+       swiftlint --strict --quiet --config $PWD/linters/swiftlint/.swiftlint.yml .
+       SWIFT_LINT_RESULT=$?
+   else
+       echo "${RED}SwiftLint is not installed. Use command '${NC}brew install swiftlint${RED}' to install${NC}"
+       exit 1
+   fi
+   if [ $SWIFT_LINT_RESULT -eq 0 ]; then
+       echo ""
+       echo "${GREEN}SwiftLint: No violation were found${NC}"
+       echo "SwiftLint finish"
+       echo ""
+   else
+       echo ""
+       echo "${RED}SwiftLint: Violations were found! Must fix before commit!${NC}"
+       echo ""
+       exit 1
+   fi
+   
+   if git diff --quiet; then
+     echo "${GREEN}Rebase is finished${NC}"
+   else
+     echo "${YELLOW}Uncommited files detected, commiting${NC}"
+     git add -u
+     git commit -m "Formatted files after rebase"
+   fi
+fi

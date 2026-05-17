@@ -1,0 +1,96 @@
+#!/bin/sh
+set -e
+
+# colors
+RED='\033[0;31m'
+GREEN='\033[92m'
+NC='\033[0m' # No Color
+
+STAGED_SWIFT_FILES=$(git diff --diff-filter=d --name-only --cached | grep ".swift$")
+
+# IOS pre-commit
+SWIFTFORMAT_FILES="$STAGED_SWIFT_FILES"
+if [[ ! -z $SWIFTFORMAT_FILES ]]; then
+  # swiftFormat
+  echo ""
+  echo "SwiftFormat start"
+  if which swiftformat > /dev/null; then
+       echo $(swiftformat --version)
+        swiftformat --config $PWD/linters/swiftformat/.swiftformat $SWIFTFORMAT_FILES
+        git add $SWIFTFORMAT_FILES
+      echo "SwiftFormat finish"
+  else
+      echo "${RED}SwiftFormat is not installed. Use command '${NC}brew install swiftformat${RED}' to install${NC}"
+      exit 1
+  fi
+
+  SWIFTLINT_FILES="$STAGED_SWIFT_FILES"
+  if [[ ! -z $SWIFTLINT_FILES ]]; then
+    # swiftLint
+    echo ""
+    echo "SwiftLint start"
+    if which swiftlint > /dev/null; then
+        # Run for staged files
+        swiftlint --strict --config $PWD/linters/swiftlint/.swiftlint.yml $SWIFTLINT_FILES
+        SWIFT_LINT_RESULT=$?
+    else
+        echo "${RED}SwiftLint is not installed. Use command '${NC}brew install swiftlint${RED}' to install${NC}"
+        exit 1
+    fi
+    if [ $SWIFT_LINT_RESULT -eq 0 ]; then
+        echo ""
+        echo "${GREEN}SwiftLint: No violation were found${NC}"
+        echo "SwiftLint finish"
+        echo ""
+    else
+        echo ""
+        echo "${RED}SwiftLint: Violations were found! Must fix before commit!${NC}"
+        echo ""
+        exit 1
+    fi
+  else
+    echo ""
+    echo "There are no staged .swift files for SwiftLint after formatting"
+    echo ""
+  fi
+else
+  echo ""
+  echo "There are no staged .swift files for SwiftLint and SwiftFormat"
+  echo ""
+fi
+
+# Android pre-commit
+EXPLICIT_FILES=$(git diff --name-only --cached)
+
+STAGED_KT_FILES=$(echo "$EXPLICIT_FILES" | grep ".kt$")
+
+if [[ ! -z "$STAGED_KT_FILES" ]]; then
+  ./gradlew detekt
+  DETEKT_STATUS=$?
+
+  if [ $DETEKT_STATUS -ne 0 ]; then
+    ./gradlew detekt
+    DETEKT_STATUS=$?
+
+    if [ $DETEKT_STATUS -eq 0 ]; then
+      git restore --staged .
+
+      echo "$EXPLICIT_FILES" | xargs git add
+    fi
+  fi
+
+  if [ $DETEKT_STATUS -ne 0 ]; then
+    echo "${RED}Detekt check failed${NC}"
+    exit 1
+  fi
+else
+  echo ""
+  echo "There are no staged .kt files for detekt"
+  echo ""
+fi
+
+if [[ -z $EXPLICIT_FILES ]]; then
+  echo ""
+  echo "${RED}There are no staged files to commit! Commit canceled${NC}"
+  exit 1
+fi
