@@ -4,6 +4,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
+import utils.AppVersion
 import java.util.Properties
 
 plugins {
@@ -106,8 +107,8 @@ android {
         targetSdk = 34
 
         applicationId = "dev.nonoxy.d2buildhelper.androidApp"
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = AppVersion.getVersionCode(project).get()
+        versionName = AppVersion.getVersionName(project).get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
