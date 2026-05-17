@@ -13,7 +13,7 @@ import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesViewSt
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuideListView
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesTopBar
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 internal fun GuidesView(

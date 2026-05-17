@@ -25,7 +25,7 @@ import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 import dota_2_build_helper.composeapp.generated.resources.Res
 import dota_2_build_helper.composeapp.generated.resources.all_heroes
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun GuidesTopBar(

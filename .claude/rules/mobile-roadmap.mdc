@@ -10,37 +10,33 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
 
 ## Migration Order
 
-1. **Version bumps** (Kotlin 2.0 → 2.1+, AGP 8.3 → 9.x, Compose Multiplatform 1.6 → 1.10+).
-   - Blocking factors: Apollo 4.0-beta.6 → stable, Coil 3 alpha → stable, kotlin.coroutines RC → stable, compose-navigation alpha → stable.
-   - Done in one dedicated PR; verify each platform target builds (`assembleDebug`, `jvmTest`, `iosSimulatorArm64Test`).
+- [x] **Version bumps** — Kotlin 2.3.10, AGP 9.0.0, Compose MP 1.10.1, Ktor 3.3.3, Apollo 4.3.1, Coil 3.2.0 stable, Supabase 3.1.0, coroutines 1.10.2, serialization 1.10.0.
+- [x] **DI migration to Koin** — `core/di/AppModule.kt`, `koin-compose-viewmodel`, `koinViewModel()` in composables.
 
-2. **DI migration to Koin.**
-   - Remove `InjectProvider` in favour of Koin modules colocated with each feature.
-   - Introduce `org.koin.compose:koin-compose` for `koinViewModel()` in composables.
-   - Add `coRunCatching` helper alongside (used by the new repository constructors).
+Remaining work, in order:
 
-3. **State management migration to MVIKotlin.**
+1. **State management migration to MVIKotlin.**
    - Introduces Store / Intent / State / Label per feature.
    - `BaseViewModel<State, Action, Event>` → MVIKotlin `BaseViewModel` over `Store`.
    - Reducer + Executor pattern, `StoreFactory` per feature.
 
-4. **Multi-module split.**
+2. **Multi-module split** (also fixes the AGP 9 + KMP `com.android.application` deprecation we currently bypass via `android.builtInKotlin=false` + `android.newDsl=false`).
    - Per feature: `api`, `impl`, `presentation`, `ui` (matches the KMMTemplate playbook).
    - Shared: `common`, `common-ui`, `core-domain`, `core-network`, `core-storage`, `core-navigation`, `core-presentation`.
-   - Convention plugins `kmp-feature-setup`, `kmp-library`, `compose-multiplatform-setup` are registered then.
+   - Convention plugins `kmp-feature-setup`, `kmp-library`, `compose-multiplatform-setup` get registered then.
+   - The `com.android.application` plugin moves to its own Android-only module depending on a shared KMP module.
 
-5. **moko-resources migration.**
+3. **moko-resources migration.**
    - Replace `composeResources/values/strings.xml` with `commonMain/moko-resources/base/strings.xml`.
    - Generated `MR.strings.*` replaces `Res.string.*`.
 
 ## Implication for Today
 
-- Suggestions involving Koin (`viewModelOf`, `single`, `koinViewModel()`) are **out of scope** until step 2.
-- Suggestions involving `MVIKotlin Store` / `BaseExecutor` / `Reducer` are **out of scope** until step 3.
-- Suggestions to split a feature into 4 modules are **out of scope** until step 4.
-- Suggestions involving `MR.strings` / moko-resources are **out of scope** until step 5.
+- Suggestions involving `MVIKotlin Store` / `BaseExecutor` / `Reducer` are **out of scope** until step 1.
+- Suggestions to split a feature into 4 modules are **out of scope** until step 2.
+- Suggestions involving `MR.strings` / moko-resources are **out of scope** until step 3.
 
-For incremental work today: use `BaseViewModel<State, Action, Event>`, resolve dependencies via `InjectProvider`, place strings in `composeResources/values/strings.xml`.
+For incremental work today: use `BaseViewModel<State, Action, Event>`, register dependencies in `core/di/AppModule.kt` and inject via constructor params (`koinViewModel()` for VMs), place strings in `composeResources/values/strings.xml`.
 
 ## Track planned helpers
 

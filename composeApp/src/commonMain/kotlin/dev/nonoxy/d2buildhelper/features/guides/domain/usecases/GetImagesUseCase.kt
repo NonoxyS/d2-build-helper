@@ -3,7 +3,6 @@ package dev.nonoxy.d2buildhelper.features.guides.domain.usecases
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
-import dev.nonoxy.d2buildhelper.core.di.InjectProvider
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -13,9 +12,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 
 internal class GetImagesUseCase(
-    private val resourcesRepository: ResourcesRepository = InjectProvider.getDependency(
-        ResourcesRepository::class
-    )
+    private val resourcesRepository: ResourcesRepository
 ) {
     internal operator fun invoke(
         isNeedHeroImages: Boolean = true,

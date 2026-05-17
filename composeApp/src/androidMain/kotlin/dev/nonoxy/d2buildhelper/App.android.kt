@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import dev.nonoxy.d2buildhelper.core.di.initKoin
+import org.koin.android.ext.koin.androidContext
 
 class AndroidApp : Application() {
     companion object {
@@ -16,6 +18,7 @@ class AndroidApp : Application() {
     override fun onCreate() {
         super.onCreate()
         INSTANCE = this
+        initKoin { androidContext(this@AndroidApp) }
     }
 }
 

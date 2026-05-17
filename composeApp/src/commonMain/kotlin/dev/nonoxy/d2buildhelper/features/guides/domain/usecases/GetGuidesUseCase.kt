@@ -3,11 +3,9 @@ package dev.nonoxy.d2buildhelper.features.guides.domain.usecases
 import androidx.compose.ui.util.fastLastOrNull
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
 import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesApi
-import dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesDataSource
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStats
 import dev.nonoxy.d2buildhelper.core.data.map
-import dev.nonoxy.d2buildhelper.core.di.InjectProvider
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.GuideUI
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchaseUI
@@ -19,9 +17,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 internal class GetGuidesUseCase(
-    private val guidesDataSource: GuidesApi = InjectProvider.getDependency(
-        GuidesDataSource::class
-    )
+    private val guidesDataSource: GuidesApi
 ) {
     internal fun getGuides(): Flow<RequestResult<List<GuideUI>>> {
         return guidesDataSource.getGuides().map { result ->

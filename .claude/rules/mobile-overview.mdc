@@ -8,21 +8,20 @@ alwaysApply: false
 
 ## Tech Stack
 
-- Kotlin 2.0.0 + Compose Multiplatform 1.6.11
-- AGP 8.3.0, Android minSdk 24 / targetSdk 34 / compileSdk 34
-- Java target 1.8
-- Apollo Kotlin 4.0.0-beta.6 — Stratz GraphQL
-- Supabase Storage 2.5.0 — hero/item/ability icons
-- Ktor 2.3.11 — CIO on Android+JVM, Darwin on iOS
-- Coil 3.0.0-alpha06 — image loading
-- kotlinx.coroutines 1.9.0-RC, kotlinx.serialization 1.7.0
-- compose-viewmodel 2.8.2, compose-navigation 2.8.0-alpha02
-
-Several core deps are pinned to alpha/beta/RC releases. Before upgrading or adding deps, check the compatibility matrix in `mobile-roadmap.mdc`.
+- Kotlin 2.3.10 + Compose Multiplatform 1.10.1 (material3 1.9.0)
+- AGP 9.0.0, Android minSdk 26 / targetSdk 36 / compileSdk 36
+- Gradle 9.4.1, Java target 17
+- Apollo Kotlin 4.3.1 — Stratz GraphQL
+- Supabase Storage 3.1.0 — hero/item/ability icons
+- Ktor 3.3.3 — OkHttp on Android+JVM, Darwin on iOS
+- Coil 3.2.0 — image loading
+- kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
+- compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
+- Koin 4.1.x for DI
 
 ## Module Layout
 
-Single module: `:composeApp`. Targets `androidTarget()`, `jvm()`, `iosX64()`, `iosArm64()`, `iosSimulatorArm64()`. Multi-module split is planned but out of scope for current work.
+Single module: `:composeApp`. Targets `androidTarget()`, `jvm()`, `iosX64()`, `iosArm64()`, `iosSimulatorArm64()`. Multi-module split is planned (see `mobile-roadmap.mdc`).
 
 ```
 composeApp/src/
@@ -31,7 +30,7 @@ composeApp/src/
 │   ├── theme/
 │   ├── base/
 │   ├── core/
-│   │   ├── di/
+│   │   ├── di/                # AppModule.kt + Koin.kt (initKoin)
 │   │   ├── data/
 │   │   └── graphql/
 │   ├── common/utils/
@@ -41,13 +40,13 @@ composeApp/src/
 │   ├── values/strings.xml
 │   ├── files/constants/{heroes,items,abilities}.json
 │   └── font/
-├── androidMain/kotlin/...
-├── iosMain/kotlin/...
-├── jvmMain/kotlin/...
-└── commonTest/kotlin/...
+├── androidMain/kotlin/...      # AndroidApp (initKoin), AppActivity, openUrl actual
+├── iosMain/kotlin/...          # MainViewController (initKoin), openUrl actual
+├── jvmMain/kotlin/...          # main(), openUrl actual
+└── commonTest/kotlin/...       # GetGuidesUseCaseTest, FakeGuidesDataSource
 ```
 
-`build-logic/` is a composite build with shared Gradle utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`). It exists so future convention plugins land in one place; feature build scripts currently apply gradle plugins directly via aliases.
+`build-logic/` is a composite build with shared Gradle utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`). Future convention plugins land here.
 
 ## Naming Conventions
 

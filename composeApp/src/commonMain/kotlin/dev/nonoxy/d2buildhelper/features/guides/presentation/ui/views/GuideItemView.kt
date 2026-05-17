@@ -33,7 +33,7 @@ import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchaseUI
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPositionType
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStatsUI
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 internal fun GuideItemView(

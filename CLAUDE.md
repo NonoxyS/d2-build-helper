@@ -11,24 +11,25 @@ Dota 2 build helper — Compose Multiplatform app (Android, Desktop/JVM, iOS) th
 ./gradlew :composeApp:jvmTest
 ./gradlew :composeApp:lintDebug            # Android Lint
 ./gradlew detekt                            # Static analysis (Kotlin)
-./gradlew :composeApp:pixel5Check          # Compose UI tests on Pixel 5 managed device
 ```
 
 iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 
-## Stack (current — May 2026)
+## Stack
 
-- Kotlin 2.0.0, Compose Multiplatform 1.6.11, AGP 8.3.0, Java target 1.8.
-- Apollo Kotlin 4.0.0-beta.6 (Stratz GraphQL).
-- Supabase 2.5.0 (storage only — for hero/item/ability icons).
-- Ktor 2.3.11 (CIO on Android+JVM, Darwin on iOS).
-- Coil 3.0.0-alpha06 (image loading).
-- Coroutines 1.9.0-RC, kotlinx.serialization 1.7.0.
-- Single-module project (`:composeApp`).
-- DI: hand-rolled service locator `core/di/InjectProvider`.
+- Kotlin 2.3.10, Compose Multiplatform 1.10.1 (material3 1.9.0), AGP 9.0.0, Java target 17.
+- Gradle 9.4.1.
+- Apollo Kotlin 4.3.1 (Stratz GraphQL).
+- Supabase 3.1.0 (storage only — for hero/item/ability icons).
+- Ktor 3.3.3 (OkHttp on Android+JVM, Darwin on iOS).
+- Coil 3.2.0 (image loading).
+- Coroutines 1.10.2, kotlinx.serialization 1.10.0.
+- Android: compileSdk/targetSdk 36, minSdk 26.
+- Single-module project (`:composeApp`) with `build-logic` composite build.
+- DI: Koin 4.1.x (`core/di/AppModule.kt`, `core/di/Koin.kt#initKoin`).
 - State management: custom `base/BaseViewModel<State, Action, Event>` (StateFlow + SharedFlow, `obtainEvent`).
 - Resources: `composeApp/src/commonMain/composeResources/` (`values/strings.xml`, `files/constants/*.json`, `font/`). Generated `Res.string.*` / `Res.readBytes(...)`.
-- Navigation: `compose-navigation` 2.8.0-alpha02 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal.
+- Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal.
 
 API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`) via `buildConfig` plugin.
 
@@ -44,7 +45,9 @@ composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
 │   ├── BaseViewModel.kt                # State + Action + Event abstraction
 │   └── LocalImageLoader.kt
 ├── core/
-│   ├── di/InjectProvider.kt            # Service locator (Apollo, Supabase, repositories)
+│   ├── di/
+│   │   ├── AppModule.kt                # Koin module (Apollo, Supabase, datasources, repos, use-cases, VMs)
+│   │   └── Koin.kt                     # initKoin(appDeclaration) entry point
 │   ├── data/
 │   │   ├── RequestResult.kt            # Success | InProgress | Error
 │   │   ├── api/                        # Remote data sources (GraphQL, Supabase Storage)
@@ -70,23 +73,25 @@ composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
 | File | Description |
 | --- | --- |
 | `mobile-overview.mdc` | Stack, package layout, naming conventions |
-| `mobile-architecture.mdc` | `BaseViewModel<State, Action, Event>`, `InjectProvider`, Compose Navigation |
+| `mobile-architecture.mdc` | `BaseViewModel<State, Action, Event>`, Koin (`AppModule`, `initKoin`), Compose Navigation |
 | `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews |
 | `mobile-data-layer.mdc` | Remote / Domain / UI entities, `RequestResult<T>`, mappers, repository cache |
 | `mobile-network.mdc` | Apollo (GraphQL), Supabase Storage, Ktor engine per platform, BuildConfig keys |
 | `mobile-resources.mdc` | `composeResources/` layout, `Res.string.*`, JSON constants |
 | `mobile-error-handling.mdc` | `runCatching` discipline, `RequestResult` wrapping, no swallowed cancellation |
 | `mobile-code-rules.mdc` | Access modifiers, member ordering, NPE-safety |
-| `mobile-roadmap.mdc` | Planned migrations (Koin, MVIKotlin, multi-module, moko-resources) and their order |
+| `mobile-roadmap.mdc` | Planned migrations (MVIKotlin, multi-module, moko-resources) and their order |
 
 ## Key Gotchas
 
 - `runCatching` is currently the norm in suspend functions, but a `coRunCatching` helper that rethrows `CancellationException` should be introduced before adding more retry logic. Until then: never silently swallow `Throwable` in coroutines.
-- `InjectProvider` is a static service locator with no scope. Do **not** add more dependencies to it lightly — it is on the migration path to Koin (see `mobile-roadmap.mdc`).
+- Koin bindings live in `core/di/AppModule.kt`. Add new datasources / repos / use-cases / view-models there, then resolve via constructor parameters in code. Use `koinViewModel<T>()` in composables.
+- `initKoin()` is called from each platform entry point (`AndroidApp.onCreate`, `jvmMain/main.kt` before `application{}`, and the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
 - `BaseViewModel` exposes `_viewStates` (StateFlow) and `_viewActions` (SharedFlow). UI reacts to actions one-time, state continuously. Events go through `obtainEvent(...)`.
 - All Apollo/Supabase config lives in `composeApp/build.gradle.kts` under `apollo { ... }` and `buildConfig { ... }`. API keys must be in `local.properties`.
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. Do not hardcode.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
+- AGP 9.0 + KMP `com.android.application` combination uses legacy flags `android.builtInKotlin=false` and `android.newDsl=false` in `gradle.properties`. These are deprecated by AGP 9 but kept until we split the Android app into its own module (see `mobile-roadmap.mdc`).
 - Git hooks live in `.githooks/`. Enable via `git config core.hooksPath .githooks`.
 - CI lives in `.github/workflows/`. PRs to `master`, `develop`, `develop-cmp` run Detekt + Android Lint + SwiftLint + SwiftFormat.
 - Detekt baseline at `linters/detekt/baseline.xml` — regenerate with `./gradlew detektBaseline` after intentional rule changes.
