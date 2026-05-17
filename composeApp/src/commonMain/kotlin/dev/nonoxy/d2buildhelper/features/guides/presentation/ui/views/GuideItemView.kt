@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.base.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
-import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchase

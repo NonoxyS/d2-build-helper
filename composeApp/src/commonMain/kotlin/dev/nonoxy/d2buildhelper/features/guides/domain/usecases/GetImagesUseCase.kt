@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.features.guides.domain.usecases
 
 import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import kotlinx.coroutines.Dispatchers

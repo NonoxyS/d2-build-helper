@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.nonoxy.d2buildhelper.core.data.api.resources.image.models.ImageResources
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesEvent
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesViewState
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuideListView
