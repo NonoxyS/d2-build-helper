@@ -1,0 +1,22 @@
+name: iOS Checks
+
+on:
+  pull_request:
+    branches: [ master, develop, develop-cmp ]
+
+jobs:
+  ios-lint:
+    name: SwiftLint + SwiftFormat
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftLint & SwiftFormat
+        run: brew install swiftlint swiftformat
+
+      - name: SwiftLint
+        run: cd linters/swiftlint && swiftlint lint --strict ../../iosApp/
+
+      - name: SwiftFormat
+        if: always()
+        run: cd linters/swiftformat && swiftformat --lint ../../iosApp/
