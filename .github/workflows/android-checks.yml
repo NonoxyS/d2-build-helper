@@ -18,6 +18,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v3
 
+      - name: Provision local.properties
+        env:
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
+        run: |
+          cat > local.properties <<EOF
+          SUPABASE_API_KEY=${SUPABASE_API_KEY:-ci-stub}
+          STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
+          EOF
+
       - name: Run Detekt
         run: ./gradlew detekt
 
@@ -42,6 +52,16 @@ jobs:
           java-version: 17
 
       - uses: gradle/actions/setup-gradle@v3
+
+      - name: Provision local.properties
+        env:
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
+        run: |
+          cat > local.properties <<EOF
+          SUPABASE_API_KEY=${SUPABASE_API_KEY:-ci-stub}
+          STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
+          EOF
 
       - name: Run Android Lint
         run: ./gradlew :composeApp:lintDebug
