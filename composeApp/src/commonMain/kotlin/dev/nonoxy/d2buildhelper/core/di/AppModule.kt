@@ -11,6 +11,7 @@ import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesData
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResources
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResourcesDataSource
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
+import dev.nonoxy.d2buildhelper.core.mvikotlin.di.coreMVIKotlinModule
 import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetGuidesUseCase
 import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetImagesUseCase
 import dev.nonoxy.d2buildhelper.features.guides.presentation.GuidesViewModel
@@ -24,6 +25,8 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
+    includes(coreMVIKotlinModule)
+
     single<CoroutineDispatchers> { CoroutineDispatchersImpl() }
 
     single<ApolloClient> {
