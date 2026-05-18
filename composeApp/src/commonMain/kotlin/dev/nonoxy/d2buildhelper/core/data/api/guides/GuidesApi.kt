@@ -1,14 +1,12 @@
 package dev.nonoxy.d2buildhelper.core.data.api.guides
 
-import dev.nonoxy.d2buildhelper.core.data.RequestResult
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuide
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.Guide
-import kotlinx.coroutines.flow.Flow
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuideDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.GuideDto
 
-interface GuidesApi {
-    fun getGuides(): Flow<RequestResult<List<Guide>>>
+internal interface GuidesApi {
+    suspend fun getGuides(): Result<List<GuideDto>>
 
-    fun getHeroGuides(heroId: Short): Flow<RequestResult<List<Guide>>>
+    suspend fun getHeroGuides(heroId: Short): Result<List<GuideDto>>
 
-    fun getDetailGuide(matchId: Long, steamAccountId: Long): Flow<RequestResult<DetailGuide>>
+    suspend fun getDetailGuide(matchId: Long, steamAccountId: Long): Result<DetailGuideDto>
 }

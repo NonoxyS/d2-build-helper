@@ -64,6 +64,13 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.supabase.storage)
+
+            implementation(libs.mvikotlin.core)
+            implementation(libs.mvikotlin.main)
+            implementation(libs.mvikotlin.logging)
+            implementation(libs.mvikotlin.coroutines)
+            implementation(libs.napier)
+            implementation(libs.moko.mvvm.flow)
         }
 
         commonTest.dependencies {

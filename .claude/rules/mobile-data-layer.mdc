@@ -1,45 +1,41 @@
 ---
-description: Data layer — Remote / Domain / UI entities, RequestResult, mappers, repository cache
+description: Data layer — DTO / domain split, suspend Result-returning repositories, mappers, repository cache
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
 
 # Data Layer
 
-## Three Layers
+## DTO vs domain
 
 | Layer | Location | Purpose |
 | --- | --- | --- |
-| Remote DTO | `core/data/api/{topic}/models/` and Apollo-generated classes under `core/graphql/` | Wire format (GraphQL responses, Supabase storage payloads) |
-| Domain / UI model | `features/{feature}/domain/models/` (`*UI.kt`) | UI-ready shape, formatted, with display-friendly types |
-| (No separate UI model layer) | — | The "UI" suffix on `GuideUI`, `HeroUI` indicates these are already the model the screen renders |
+| Remote DTO | `core/data/api/{topic}/models/*Dto.kt` and Apollo-generated classes under `core/graphql/` | Wire format (GraphQL responses, Supabase storage payloads) |
+| Domain model | `features/{feature}/domain/models/` | Domain shape consumed by features |
 
 Rules:
-- Apollo-generated types live in `dev.nonoxy.d2buildhelper.graphql.*` and are treated as DTOs. They never leak into UI code directly.
-- `core/data/api/.../models/` houses hand-written DTOs (when an Apollo type needs reshaping or wrapping).
-- The `*UI` suffix in `features/.../domain/models/` may be renamed to plain `*` once the project gains a true domain layer; for now keep the suffix consistent with the rest of the codebase.
+- Apollo-generated types live in `dev.nonoxy.d2buildhelper.graphql.*` and are treated as DTOs. They never leak past the repository.
+- Hand-written DTOs live under `core/data/...` with the `Dto` suffix and are `internal` (only the data layer touches them).
+- Domain models live next to their consumer (`features/<feature>/domain/models/`) without the `Dto` suffix.
+- DTO→domain mapping is the **repository's** responsibility, not a separate UseCase. The repository is the boundary; everything outside the repository sees domain types.
 
-## RequestResult<T>
+## Repository contract
 
-Defined in `core/data/RequestResult.kt`:
+Repositories expose `suspend fun (): Result<T>` (one-shot). No Flow boilerplate unless a feature truly observes a live stream.
 
-```kotlin
-sealed interface RequestResult<out T> {
-    data class Success<T>(val data: T) : RequestResult<T>
-    data object InProgress : RequestResult<Nothing>
-    data class Error(val error: Any? = null) : RequestResult<Nothing>
-}
-```
+Errors surface as `Result.failure(throwable)` via the `coRunCatching { ... }` helper from `common/extensions/CoroutineExtensions.kt`. Loading is tracked as a `Store.State.isLoading: Boolean` flag, not a Result variant. See `mobile-error-handling.mdc`.
 
-Repositories return `Flow<RequestResult<T>>`. UseCases consume that flow, map success payloads to UI/domain models, and emit further `Flow<RequestResult<T_UI>>`. ViewModels collect the flow and reduce it into `GuidesViewState`.
+## Dispatchers
 
-Do not use `kotlin.Result<T>` in the data layer (`runCatching` semantics differ; see `mobile-error-handling.mdc`).
+`CoroutineDispatchers` is injected (interface in `common/coroutines/CoroutineDispatchers.kt`). Never reference `Dispatchers.IO` / `Dispatchers.Default` directly from `commonMain` — go through the abstraction so tests can substitute `UnconfinedTestDispatcher`.
+
+Note: on Kotlin/Native, `Dispatchers.IO` is exposed via an extension property — `common/coroutines/Dispatchers.kt` has a load-bearing `import kotlinx.coroutines.IO` guarded by `@file:Suppress("UnusedImport")`. Do not remove it.
 
 ## Mappers
 
 Mappers live next to the data they convert. For Apollo → domain conversion: `core/data/api/{topic}/mappers/{Topic}Mappers.kt`. For other conversions, prefer extension functions colocated with the target type.
 
-Style: free-standing `internal fun ApolloType.toDomain(): DomainType = ...`. No `Mapper<From, To>` interface for now — the project has not adopted DI for mappers. When the Koin migration lands (see roadmap) introduce the interface + Koin-bound `internal class ...Impl` pattern.
+Style: free-standing `internal fun ApolloType.toDomain(): DomainType = ...`. UI-state mappers (Store `State`/`Label` → `Ui*State`/`Ui*Label`) live under `features/<feature>/presentation/mappers/` as `Api` + `internal class Impl`, bound through `<feature>/impl/di/<Feature>ImplModule.kt` with `singleOf(::Impl) bind Api::class`.
 
 ## Repository Cache
 
@@ -48,7 +44,7 @@ Style: free-standing `internal fun ApolloType.toDomain(): DomainType = ...`. No 
 Rules:
 - Cache keys live inside the repository as private constants.
 - No TTL today. If you add one, document it in the repository file and surface it in the constructor (e.g., `ttl: Duration = 1.hours`).
-- Repositories never throw to the caller; wrap exceptions in `RequestResult.Error`.
+- Repositories never throw to the caller; wrap exceptions via `coRunCatching { ... }` so they emerge as `Result.failure(throwable)`. Log in the catch block with `Napier.e(throwable = ..., message = ...)`.
 
 ## Local JSON Constants
 

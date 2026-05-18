@@ -24,6 +24,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.base.LocalImageLoader
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.HeroUI
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 import dota_2_build_helper.composeapp.generated.resources.Res
 import dota_2_build_helper.composeapp.generated.resources.hero_filter
@@ -39,7 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun HeroFilterDialog(
-    filteredHeroImageUrls: Map<HeroUI, String>,
+    filteredHeroImageUrls: Map<Hero, String>,
     heroSearchValue: String,
     onSearchValueChanged: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -62,10 +66,15 @@ internal fun HeroFilterDialog(
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                var input by remember(heroSearchValue) { mutableStateOf(heroSearchValue) }
+
                 OutlinedTextField(
                     modifier = Modifier,
-                    value = heroSearchValue,
-                    onValueChange = onSearchValueChanged,
+                    value = input,
+                    onValueChange = { newValue ->
+                        input = newValue
+                        onSearchValueChanged(newValue)
+                    },
                     placeholder = {
                         Text(
                             text = stringResource(Res.string.hero_filter),
@@ -79,11 +88,14 @@ internal fun HeroFilterDialog(
                         unfocusedTextColor = D2BuildHelperTheme.colors.primaryText
                     ),
                     trailingIcon = {
-                        if (heroSearchValue.isNotBlank()) {
+                        if (input.isNotBlank()) {
                             Icon(
                                 imageVector = Icons.Rounded.Clear,
                                 contentDescription = null,
-                                modifier = Modifier.clickable { onSearchValueChanged("") }
+                                modifier = Modifier.clickable {
+                                    input = ""
+                                    onSearchValueChanged("")
+                                }
                             )
                         }
                     }
@@ -115,7 +127,7 @@ internal fun HeroFilterDialog(
 
 @Composable
 private fun HeroFilterItem(
-    hero: HeroUI,
+    hero: Hero,
     imageUrl: String,
     onItemClick: (Short) -> Unit
 ) {

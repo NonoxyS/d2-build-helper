@@ -6,10 +6,13 @@ import dev.nonoxy.d2buildhelper.App
 import dev.nonoxy.d2buildhelper.core.di.initKoin
 import dota_2_build_helper.composeapp.generated.resources.Res
 import dota_2_build_helper.composeapp.generated.resources.app_name
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
 
 fun main() {
+    Napier.base(DebugAntilog(defaultTag = "D2BuildHelper"))
     initKoin()
     application {
     Window(

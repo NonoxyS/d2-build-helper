@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dev.nonoxy.d2buildhelper.core.di.initKoin
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import org.koin.android.ext.koin.androidContext
 
 class AndroidApp : Application() {
@@ -18,6 +20,7 @@ class AndroidApp : Application() {
     override fun onCreate() {
         super.onCreate()
         INSTANCE = this
+        Napier.base(DebugAntilog(defaultTag = "D2BuildHelper"))
         initKoin { androidContext(this@AndroidApp) }
     }
 }

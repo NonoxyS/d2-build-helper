@@ -1,12 +1,16 @@
 package dev.nonoxy.d2buildhelper.core.data.api.guides.mappers
 
-import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.GuideDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.ItemPurchaseDto
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.MatchPlayerPositionType
+import dev.nonoxy.d2buildhelper.core.data.api.guides.models.PlayerStatsDto
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 import dev.nonoxy.d2buildhelper.graphql.HeroGuidesQuery
 
-fun GuidesQuery.Guide1.toGuide(): Guide {
-    return Guide(
-        hero = Hero(
+internal fun GuidesQuery.Guide1.toGuideDto(): GuideDto {
+    return GuideDto(
+        hero = HeroDto(
             heroId = matchPlayer?.hero?.id.toString().toShort(),
             shortName = matchPlayer?.hero?.shortName ?: "",
             displayName = matchPlayer?.hero?.displayName ?: "Unknown",
@@ -14,12 +18,12 @@ fun GuidesQuery.Guide1.toGuide(): Guide {
         steamAccountId = steamAccountId.toString().toLong(),
         matchId = matchId.toString().toLong(),
         durationSeconds = this.match?.durationSeconds ?: 0,
-        playerStats = matchPlayer!!.toPlayerStats()
+        playerStats = matchPlayer!!.toPlayerStatsDto()
     )
 }
 
-fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
-    return PlayerStats(
+internal fun GuidesQuery.MatchPlayer.toPlayerStatsDto(): PlayerStatsDto {
+    return PlayerStatsDto(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
         kills = kills?.toString()?.toByte() ?: 0,
@@ -38,15 +42,15 @@ fun GuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
         endNeutralItemId = neutral0Id?.toString()?.toShortOrNull(),
         itemPurchases = stats?.itemPurchases?.map { itemPurchase ->
             itemPurchase?.run {
-                ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
+                ItemPurchaseDto(itemId = itemPurchase.itemId, time = itemPurchase.time)
             }
         },
-        )
+    )
 }
 
-fun HeroGuidesQuery.Guide1.toGuide(): Guide {
-    return Guide(
-        hero = Hero(
+internal fun HeroGuidesQuery.Guide1.toGuideDto(): GuideDto {
+    return GuideDto(
+        hero = HeroDto(
             heroId = matchPlayer?.hero?.id.toString().toShort(),
             shortName = matchPlayer?.hero?.shortName ?: "",
             displayName = matchPlayer?.hero?.displayName ?: "Unknown",
@@ -54,12 +58,12 @@ fun HeroGuidesQuery.Guide1.toGuide(): Guide {
         steamAccountId = steamAccountId.toString().toLong(),
         matchId = matchId.toString().toLong(),
         durationSeconds = this.match?.durationSeconds ?: 0,
-        playerStats = matchPlayer!!.toPlayerStats()
+        playerStats = matchPlayer!!.toPlayerStatsDto()
     )
 }
 
-fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
-    return PlayerStats(
+internal fun HeroGuidesQuery.MatchPlayer.toPlayerStatsDto(): PlayerStatsDto {
+    return PlayerStatsDto(
         position = MatchPlayerPositionType.valueOf(position?.name ?: "UNKNOWN"),
         isRadiant = isRadiant,
         kills = kills?.toString()?.toByte() ?: 0,
@@ -78,65 +82,8 @@ fun HeroGuidesQuery.MatchPlayer.toPlayerStats(): PlayerStats {
         endNeutralItemId = neutral0Id?.toString()?.toShortOrNull(),
         itemPurchases = stats?.itemPurchases?.map { itemPurchase ->
             itemPurchase?.run {
-                ItemPurchase(itemId = itemPurchase.itemId, time = itemPurchase.time)
+                ItemPurchaseDto(itemId = itemPurchase.itemId, time = itemPurchase.time)
             }
         },
     )
 }
-
-/*
-fun GuidesQuery.InventoryReport.toInventoryChange(): InventoryChange {
-    return InventoryChange(
-        item0 = item0?.run {
-            Item0(
-                itemId = item0.itemId,
-                charges = item0.charges
-            )
-        },
-        item1 = item1?.run {
-            Item1(
-                itemId = item1.itemId,
-                charges = item1.charges
-            )
-        },
-        item2 = item2?.run {
-            Item2(
-                itemId = item2.itemId,
-                charges = item2.charges
-            )
-        },
-        item3 = item3?.run {
-            Item3(
-                itemId = item3.itemId,
-                charges = item3.charges
-            )
-        },
-        item4 = item4?.run {
-            Item4(
-                itemId = item4.itemId,
-                charges = item4.charges
-            )
-        },
-        item5 = item5?.run {
-            Item5(
-                itemId = item5.itemId,
-                charges = item5.charges
-            )
-        },
-        backpack0 = backPack0?.run {
-            Backpack0(
-                itemId = backPack0.itemId,
-            )
-        },
-        backpack1 = backPack1?.run {
-            Backpack1(
-                itemId = backPack1.itemId,
-            )
-        },
-        backpack2 = backPack2?.run {
-            Backpack2(
-                itemId = backPack2.itemId,
-            )
-        },
-    )
-}*/

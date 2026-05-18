@@ -1,139 +1,98 @@
 package dev.nonoxy.d2buildhelper.core.data.repository.resources
 
-import dev.nonoxy.d2buildhelper.core.data.RequestResult
+import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesApi
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResources
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Ability
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Hero
-import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.Item
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
+import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Ability
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Item
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
-class ResourcesRepository(
-    private val imageResourcesDataSource: ImageResourcesApi,
-    private val constantResourcesDataSource: ConstantResources
-) {
-    private var heroList: List<Hero>? = null
-    private var itemList: List<Item>? = null
-    private var abilityList: List<Ability>? = null
+interface ResourcesRepository {
+    suspend fun getHeroImages(): Result<Map<Hero, String>>
+    suspend fun getItemImages(): Result<Map<Item, String>>
+    suspend fun getAbilityImages(): Result<Map<Ability, String>>
+    suspend fun getAdditionalImages(): Result<Map<String, String>>
+}
 
-    private var heroImageUrls: Map<Hero, String>? = null
-    private var itemImageUrls: Map<Item, String>? = null
-    private var abilityImageUrls: Map<Ability, String>? = null
-    private var additionalImageUrls: Map<String, String>? = null
+internal class ResourcesRepositoryImpl(
+    private val imageResourcesApi: ImageResourcesApi,
+    private val constantResources: ConstantResources,
+    private val dispatchers: CoroutineDispatchers,
+) : ResourcesRepository {
 
-    private suspend fun fetchAllConstantsDataIfNeeded() {
-        if (heroList == null) {
-            constantResourcesDataSource.getHeroConstants().collect { heroes ->
-                heroList = heroes
+    private val constantsMutex = Mutex()
+    private var heroConstants: List<HeroDto>? = null
+    private var itemConstants: List<ItemDto>? = null
+    private var abilityConstants: List<AbilityDto>? = null
+
+    private var heroImagesCache: Map<Hero, String>? = null
+    private var itemImagesCache: Map<Item, String>? = null
+    private var abilityImagesCache: Map<Ability, String>? = null
+    private var additionalImagesCache: Map<String, String>? = null
+
+    override suspend fun getHeroImages(): Result<Map<Hero, String>> {
+        heroImagesCache?.let { return Result.success(it) }
+        return ensureHeroes().mapCatching { heroes ->
+            val urls = imageResourcesApi.getHeroImageUrls(heroes).getOrThrow()
+            val domain = withContext(dispatchers.default) {
+                urls.mapKeys { (dto, _) -> dto.toDomain() }
             }
+            heroImagesCache = domain
+            domain
         }
-        if (itemList == null) {
-            constantResourcesDataSource.getItemConstants().collect { items ->
-                itemList = items
+    }
+
+    override suspend fun getItemImages(): Result<Map<Item, String>> {
+        itemImagesCache?.let { return Result.success(it) }
+        return ensureItems().mapCatching { items ->
+            val urls = imageResourcesApi.getItemImageUrls(items).getOrThrow()
+            val domain = withContext(dispatchers.default) {
+                urls.mapKeys { (dto, _) -> dto.toDomain() }
             }
+            itemImagesCache = domain
+            domain
         }
-        if (abilityList == null) {
-            constantResourcesDataSource.getAbilityConstants().collect { abilities ->
-                abilityList = abilities
+    }
+
+    override suspend fun getAbilityImages(): Result<Map<Ability, String>> {
+        abilityImagesCache?.let { return Result.success(it) }
+        return ensureAbilities().mapCatching { abilities ->
+            val urls = imageResourcesApi.getAbilityImageUrls(abilities).getOrThrow()
+            val domain = withContext(dispatchers.default) {
+                urls.mapKeys { (dto, _) -> dto.toDomain() }
             }
+            abilityImagesCache = domain
+            domain
         }
     }
 
-    fun getHeroImages(): Flow<RequestResult<Map<Hero, String>>> {
-        return flow {
-            emit(RequestResult.InProgress())
-
-            // Если есть закешированные данные - выводим их
-            heroImageUrls?.let { cachedHeroImageUrls ->
-                emit(RequestResult.Success(cachedHeroImageUrls))
-                return@flow
-            }
-
-            // Загрузка констант, если они ещё не загружены
-            fetchAllConstantsDataIfNeeded()
-
-            heroList?.let { heroList ->
-                imageResourcesDataSource.getHeroImageUrls(heroList).collect { result ->
-                    if (result is RequestResult.Success) {
-                        heroImageUrls = result.data
-                    }
-                    emit(result)
-                }
-            }
-        }.catch { e -> emit(RequestResult.Error(e)) }
+    override suspend fun getAdditionalImages(): Result<Map<String, String>> {
+        additionalImagesCache?.let { return Result.success(it) }
+        return imageResourcesApi.getAdditionalImageUrls().onSuccess { additionalImagesCache = it }
     }
 
-    fun getItemImages(): Flow<RequestResult<Map<Item, String>>> {
-        return flow {
-            emit(RequestResult.InProgress())
-
-            // Если есть закешированные данные - выводим их
-            itemImageUrls?.let { cachedItemImageUrls ->
-                emit(RequestResult.Success(cachedItemImageUrls))
-                return@flow
-            }
-
-            // Загрузка констант, если они ещё не загружены
-            fetchAllConstantsDataIfNeeded()
-
-
-            itemList?.let { itemList ->
-                imageResourcesDataSource.getItemImageUrls(itemList).collect { result ->
-                    if (result is RequestResult.Success) {
-                        itemImageUrls = result.data
-                    }
-                    emit(result)
-                }
-            }
-        }.catch { e -> emit(RequestResult.Error(e)) }
+    private suspend fun ensureHeroes(): Result<List<HeroDto>> = constantsMutex.withLock {
+        heroConstants?.let { return Result.success(it) }
+        constantResources.getHeroConstants().onSuccess { heroConstants = it }
     }
 
-    fun getAbilityImages(): Flow<RequestResult<Map<Ability, String>>> {
-        return flow {
-            emit(RequestResult.InProgress())
-
-            // Если есть закешированные данные - выводим их
-            abilityImageUrls?.let { cachedAbilityImageUrls ->
-                emit(RequestResult.Success(cachedAbilityImageUrls))
-                return@flow
-            }
-
-            // Загрузка констант, если они ещё не загружены
-            fetchAllConstantsDataIfNeeded()
-
-
-            abilityList?.let { abilityList ->
-                imageResourcesDataSource.getAbilityImageUrls(abilityList).collect { result ->
-                    if (result is RequestResult.Success) {
-                        abilityImageUrls = result.data
-                    }
-                    emit(result)
-                }
-            }
-        }.catch { e -> emit(RequestResult.Error(e)) }
+    private suspend fun ensureItems(): Result<List<ItemDto>> = constantsMutex.withLock {
+        itemConstants?.let { return Result.success(it) }
+        constantResources.getItemConstants().onSuccess { itemConstants = it }
     }
 
-    fun getAdditionalImages(): Flow<RequestResult<Map<String, String>>> {
-        return flow {
-            emit(RequestResult.InProgress())
-
-            // Если есть закешированные данные - выводим их
-            additionalImageUrls?.let { cachedAdditionalImageUrls ->
-                emit(RequestResult.Success(cachedAdditionalImageUrls))
-                return@flow
-            }
-
-            // Загрузка констант, если они ещё не загружены
-            fetchAllConstantsDataIfNeeded()
-
-            imageResourcesDataSource.getAdditionalImageUrls().collect { result ->
-                if (result is RequestResult.Success) {
-                    additionalImageUrls = result.data
-                }
-                emit(result)
-            }
-        }.catch { e -> emit(RequestResult.Error(e)) }
+    private suspend fun ensureAbilities(): Result<List<AbilityDto>> = constantsMutex.withLock {
+        abilityConstants?.let { return Result.success(it) }
+        constantResources.getAbilityConstants().onSuccess { abilityConstants = it }
     }
 }
+
+private fun HeroDto.toDomain(): Hero = Hero(heroId = id, shortName = shortName, displayName = displayName)
+private fun ItemDto.toDomain(): Item = Item(id = id, shortName = shortName, displayName = displayName)
+private fun AbilityDto.toDomain(): Ability = Ability(id = id, name = name)

@@ -27,7 +27,10 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Android: compileSdk/targetSdk 36, minSdk 26.
 - Single-module project (`:composeApp`) with `build-logic` composite build.
 - DI: Koin 4.1.x (`core/di/AppModule.kt`, `core/di/Koin.kt#initKoin`).
-- State management: custom `base/BaseViewModel<State, Action, Event>` (StateFlow + SharedFlow, `obtainEvent`).
+- MVIKotlin 4.4.0 (`core/mvikotlin/BaseExecutor`, `LoggingStoreFactory` wired through Napier).
+- Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on every platform entry).
+- moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`).
+- State management: MVIKotlin `Store` per feature + `core/presentation/viewmodel/BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
 - Resources: `composeApp/src/commonMain/composeResources/` (`values/strings.xml`, `files/constants/*.json`, `font/`). Generated `Res.string.*` / `Res.readBytes(...)`.
 - Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal.
 
@@ -42,27 +45,34 @@ composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
 ├── App.kt                              # Root composable + theme + NavHost
 ├── theme/                              # Colors, typography, theme (platform-split)
 ├── base/
-│   ├── BaseViewModel.kt                # State + Action + Event abstraction
 │   └── LocalImageLoader.kt
 ├── core/
 │   ├── di/
-│   │   ├── AppModule.kt                # Koin module (Apollo, Supabase, datasources, repos, use-cases, VMs)
+│   │   ├── AppModule.kt                # Koin module (Apollo, Supabase, datasources, repos, VMs); aggregates per-feature impl modules
 │   │   └── Koin.kt                     # initKoin(appDeclaration) entry point
 │   ├── data/
-│   │   ├── RequestResult.kt            # Success | InProgress | Error
-│   │   ├── api/                        # Remote data sources (GraphQL, Supabase Storage)
+│   │   ├── api/                        # Remote data sources (GraphQL, Supabase Storage) + DTOs
 │   │   ├── local/resources/constants/  # Local JSON data sources
-│   │   └── repository/                 # Aggregating repositories with in-memory cache
-│   └── graphql/                        # Apollo GraphQL queries + Stratz schema
-├── common/utils/                       # Pure-Kotlin helpers (TimeConverter, ...)
+│   │   └── repository/                 # Aggregating repositories (suspend fun (): Result<T>) with in-memory cache
+│   ├── graphql/                        # Apollo GraphQL queries + Stratz schema
+│   ├── mvikotlin/                      # BaseExecutor + CoreMVIKotlinModule (LoggingStoreFactory via Napier)
+│   └── presentation/viewmodel/         # BaseViewModel<State, Label> + BaseIosViewModel
+├── common/
+│   ├── coroutines/                     # CoroutineDispatchers interface + Impl + Dispatchers.kt (load-bearing IO import)
+│   ├── extensions/                     # coRunCatching, ResultExtensions
+│   ├── mappers/                        # Shared mapper interfaces
+│   └── utils/                          # Pure-Kotlin helpers (TimeConverter, OneTimeEvent, ...)
 ├── features/
 │   ├── guides/
-│   │   ├── domain/
-│   │   │   ├── models/                 # UI-shaped domain models (GuideUI, HeroUI, ...)
-│   │   │   └── usecases/               # UseCase classes
+│   │   ├── api/store/GuidesStore.kt
+│   │   ├── impl/
+│   │   │   ├── di/FeatureGuidesImplModule.kt
+│   │   │   └── domain/{GuidesStoreFactory, GuidesExecutor, GuidesReducer}.kt
+│   │   ├── domain/models/              # Guide, Hero, Item, ImageResources, ...
 │   │   └── presentation/
-│   │       ├── models/                 # ViewState | Action | Event
 │   │       ├── GuidesViewModel.kt
+│   │       ├── models/{UiGuidesState, UiGuidesLabel}.kt
+│   │       ├── mappers/{UiGuidesStateMapper, UiGuidesLabelMapper}.kt
 │   │       └── ui/                     # Screen + sub-views
 │   └── detailGuide/                    # Stub for the next feature
 └── navigation/AppScreens.kt
@@ -73,21 +83,25 @@ composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
 | File | Description |
 | --- | --- |
 | `mobile-overview.mdc` | Stack, package layout, naming conventions |
-| `mobile-architecture.mdc` | `BaseViewModel<State, Action, Event>`, Koin (`AppModule`, `initKoin`), Compose Navigation |
-| `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews |
-| `mobile-data-layer.mdc` | Remote / Domain / UI entities, `RequestResult<T>`, mappers, repository cache |
+| `mobile-architecture.mdc` | MVIKotlin Store/Executor/Reducer, `BaseViewModel<State, Label>`, Koin (`AppModule`, per-feature `*ImplModule`), Compose Navigation |
+| `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews, local-mirror text inputs |
+| `mobile-data-layer.mdc` | DTO / domain split, `suspend fun (): Result<T>` repositories, mappers, repository cache, `CoroutineDispatchers` |
 | `mobile-network.mdc` | Apollo (GraphQL), Supabase Storage, Ktor engine per platform, BuildConfig keys |
 | `mobile-resources.mdc` | `composeResources/` layout, `Res.string.*`, JSON constants |
-| `mobile-error-handling.mdc` | `runCatching` discipline, `RequestResult` wrapping, no swallowed cancellation |
+| `mobile-error-handling.mdc` | `coRunCatching` in suspend, `Result<T>` surfacing, Napier logging in repos/executors |
 | `mobile-code-rules.mdc` | Access modifiers, member ordering, NPE-safety |
-| `mobile-roadmap.mdc` | Planned migrations (MVIKotlin, multi-module, moko-resources) and their order |
+| `mobile-roadmap.mdc` | Planned migrations (multi-module, moko-resources) and their order |
 
 ## Key Gotchas
 
-- `runCatching` is currently the norm in suspend functions, but a `coRunCatching` helper that rethrows `CancellationException` should be introduced before adding more retry logic. Until then: never silently swallow `Throwable` in coroutines.
-- Koin bindings live in `core/di/AppModule.kt`. Add new datasources / repos / use-cases / view-models there, then resolve via constructor parameters in code. Use `koinViewModel<T>()` in composables.
+- In suspend code, use `coRunCatching { ... }` (not bare `try/catch` and not plain `runCatching` — the latter swallows `CancellationException`). Plain `runCatching` is only OK in non-suspend paths.
+- All repositories return `suspend fun (): Result<T>`. There is no `RequestResult` or UseCase layer — DTO→domain mapping lives in the repository.
+- Loading is `Store.State.isLoading: Boolean`, not a `Result` variant. Errors are `Store.State.isError: Boolean` (and optional `Label`s for one-shot UI side effects).
+- `CoroutineDispatchers` is the only way to obtain dispatchers in commonMain — inject it. `common/coroutines/Dispatchers.kt` contains a load-bearing `import kotlinx.coroutines.IO` (guarded by `@file:Suppress("UnusedImport")`) needed for Kotlin/Native — do not remove it.
+- `BaseViewModel.onCleared()` must call `store.dispose()` (Store does not auto-dispose with the VM) — see `GuidesViewModel`.
+- `Napier.base(DebugAntilog(...))` is called once per platform entry, before `initKoin(...)`. The call appends antilogs — if an entry can be re-created (test scenarios), wrap with `Napier.takeLogarithm()` first to avoid duplicate sinks.
+- Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<feature>/impl/di/<Feature>ImplModule.kt` and are aggregated by `appModule`. Resolve via constructor parameters in code. Use `koinViewModel<T>()` in composables.
 - `initKoin()` is called from each platform entry point (`AndroidApp.onCreate`, `jvmMain/main.kt` before `application{}`, and the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
-- `BaseViewModel` exposes `_viewStates` (StateFlow) and `_viewActions` (SharedFlow). UI reacts to actions one-time, state continuously. Events go through `obtainEvent(...)`.
 - All Apollo/Supabase config lives in `composeApp/build.gradle.kts` under `apollo { ... }` and `buildConfig { ... }`. API keys must be in `local.properties`.
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. Do not hardcode.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
