@@ -24,12 +24,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import dev.nonoxy.d2buildhelper.base.LocalImageLoader
+import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Item
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.Item
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchase
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStats

@@ -34,11 +34,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
-import dev.nonoxy.d2buildhelper.base.LocalImageLoader
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
+import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.common.resources.Res
+import dev.nonoxy.d2buildhelper.common.resources.hero_filter
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
-import dota_2_build_helper.composeapp.generated.resources.Res
-import dota_2_build_helper.composeapp.generated.resources.hero_filter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

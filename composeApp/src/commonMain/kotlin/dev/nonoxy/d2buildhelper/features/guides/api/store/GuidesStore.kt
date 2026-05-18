@@ -5,8 +5,8 @@ import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.Label
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.State
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
 
 interface GuidesStore : Store<Intent, State, Label> {
 

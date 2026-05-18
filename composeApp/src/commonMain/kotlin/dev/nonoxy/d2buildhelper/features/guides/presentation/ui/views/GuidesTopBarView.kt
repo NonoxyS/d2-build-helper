@@ -21,11 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
-import dota_2_build_helper.composeapp.generated.resources.Res
-import dota_2_build_helper.composeapp.generated.resources.all_heroes
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import dev.nonoxy.d2buildhelper.common.resources.Res
+import dev.nonoxy.d2buildhelper.common.resources.all_heroes
+import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun GuidesTopBar(

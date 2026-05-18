@@ -6,8 +6,8 @@ import dev.nonoxy.d2buildhelper.data.FakeResourcesRepository
 import dev.nonoxy.d2buildhelper.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Item
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.Item
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStats
 import kotlinx.coroutines.ExperimentalCoroutinesApi

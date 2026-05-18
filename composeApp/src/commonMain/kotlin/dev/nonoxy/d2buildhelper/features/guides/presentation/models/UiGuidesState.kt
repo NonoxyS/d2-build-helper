@@ -1,8 +1,8 @@
 package dev.nonoxy.d2buildhelper.features.guides.presentation.models
 
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
 
 data class UiGuidesState(
     val guides: List<Guide> = emptyList(),

@@ -8,9 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dota_2_build_helper.composeapp.generated.resources.Res
-import dota_2_build_helper.composeapp.generated.resources.error_loading
-import dota_2_build_helper.composeapp.generated.resources.retry
+import dev.nonoxy.d2buildhelper.common.resources.Res
+import dev.nonoxy.d2buildhelper.common.resources.error_loading
+import dev.nonoxy.d2buildhelper.common.resources.retry
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

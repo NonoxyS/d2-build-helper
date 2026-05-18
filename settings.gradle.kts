@@ -35,3 +35,12 @@ dependencyResolutionManagement {
 includeBuild("build-logic")
 
 include(":composeApp")
+include(":common")
+include(":core-domain")
+include(":common-resources")
+include(":core-presentation")
+include(":core-navigation")
+include(":common-ui")
+include(":core-network")
+include(":core-storage")
+include(":core-resources")

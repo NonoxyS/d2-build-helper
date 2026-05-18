@@ -10,11 +10,11 @@ import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.crossfade
-import dev.nonoxy.d2buildhelper.base.LocalImageLoader
+import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.GuidesScreen
-import dev.nonoxy.d2buildhelper.navigation.AppScreens
-import dev.nonoxy.d2buildhelper.navigation.LocalNavHost
+import dev.nonoxy.d2buildhelper.core.navigation.AppScreens
+import dev.nonoxy.d2buildhelper.core.navigation.LocalNavHost
 import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
 
 @Composable

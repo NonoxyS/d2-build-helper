@@ -5,14 +5,14 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
 import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
-import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
+import dev.nonoxy.d2buildhelper.core.resources.data.repository.ResourcesRepository
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.Label
 import dev.nonoxy.d2buildhelper.features.guides.api.store.GuidesStore.State
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
 
 internal class GuidesStoreFactory(
     private val storeFactory: StoreFactory,

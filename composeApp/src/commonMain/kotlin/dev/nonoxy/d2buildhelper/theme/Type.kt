@@ -6,9 +6,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import dota_2_build_helper.composeapp.generated.resources.Res
-import dota_2_build_helper.composeapp.generated.resources.noto_sans_bold
-import dota_2_build_helper.composeapp.generated.resources.noto_sans_regular
+import dev.nonoxy.d2buildhelper.common.resources.Res
+import dev.nonoxy.d2buildhelper.common.resources.noto_sans_bold
+import dev.nonoxy.d2buildhelper.common.resources.noto_sans_regular
 import org.jetbrains.compose.resources.Font
 
 @Composable

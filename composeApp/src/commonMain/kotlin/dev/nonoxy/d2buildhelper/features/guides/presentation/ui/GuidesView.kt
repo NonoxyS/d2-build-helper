@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.UiGuidesState
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuideListView
 import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesTopBar

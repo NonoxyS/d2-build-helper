@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.core.domain.ImageResources
 
 @Composable
 internal fun GuideListView(
