@@ -48,6 +48,10 @@ kotlin {
             implementation(projects.coreNetwork)
             implementation(projects.coreStorage)
             implementation(projects.coreResources)
+            implementation(projects.featureGuides.api)
+            implementation(projects.featureGuides.impl)
+            implementation(projects.featureGuides.presentation)
+            implementation(projects.featureGuides.ui)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

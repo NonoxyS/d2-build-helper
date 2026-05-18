@@ -12,10 +12,10 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.crossfade
 import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen
-import dev.nonoxy.d2buildhelper.features.guides.presentation.ui.GuidesScreen
+import dev.nonoxy.d2buildhelper.feature.guides.ui.GuidesScreen
 import dev.nonoxy.d2buildhelper.core.navigation.AppScreens
 import dev.nonoxy.d2buildhelper.core.navigation.LocalNavHost
-import dev.nonoxy.d2buildhelper.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
 
 @Composable
 internal fun App() = D2BuildHelperTheme {
