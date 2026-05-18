@@ -35,6 +35,7 @@ internal class GuidesExecutor(
 
     private val searchValue = MutableStateFlow("")
     private var debouncePipelineStarted = false
+    private var lastFailedRetry: (suspend () -> Unit)? = null
 
     override suspend fun suspendExecuteAction(action: Action) {
         when (action) {
@@ -51,7 +52,7 @@ internal class GuidesExecutor(
             }
             Intent.OnHeroSearchDialogClick -> publish(Label.ShowHeroSearchDialog)
             is Intent.OnHeroSelect -> selectHero(intent.heroId)
-            Intent.OnRetry -> suspendExecuteAction(Action.LoadInitial)
+            Intent.OnRetry -> (lastFailedRetry ?: { suspendExecuteAction(Action.LoadInitial) }).invoke()
         }
     }
 
@@ -75,6 +76,7 @@ internal class GuidesExecutor(
             .firstOrNull { it.isFailure }
         if (firstFailure != null) {
             Napier.e(throwable = firstFailure.exceptionOrNull(), message = "GuidesExecutor.loadInitial failed")
+            lastFailedRetry = { suspendExecuteAction(Action.LoadInitial) }
             dispatch(Message.SetError(true))
             dispatch(Message.SetLoading(false))
             return
@@ -106,6 +108,7 @@ internal class GuidesExecutor(
                 .onEach { suspendExecuteAction(Action.FilterHeroes(it)) }
                 .launchIn(scope)
         }
+        lastFailedRetry = null
     }
 
     private suspend fun filterHeroes(query: String) {
@@ -124,9 +127,13 @@ internal class GuidesExecutor(
     private suspend fun selectHero(heroId: Short) {
         dispatch(Message.SetLoading(true))
         guidesRepository.getHeroGuides(heroId)
-            .onSuccess { dispatch(Message.SetGuides(it)) }
-            .onFailure {
-                Napier.e(throwable = it, message = "GuidesExecutor.selectHero($heroId) failed")
+            .onSuccess {
+                dispatch(Message.SetGuides(it))
+                lastFailedRetry = null
+            }
+            .onFailure { throwable ->
+                Napier.e(throwable = throwable, message = "GuidesExecutor.selectHero($heroId) failed")
+                lastFailedRetry = { selectHero(heroId) }
                 dispatch(Message.SetError(true))
             }
         dispatch(Message.SetLoading(false))

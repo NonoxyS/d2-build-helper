@@ -8,6 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import dota_2_build_helper.composeapp.generated.resources.Res
+import dota_2_build_helper.composeapp.generated.resources.error_loading
+import dota_2_build_helper.composeapp.generated.resources.retry
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun GuidesErrorView(onRetry: () -> Unit) {
@@ -16,7 +20,7 @@ internal fun GuidesErrorView(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("Failed to load")
-        Button(onClick = onRetry) { Text("Retry") }
+        Text(stringResource(Res.string.error_loading))
+        Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
 }
