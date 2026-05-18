@@ -7,7 +7,6 @@ import extensions.libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 class AndroidApplicationSetupPlugin : Plugin<Project> {
@@ -16,7 +15,7 @@ class AndroidApplicationSetupPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply(libs.plugins.android.application.get().pluginId)
-                apply("org.jetbrains.kotlin.android")
+                apply(libs.plugins.kotlin.android.get().pluginId)
                 apply(libs.plugins.compose.asProvider().get().pluginId)
                 apply(libs.plugins.compose.compiler.get().pluginId)
             }

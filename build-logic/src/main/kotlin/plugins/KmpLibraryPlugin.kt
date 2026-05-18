@@ -33,7 +33,11 @@ class KmpLibraryPlugin : Plugin<Project> {
 
                 listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { ios ->
                     ios.binaries.framework {
-                        baseName = project.name.replace("-", "_").replace(":", "_")
+                        baseName = project.path
+                            .removePrefix(":")
+                            .split(Regex("[^A-Za-z0-9]+"))
+                            .filter { it.isNotEmpty() }
+                            .joinToString("_")
                         isStatic = true
                     }
                 }
