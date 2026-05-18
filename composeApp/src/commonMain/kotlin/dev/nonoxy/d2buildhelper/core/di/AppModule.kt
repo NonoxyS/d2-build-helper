@@ -15,17 +15,16 @@ import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepositoryImpl
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepositoryImpl
 import dev.nonoxy.d2buildhelper.core.mvikotlin.di.coreMVIKotlinModule
-import dev.nonoxy.d2buildhelper.features.guides.presentation.GuidesViewModel
+import dev.nonoxy.d2buildhelper.features.guides.impl.di.featureGuidesImplModule
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
-    includes(coreMVIKotlinModule)
+    includes(coreMVIKotlinModule, featureGuidesImplModule)
 
     single<CoroutineDispatchers> { CoroutineDispatchersImpl() }
 
@@ -51,6 +50,4 @@ val appModule = module {
 
     singleOf(::GuidesRepositoryImpl) bind GuidesRepository::class
     singleOf(::ResourcesRepositoryImpl) bind ResourcesRepository::class
-
-    viewModelOf(::GuidesViewModel)
 }

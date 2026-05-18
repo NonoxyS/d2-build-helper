@@ -24,6 +24,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -62,10 +66,15 @@ internal fun HeroFilterDialog(
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                var input by remember(heroSearchValue) { mutableStateOf(heroSearchValue) }
+
                 OutlinedTextField(
                     modifier = Modifier,
-                    value = heroSearchValue,
-                    onValueChange = onSearchValueChanged,
+                    value = input,
+                    onValueChange = { newValue ->
+                        input = newValue
+                        onSearchValueChanged(newValue)
+                    },
                     placeholder = {
                         Text(
                             text = stringResource(Res.string.hero_filter),
@@ -79,11 +88,14 @@ internal fun HeroFilterDialog(
                         unfocusedTextColor = D2BuildHelperTheme.colors.primaryText
                     ),
                     trailingIcon = {
-                        if (heroSearchValue.isNotBlank()) {
+                        if (input.isNotBlank()) {
                             Icon(
                                 imageVector = Icons.Rounded.Clear,
                                 contentDescription = null,
-                                modifier = Modifier.clickable { onSearchValueChanged("") }
+                                modifier = Modifier.clickable {
+                                    input = ""
+                                    onSearchValueChanged("")
+                                }
                             )
                         }
                     }

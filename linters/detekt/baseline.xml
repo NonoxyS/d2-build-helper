@@ -20,23 +20,19 @@
     <ID>FinalNewline:App.ios.kt$dev.nonoxy.d2buildhelper.App.ios.kt</ID>
     <ID>FinalNewline:App.jvm.kt$dev.nonoxy.d2buildhelper.App.jvm.kt</ID>
     <ID>FinalNewline:AppScreens.kt$dev.nonoxy.d2buildhelper.navigation.AppScreens.kt</ID>
-    <ID>FinalNewline:BaseViewModel.kt$dev.nonoxy.d2buildhelper.base.BaseViewModel.kt</ID>
     <ID>FinalNewline:DetailGuideDto.kt$dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuideDto.kt</ID>
     <ID>FinalNewline:DetailGuideScreen.kt$dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen.kt</ID>
     <ID>FinalNewline:GuideItemView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuideItemView.kt</ID>
     <ID>FinalNewline:GuideListView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuideListView.kt</ID>
     <ID>FinalNewline:Guide.kt$dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide.kt</ID>
-    <ID>FinalNewline:GuidesAction.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesAction.kt</ID>
     <ID>FinalNewline:GuidesApi.kt$dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesApi.kt</ID>
     <ID>FinalNewline:GuidesDataSource.kt$dev.nonoxy.d2buildhelper.core.data.api.guides.GuidesDataSource.kt</ID>
     <ID>FinalNewline:GuidesErrorView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesErrorView.kt</ID>
-    <ID>FinalNewline:GuidesEvent.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesEvent.kt</ID>
     <ID>FinalNewline:GuidesLoadingView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesLoadingView.kt</ID>
     <ID>FinalNewline:GuidesScreen.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.GuidesScreen.kt</ID>
     <ID>FinalNewline:GuidesTopBarView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.GuidesTopBarView.kt</ID>
     <ID>FinalNewline:GuidesView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.GuidesView.kt</ID>
     <ID>FinalNewline:GuidesViewModel.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.GuidesViewModel.kt</ID>
-    <ID>FinalNewline:GuidesViewState.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesViewState.kt</ID>
     <ID>FinalNewline:HeroFilterDialogView.kt$dev.nonoxy.d2buildhelper.features.guides.presentation.ui.views.HeroFilterDialogView.kt</ID>
     <ID>FinalNewline:LocalImageLoader.kt$dev.nonoxy.d2buildhelper.base.LocalImageLoader.kt</ID>
     <ID>FinalNewline:LocalNavHost.kt$dev.nonoxy.d2buildhelper.navigation.LocalNavHost.kt</ID>
@@ -59,7 +55,7 @@
     <ID>NoBlankLineBeforeRbrace:GuidesErrorView.kt$ </ID>
     <ID>NoConsecutiveBlankLines:App.ios.kt$ </ID>
     <ID>NoWildcardImports:GuideMappers.kt$import dev.nonoxy.d2buildhelper.core.data.api.guides.models.*</ID>
-    <ID>UnstableCollections:GuideItemView.kt$Map&lt;Short, String&gt;</ID>
+    <ID>UnstableCollections:GuideItemView.kt$Map&lt;Item, String&gt;</ID>
     <ID>UnstableCollections:GuideListView.kt$List&lt;Guide&gt;</ID>
     <ID>UnstableCollections:HeroFilterDialogView.kt$Map&lt;Hero, String&gt;</ID>
     <ID>Wrapping:GuideItemView.kt$[</ID>

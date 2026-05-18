@@ -26,9 +26,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.base.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
+import dev.nonoxy.d2buildhelper.features.guides.domain.models.Item
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.ItemPurchase
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.PlayerStats
@@ -196,7 +197,7 @@ private fun MatchStatsRow(
 @Composable
 private fun ItemRow(
     guide: Guide,
-    itemImageUrls: Map<Short, String>
+    itemImageUrls: Map<Item, String>
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -206,11 +207,11 @@ private fun ItemRow(
             val item = guide.playerStats.sortedEndItemPurchases.getOrNull(i)
             ItemWithBuyTime(
                 itemPurchase = item,
-                itemImageUrl = itemImageUrls[item?.itemId] ?: ""
+                itemImageUrl = item?.itemId?.let { itemImageUrls.findByItemId(it) } ?: ""
             )
         }
         AsyncImage(
-            model = itemImageUrls[guide.playerStats.endNeutralItemId],
+            model = guide.playerStats.endNeutralItemId?.let { itemImageUrls.findByItemId(it) },
             contentDescription = null,
             imageLoader = LocalImageLoader.current,
             contentScale = ContentScale.Crop,
@@ -223,6 +224,9 @@ private fun ItemRow(
         )
     }
 }
+
+private fun Map<Item, String>.findByItemId(id: Short): String? =
+    entries.firstOrNull { it.key.id == id }?.value
 
 @Composable
 private fun ItemWithBuyTime(
