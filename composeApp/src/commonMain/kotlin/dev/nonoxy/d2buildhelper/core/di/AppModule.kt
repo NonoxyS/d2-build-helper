@@ -10,15 +10,15 @@ import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesApi
 import dev.nonoxy.d2buildhelper.core.data.api.resources.image.ImageResourcesDataSource
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResources
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.ConstantResourcesDataSource
+import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
+import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepositoryImpl
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
+import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepositoryImpl
 import dev.nonoxy.d2buildhelper.core.mvikotlin.di.coreMVIKotlinModule
-import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetGuidesUseCase
-import dev.nonoxy.d2buildhelper.features.guides.domain.usecases.GetImagesUseCase
 import dev.nonoxy.d2buildhelper.features.guides.presentation.GuidesViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
-import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
@@ -39,7 +39,7 @@ val appModule = module {
     single<SupabaseClient> {
         createSupabaseClient(
             supabaseUrl = BuildConfig.SUPABASE_BASE_URL,
-            supabaseKey = BuildConfig.SUPABASE_API_KEY
+            supabaseKey = BuildConfig.SUPABASE_API_KEY,
         ) {
             install(Storage)
         }
@@ -48,10 +48,9 @@ val appModule = module {
     singleOf(::GuidesDataSource) bind GuidesApi::class
     singleOf(::ImageResourcesDataSource) bind ImageResourcesApi::class
     singleOf(::ConstantResourcesDataSource) bind ConstantResources::class
-    singleOf(::ResourcesRepository)
 
-    factoryOf(::GetGuidesUseCase)
-    factoryOf(::GetImagesUseCase)
+    singleOf(::GuidesRepositoryImpl) bind GuidesRepository::class
+    singleOf(::ResourcesRepositoryImpl) bind ResourcesRepository::class
 
     viewModelOf(::GuidesViewModel)
 }

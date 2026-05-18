@@ -2,86 +2,63 @@ package dev.nonoxy.d2buildhelper.core.data.api.guides
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
-import dev.nonoxy.d2buildhelper.core.data.RequestResult
+import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
+import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
+import dev.nonoxy.d2buildhelper.core.data.api.guides.mappers.toGuideDto
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.DetailGuideDto
 import dev.nonoxy.d2buildhelper.core.data.api.guides.models.GuideDto
-import dev.nonoxy.d2buildhelper.core.data.api.guides.mappers.toGuide
-import dev.nonoxy.d2buildhelper.core.data.toRequestResult
 import dev.nonoxy.d2buildhelper.graphql.GuidesQuery
 import dev.nonoxy.d2buildhelper.graphql.HeroGuidesQuery
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class GuidesDataSource(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
+    private val dispatchers: CoroutineDispatchers,
 ) : GuidesApi {
-    override fun getGuides(): Flow<RequestResult<List<GuideDto>>> {
-        val apiRequest = flow {
-            emit(apolloClient.query(GuidesQuery()).execute())
-        }.flowOn(Dispatchers.IO)
-            .map { it.toRequestResult() }
-            .flatMapConcat { requestResult ->
-                when (requestResult) {
-                    is RequestResult.Success -> {
-                        val guidesList =
-                            requestResult.data.heroStats?.guideFilterNotNull()?.flatMap { guide ->
-                                guide.guidesFilterNotNull()?.map { guides ->
-                                    guides.toGuide()
-                                } ?: emptyList()
-                            } ?: emptyList()
-                        flowOf(RequestResult.Success(guidesList))
-                    }
 
-                    is RequestResult.InProgress -> flowOf(RequestResult.InProgress())
-                    is RequestResult.Error -> flowOf(RequestResult.Error(requestResult.error))
+    override suspend fun getGuides(): Result<List<GuideDto>> = withContext(dispatchers.io) {
+        coRunCatching(
+            tryBlock = {
+                val response = apolloClient.query(GuidesQuery()).execute()
+                when {
+                    response.hasErrors() -> error("GraphQL errors: ${response.errors}")
+                    response.exception != null -> throw response.exception!!
+                    else -> response.dataOrThrow().heroStats?.guideFilterNotNull()?.flatMap { guide ->
+                        guide.guidesFilterNotNull()?.map { it.toGuideDto() } ?: emptyList()
+                    } ?: emptyList()
                 }
-            }.flowOn(Dispatchers.Default)
-
-        val start = flowOf<RequestResult<List<GuideDto>>>(RequestResult.InProgress())
-
-        return merge(apiRequest, start)
+            },
+            catchBlock = { throwable ->
+                Napier.e(throwable = throwable, message = "getGuides failed")
+                throwable.wrapResultFailure()
+            },
+        )
     }
 
-    override fun getHeroGuides(heroId: Short): Flow<RequestResult<List<GuideDto>>> {
-        val apiRequest = flow {
-            emit(apolloClient.query(HeroGuidesQuery(heroId = Optional.present(heroId.toInt()))).execute())
-        }.flowOn(Dispatchers.IO)
-            .map { it.toRequestResult() }
-            .flatMapConcat { requestResult ->
-                when (requestResult) {
-                    is RequestResult.Success -> {
-                        val guidesList =
-                            requestResult.data.heroStats?.guideFilterNotNull()?.flatMap { guide ->
-                                guide.guidesFilterNotNull()?.map { guides ->
-                                    guides.toGuide()
-                                } ?: emptyList()
-                            } ?: emptyList()
-                        flowOf(RequestResult.Success(guidesList))
-                    }
-
-                    is RequestResult.InProgress -> flowOf(RequestResult.InProgress())
-                    is RequestResult.Error -> flowOf(RequestResult.Error(requestResult.error))
+    override suspend fun getHeroGuides(heroId: Short): Result<List<GuideDto>> = withContext(dispatchers.io) {
+        coRunCatching(
+            tryBlock = {
+                val response = apolloClient
+                    .query(HeroGuidesQuery(heroId = Optional.present(heroId.toInt())))
+                    .execute()
+                when {
+                    response.hasErrors() -> error("GraphQL errors: ${response.errors}")
+                    response.exception != null -> throw response.exception!!
+                    else -> response.dataOrThrow().heroStats?.guideFilterNotNull()?.flatMap { guide ->
+                        guide.guidesFilterNotNull()?.map { it.toGuideDto() } ?: emptyList()
+                    } ?: emptyList()
                 }
-            }.flowOn(Dispatchers.Default)
-
-        val start = flowOf<RequestResult<List<GuideDto>>>(RequestResult.InProgress())
-
-        return merge(apiRequest, start)
+            },
+            catchBlock = { throwable ->
+                Napier.e(throwable = throwable, message = "getHeroGuides($heroId) failed")
+                throwable.wrapResultFailure()
+            },
+        )
     }
 
-    override fun getDetailGuide(
-        matchId: Long,
-        steamAccountId: Long
-    ): Flow<RequestResult<DetailGuideDto>> {
-        TODO("Not yet implemented")
+    override suspend fun getDetailGuide(matchId: Long, steamAccountId: Long): Result<DetailGuideDto> {
+        TODO("Not yet implemented — detail guide feature is a stub")
     }
 }

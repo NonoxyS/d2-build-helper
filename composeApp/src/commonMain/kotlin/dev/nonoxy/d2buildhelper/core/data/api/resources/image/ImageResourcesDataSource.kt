@@ -1,121 +1,108 @@
 package dev.nonoxy.d2buildhelper.core.data.api.resources.image
 
 import Dota___Build_Helper.composeApp.BuildConfig
-import dev.nonoxy.d2buildhelper.core.data.RequestResult
+import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
+import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.AbilityDto
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.HeroDto
 import dev.nonoxy.d2buildhelper.core.data.local.resources.constants.models.ItemDto
+import io.github.aakira.napier.Napier
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.withContext
 
 internal class ImageResourcesDataSource(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
+    private val dispatchers: CoroutineDispatchers,
 ) : ImageResourcesApi {
     private val supabaseImageStorage = supabaseClient.storage.from(IMAGES_BUCKET_ID)
 
-    override fun getHeroImageUrls(heroConstants: List<HeroDto>): Flow<RequestResult<Map<HeroDto, String>>> {
-        val heroToUrl: MutableMap<HeroDto, String> = mutableMapOf()
-        val request = flow {
-            supabaseImageStorage.list(HERO_IMAGES_FOLDER_PATH) { limit = 200 }
-                .onEach { bucketItem ->
-                    withContext(Dispatchers.Default) {
-                        val heroName = bucketItem.name.removeSuffix("_minimap_icon.png")
-                        heroConstants.find { hero ->
-                            hero.shortName == heroName
-                        }?.let { hero ->
-                            heroToUrl[hero] =
-                                "${BuildConfig.STORAGE_HERO_ICONS_FOLDER_URL}${bucketItem.name}"
+    override suspend fun getHeroImageUrls(heroConstants: List<HeroDto>): Result<Map<HeroDto, String>> =
+        withContext(dispatchers.io) {
+            coRunCatching(
+                tryBlock = {
+                    val heroToUrl = mutableMapOf<HeroDto, String>()
+                    supabaseImageStorage.list(HERO_IMAGES_FOLDER_PATH) { limit = 200 }
+                        .forEach { bucketItem ->
+                            val heroName = bucketItem.name.removeSuffix("_minimap_icon.png")
+                            heroConstants.find { it.shortName == heroName }?.let { hero ->
+                                heroToUrl[hero] =
+                                    "${BuildConfig.STORAGE_HERO_ICONS_FOLDER_URL}${bucketItem.name}"
+                            }
                         }
-                    }
-                }
-            emit(heroToUrl.toMap())
-        }.flowOn(Dispatchers.IO)
-            .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<HeroDto, String>>(e) }
+                    heroToUrl.toMap()
+                },
+                catchBlock = { throwable ->
+                    Napier.e(throwable = throwable, message = "getHeroImageUrls failed")
+                    throwable.wrapResultFailure()
+                },
+            )
+        }
 
-        val start = flowOf<RequestResult<Map<HeroDto, String>>>(RequestResult.InProgress())
-
-        return merge(request, start)
-    }
-
-    override fun getItemImageUrls(itemConstants: List<ItemDto>): Flow<RequestResult<Map<ItemDto, String>>> {
-        val itemToUrl: MutableMap<ItemDto, String> = mutableMapOf()
-        val request = flow {
-            supabaseImageStorage.list(ITEM_IMAGES_FOLDER_PATH) { limit = 500 }
-                .onEach { bucketItem ->
-                    withContext(Dispatchers.Default) {
-                        val itemName = bucketItem.name.removeSuffix(".png")
-                        itemConstants.find { item ->
-                            item.shortName == itemName
-                        }?.let { item ->
-                            itemToUrl[item] =
-                                "${BuildConfig.STORAGE_ITEM_ICONS_FOLDER_URL}${bucketItem.name}"
+    override suspend fun getItemImageUrls(itemConstants: List<ItemDto>): Result<Map<ItemDto, String>> =
+        withContext(dispatchers.io) {
+            coRunCatching(
+                tryBlock = {
+                    val itemToUrl = mutableMapOf<ItemDto, String>()
+                    supabaseImageStorage.list(ITEM_IMAGES_FOLDER_PATH) { limit = 500 }
+                        .forEach { bucketItem ->
+                            val itemName = bucketItem.name.removeSuffix(".png")
+                            itemConstants.find { it.shortName == itemName }?.let { item ->
+                                itemToUrl[item] =
+                                    "${BuildConfig.STORAGE_ITEM_ICONS_FOLDER_URL}${bucketItem.name}"
+                            }
                         }
-                    }
-                }
-            emit(itemToUrl.toMap())
-        }.flowOn(Dispatchers.IO)
-            .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<ItemDto, String>>(e) }
+                    itemToUrl.toMap()
+                },
+                catchBlock = { throwable ->
+                    Napier.e(throwable = throwable, message = "getItemImageUrls failed")
+                    throwable.wrapResultFailure()
+                },
+            )
+        }
 
-        val start = flowOf<RequestResult<Map<ItemDto, String>>>(RequestResult.InProgress())
-
-        return merge(request, start)
-    }
-
-    override fun getAbilityImageUrls(abilityConstants: List<AbilityDto>): Flow<RequestResult<Map<AbilityDto, String>>> {
-        val abilityToUrl: MutableMap<AbilityDto, String> = mutableMapOf()
-        val request = flow {
-            supabaseImageStorage.list(ABILITY_IMAGES_FOLDER_PATH) { limit = 2000 }
-                .onEach { bucketItem ->
-                    withContext(Dispatchers.Default) {
-                        val abilityName = bucketItem.name.removeSuffix(".png")
-                        abilityConstants.find { ability ->
-                            ability.name == abilityName
-                        }?.let { ability ->
-                            abilityToUrl[ability] =
-                                "${BuildConfig.STORAGE_ABILITY_ICONS_FOLDER_URL}${bucketItem.name}"
+    override suspend fun getAbilityImageUrls(abilityConstants: List<AbilityDto>): Result<Map<AbilityDto, String>> =
+        withContext(dispatchers.io) {
+            coRunCatching(
+                tryBlock = {
+                    val abilityToUrl = mutableMapOf<AbilityDto, String>()
+                    supabaseImageStorage.list(ABILITY_IMAGES_FOLDER_PATH) { limit = 2000 }
+                        .forEach { bucketItem ->
+                            val abilityName = bucketItem.name.removeSuffix(".png")
+                            abilityConstants.find { it.name == abilityName }?.let { ability ->
+                                abilityToUrl[ability] =
+                                    "${BuildConfig.STORAGE_ABILITY_ICONS_FOLDER_URL}${bucketItem.name}"
+                            }
                         }
-                    }
-                }
-            emit(abilityToUrl.toMap())
-        }.flowOn(Dispatchers.IO)
-            .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<AbilityDto, String>>(e) }
+                    abilityToUrl.toMap()
+                },
+                catchBlock = { throwable ->
+                    Napier.e(throwable = throwable, message = "getAbilityImageUrls failed")
+                    throwable.wrapResultFailure()
+                },
+            )
+        }
 
-        val start = flowOf<RequestResult<Map<AbilityDto, String>>>(RequestResult.InProgress())
-
-        return merge(request, start)
-    }
-
-    override fun getAdditionalImageUrls(): Flow<RequestResult<Map<String, String>>> {
-        val additionalToUrl: MutableMap<String, String> = mutableMapOf()
-        val request = flow {
-            supabaseImageStorage.list(ADDITIONAL_IMAGES_FOLDER_PATH) { limit = 100 }
-                .onEach { bucketItem ->
-                    val additionalName = bucketItem.name.removeSuffix(".png")
-                    additionalToUrl[additionalName] =
-                        "${BuildConfig.STORAGE_ADDITIONAL_ICONS_FOLDER_URL}${bucketItem.name}"
-                }
-            emit(additionalToUrl.toMap())
-        }.flowOn(Dispatchers.IO)
-            .map { RequestResult.Success(it) }
-            .catch { e -> RequestResult.Error<Map<String, String>>(e) }
-
-        val start = flowOf<RequestResult<Map<String, String>>>(RequestResult.InProgress())
-
-        return merge(request, start)
-    }
+    override suspend fun getAdditionalImageUrls(): Result<Map<String, String>> =
+        withContext(dispatchers.io) {
+            coRunCatching(
+                tryBlock = {
+                    val additionalToUrl = mutableMapOf<String, String>()
+                    supabaseImageStorage.list(ADDITIONAL_IMAGES_FOLDER_PATH) { limit = 100 }
+                        .forEach { bucketItem ->
+                            val additionalName = bucketItem.name.removeSuffix(".png")
+                            additionalToUrl[additionalName] =
+                                "${BuildConfig.STORAGE_ADDITIONAL_ICONS_FOLDER_URL}${bucketItem.name}"
+                        }
+                    additionalToUrl.toMap()
+                },
+                catchBlock = { throwable ->
+                    Napier.e(throwable = throwable, message = "getAdditionalImageUrls failed")
+                    throwable.wrapResultFailure()
+                },
+            )
+        }
 
 
     private companion object {
