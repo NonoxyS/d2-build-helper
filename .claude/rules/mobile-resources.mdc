@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Resources
 
-Resources live under `composeApp/src/commonMain/composeResources/`. Generated accessor: `dev.nonoxy.d2buildhelper.resources.Res`.
+Resources live under `common-resources/src/commonMain/composeResources/`. Generated accessor: `dev.nonoxy.d2buildhelper.resources.Res`.
 
 ## Strings
 

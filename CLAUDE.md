@@ -5,12 +5,13 @@ Dota 2 build helper — Compose Multiplatform app (Android, Desktop/JVM, iOS) th
 ## Build Commands
 
 ```shell
-./gradlew :composeApp:assembleDebug        # Android debug APK
-./gradlew :composeApp:run                  # Desktop (JVM)
+./gradlew :androidApp:assembleDebug         # Android debug APK
+./gradlew :composeApp:run                    # Desktop (JVM)
 ./gradlew :composeApp:iosSimulatorArm64Test
 ./gradlew :composeApp:jvmTest
-./gradlew :composeApp:lintDebug            # Android Lint
-./gradlew detekt                            # Static analysis (Kotlin)
+./gradlew :feature-guides:impl:jvmTest
+./gradlew :androidApp:lintDebug              # Android Lint
+./gradlew detekt                              # Static analysis (Kotlin, all modules)
 ```
 
 iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
@@ -25,72 +26,62 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Coil 3.2.0 (image loading).
 - Coroutines 1.10.2, kotlinx.serialization 1.10.0.
 - Android: compileSdk/targetSdk 36, minSdk 26.
-- Single-module project (`:composeApp`) with `build-logic` composite build.
-- DI: Koin 4.1.x (`core/di/AppModule.kt`, `core/di/Koin.kt#initKoin`).
-- MVIKotlin 4.4.0 (`core/mvikotlin/BaseExecutor`, `LoggingStoreFactory` wired through Napier).
-- Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on every platform entry).
+- Multi-module project (15 modules) with `build-logic` composite build hosting `kmp-library`, `compose-multiplatform-setup`, `android-application-setup`, and `json-serialization` convention plugins.
+- DI: Koin 4.1.x. Per-module Koin module functions; `:composeApp`'s `core/di/AppModule.kt` only aggregates includes.
+- MVIKotlin 4.4.0 (BaseExecutor in `:core-presentation`, LoggingStoreFactory wired through Napier).
+- Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on platform entry).
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`).
-- State management: MVIKotlin `Store` per feature + `core/presentation/viewmodel/BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
-- Resources: `composeApp/src/commonMain/composeResources/` (`values/strings.xml`, `files/constants/*.json`, `font/`). Generated `Res.string.*` / `Res.readBytes(...)`.
-- Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal.
+- State management: MVIKotlin `Store` per feature + `BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
+- Resources: still served by Compose Resources from `:common-resources` (strings.xml, JSON constants, fonts). moko-resources migration is a planned follow-up.
+- Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal (in `:core-navigation`).
 
-API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`) via `buildConfig` plugin.
+API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `SUPABASE_*` is read by `:core-storage/build.gradle.kts`, `STRATZ_*` by `:core-network/build.gradle.kts`.
 
 ## Architecture
 
-Clean-ish layering, single module:
+15 modules. Conventions: `:feature-*` modules nest their layers (`:feature-X:api`/`impl`/`presentation`/`ui`); `:core-*` and `:common*` are single. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`.
 
-```
-composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
-├── App.kt                              # Root composable + theme + NavHost
-├── theme/                              # Colors, typography, theme (platform-split)
-├── base/
-│   └── LocalImageLoader.kt
-├── core/
-│   ├── di/
-│   │   ├── AppModule.kt                # Koin module (Apollo, Supabase, datasources, repos, VMs); aggregates per-feature impl modules
-│   │   └── Koin.kt                     # initKoin(appDeclaration) entry point
-│   ├── data/
-│   │   ├── api/                        # Remote data sources (GraphQL, Supabase Storage) + DTOs
-│   │   ├── local/resources/constants/  # Local JSON data sources
-│   │   └── repository/                 # Aggregating repositories (suspend fun (): Result<T>) with in-memory cache
-│   ├── graphql/                        # Apollo GraphQL queries + Stratz schema
-│   ├── mvikotlin/                      # BaseExecutor + CoreMVIKotlinModule (LoggingStoreFactory via Napier)
-│   └── presentation/viewmodel/         # BaseViewModel<State, Label> + BaseIosViewModel
-├── common/
-│   ├── coroutines/                     # CoroutineDispatchers interface + Impl + Dispatchers.kt (load-bearing IO import)
-│   ├── extensions/                     # coRunCatching, ResultExtensions
-│   ├── mappers/                        # Shared mapper interfaces
-│   └── utils/                          # Pure-Kotlin helpers (TimeConverter, OneTimeEvent, ...)
-├── features/
-│   ├── guides/
-│   │   ├── api/store/GuidesStore.kt
-│   │   ├── impl/
-│   │   │   ├── di/FeatureGuidesImplModule.kt
-│   │   │   └── domain/{GuidesStoreFactory, GuidesExecutor, GuidesReducer}.kt
-│   │   ├── domain/models/              # Guide, Hero, Item, ImageResources, ...
-│   │   └── presentation/
-│   │       ├── GuidesViewModel.kt
-│   │       ├── models/{UiGuidesState, UiGuidesLabel}.kt
-│   │       ├── mappers/{UiGuidesStateMapper, UiGuidesLabelMapper}.kt
-│   │       └── ui/                     # Screen + sub-views
-│   └── detailGuide/                    # Stub for the next feature
-└── navigation/AppScreens.kt
-```
+| Module | Type | Responsibility |
+|---|---|---|
+| `:androidApp` | Android-only | `com.android.application` entry. `AndroidApp`, `AppActivity`, manifest. Package `dev.nonoxy.d2buildhelper.android`. |
+| `:composeApp` | KMP shell | `App.kt`, NavHost wiring, `jvmMain/main.kt` desktop entry, `iosMain/main.kt` iOS framework entry. Composition Root for Koin (`initKoin`). |
+| `:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule` Koin. |
+| `:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme` (+ platform `SystemAppearance` actuals). |
+| `:common-resources` | KMP + Compose Resources | Shared strings.xml, JSON constants under `composeResources/files/constants/`, fonts. `Res` accessor lives in package `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:core-domain` | KMP | App-wide pure domain models: `Hero`, `Item`, `Ability`, `ImageResources`. |
+| `:core-navigation` | KMP + Compose | `AppScreens` sealed routes, `LocalNavHost`. |
+| `:core-network` | KMP | `ApolloClient` + GraphQL queries + Stratz schema + buildConfig (Stratz) + per-platform Ktor engines, `coreNetworkModule` Koin. |
+| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseExecutor`, `BaseIosViewModel`, `coreMVIKotlinModule` (LoggingStoreFactory via Napier). |
+| `:core-storage` | KMP | Supabase client + buildConfig (Supabase), `coreStorageModule` Koin. |
+| `:core-resources` | KMP | `ResourcesRepository` + Impl + datasources (`ImageResourcesApi/DataSource`, `ConstantResourcesDataSource`), `coreResourcesModule` Koin. |
+| `:feature-guides:api` | KMP | `GuidesStore` contract (Intent/State/Label) + `Guide`, `PlayerStats`, `ItemPurchase`, `MatchPlayerPosition`. |
+| `:feature-guides:impl` | KMP | `GuidesStoreFactory`, `GuidesExecutor`, `GuidesReducer`, `GuidesRepository(Impl)`, `GuidesApi/DataSource` + DTO/mappers, `featureGuidesImplModule` Koin. |
+| `:feature-guides:presentation` | KMP | `GuidesViewModel`, `UiGuidesState`, `UiGuidesLabel`, mapper interfaces + impls, `featureGuidesPresentationModule` Koin. |
+| `:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
+
+### Dependency invariants
+
+- `:feature-A:impl` never depends on `:feature-B:*`. Cross-feature reuse hoists to a `:core-*` module.
+- `:feature-X:api` exports only contracts (Store interface, Intent/State/Label, public domain models). Depends only on `:core-domain` + kotlin stdlib + MVIKotlin core.
+- `:feature-X:impl` depends on its own `:api` + relevant `:core-*` modules.
+- `:feature-X:presentation` depends on its `:api` + `:core-presentation`, not on `:impl`.
+- `:feature-X:ui` depends on its `:presentation` + `:common-ui` + `:common-resources`.
+- `:core-*` modules are single (no api/impl split). Runtime hiding of impls is enforced by Koin.
+- `:composeApp` is the only Composition Root. It aggregates all Koin modules via `appModule { includes(...) }` and is the sole module pulling `:*:impl` builds into the link graph.
 
 ## Rules (`.claude/rules/`)
 
 | File | Description |
 | --- | --- |
-| `mobile-overview.mdc` | Stack, package layout, naming conventions |
-| `mobile-architecture.mdc` | MVIKotlin Store/Executor/Reducer, `BaseViewModel<State, Label>`, Koin (`AppModule`, per-feature `*ImplModule`), Compose Navigation |
+| `mobile-overview.mdc` | Stack, module layout, naming conventions |
+| `mobile-architecture.mdc` | MVIKotlin Store/Executor/Reducer, `BaseViewModel<State, Label>`, Koin per-module modules, Compose Navigation, dependency invariants |
 | `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews, local-mirror text inputs |
 | `mobile-data-layer.mdc` | DTO / domain split, `suspend fun (): Result<T>` repositories, mappers, repository cache, `CoroutineDispatchers` |
-| `mobile-network.mdc` | Apollo (GraphQL), Supabase Storage, Ktor engine per platform, BuildConfig keys |
-| `mobile-resources.mdc` | `composeResources/` layout, `Res.string.*`, JSON constants |
+| `mobile-network.mdc` | Apollo (GraphQL) in `:core-network`, Supabase Storage in `:core-storage`, BuildConfig keys per-module |
+| `mobile-resources.mdc` | `:common-resources` (Compose Resources today; moko-resources planned) |
 | `mobile-error-handling.mdc` | `coRunCatching` in suspend, `Result<T>` surfacing, Napier logging in repos/executors |
 | `mobile-code-rules.mdc` | Access modifiers, member ordering, NPE-safety |
-| `mobile-roadmap.mdc` | Planned migrations (multi-module, moko-resources) and their order |
+| `mobile-roadmap.mdc` | Remaining migrations (moko-resources, AGP9+KMP DSL cleanup) |
 
 ## Key Gotchas
 
@@ -100,12 +91,13 @@ composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/
 - `CoroutineDispatchers` is the only way to obtain dispatchers in commonMain — inject it. `common/coroutines/Dispatchers.kt` contains a load-bearing `import kotlinx.coroutines.IO` (guarded by `@file:Suppress("UnusedImport")`) needed for Kotlin/Native — do not remove it.
 - `BaseViewModel.onCleared()` must call `store.dispose()` (Store does not auto-dispose with the VM) — see `GuidesViewModel`.
 - `Napier.base(DebugAntilog(...))` is called once per platform entry, before `initKoin(...)`. The call appends antilogs — if an entry can be re-created (test scenarios), wrap with `Napier.takeLogarithm()` first to avoid duplicate sinks.
-- Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<feature>/impl/di/<Feature>ImplModule.kt` and are aggregated by `appModule`. Resolve via constructor parameters in code. Use `koinViewModel<T>()` in composables.
-- `initKoin()` is called from each platform entry point (`AndroidApp.onCreate`, `jvmMain/main.kt` before `application{}`, and the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
-- All Apollo/Supabase config lives in `composeApp/build.gradle.kts` under `apollo { ... }` and `buildConfig { ... }`. API keys must be in `local.properties`.
-- Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. Do not hardcode.
+- Feature DI: per-module Koin module functions (`commonModule`, `coreNetworkModule`, `coreStorageModule`, `coreResourcesModule`, `coreMVIKotlinModule`, `featureGuidesImplModule`, `featureGuidesPresentationModule`). `:composeApp/core/di/AppModule.kt` only aggregates via `includes(...)` — no per-class bindings live in shell. Use `koinViewModel<T>()` in composables.
+- `initKoin()` is called from each platform entry point (`:androidApp/AndroidApp.onCreate`, `:composeApp/jvmMain/main.kt` before `application{}`, and the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
+- Apollo config lives in `:core-network/build.gradle.kts` under `apollo { service("api") { ... } }`. buildConfig for Stratz keys also there. Supabase keys live in `:core-storage/build.gradle.kts` buildConfig. API keys must be in `local.properties`.
+- Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. `AppVersion.getVersionCode/Name` is invoked from `:androidApp/build.gradle.kts`.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
-- AGP 9.0 + KMP `com.android.application` combination uses legacy flags `android.builtInKotlin=false` and `android.newDsl=false` in `gradle.properties`. These are deprecated by AGP 9 but kept until we split the Android app into its own module (see `mobile-roadmap.mdc`).
+- AGP 9 + KMP via `com.android.library` requires legacy DSL flags `android.builtInKotlin=false` and `android.newDsl=false` in `gradle.properties`. These are deprecated; the cleanup hinges on migrating `build-logic` to the new `com.android.kotlin.multiplatform.library` plugin (see `mobile-roadmap.mdc`).
+- iOS Kotlin/Native cache is disabled (`kotlin.native.cacheKind=none` in `gradle.properties`) to work around a Supabase storage-kt build failure on iOS Simulator Arm64. Revisit once Supabase / Kotlin/Native versions move.
 - Git hooks live in `.githooks/`. Enable via `git config core.hooksPath .githooks`.
-- CI lives in `.github/workflows/`. PRs to `master`, `develop`, `develop-cmp` run Detekt + Android Lint + SwiftLint + SwiftFormat.
+- CI lives in `.github/workflows/`. PRs to `master`, `develop`, `develop-cmp` run Detekt + Android Lint (`:androidApp:lintDebug`) + SwiftLint + SwiftFormat.
 - Detekt baseline at `linters/detekt/baseline.xml` — regenerate with `./gradlew detektBaseline` after intentional rule changes.

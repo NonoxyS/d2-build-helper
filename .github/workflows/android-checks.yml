@@ -64,12 +64,12 @@ jobs:
           EOF
 
       - name: Run Android Lint
-        run: ./gradlew :composeApp:lintDebug
+        run: ./gradlew :androidApp:lintDebug
 
       - name: Upload Lint report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
-          path: composeApp/build/reports/lint-results-debug.html
+          path: androidApp/build/reports/lint-results-debug.html
           retention-days: 1

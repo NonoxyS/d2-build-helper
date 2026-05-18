@@ -11,30 +11,36 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
 ## Migration Order
 
 - [x] **Version bumps** — Kotlin 2.3.10, AGP 9.0.0, Compose MP 1.10.1, Ktor 3.3.3, Apollo 4.3.1, Coil 3.2.0 stable, Supabase 3.1.0, coroutines 1.10.2, serialization 1.10.0.
-- [x] **DI migration to Koin** — `core/di/AppModule.kt`, `koin-compose-viewmodel`, `koinViewModel()` in composables.
+- [x] **DI migration to Koin** — per-module Koin module functions; `:composeApp/core/di/AppModule.kt` aggregates includes.
 - [x] **State management migration to MVIKotlin.** Completed 2026-05-18.
   - Store / Intent / State / Label per feature, `BaseExecutor`, `Reducer`, `StoreFactory`.
-  - `BaseViewModel<State, Label>` (`core/presentation/viewmodel/`) binds `store.states` and `store.labels` through mappers.
-  - Logging routed through Napier via `LoggingStoreFactory` in `core/mvikotlin/di/CoreMVIKotlinModule.kt`.
+  - `BaseViewModel<State, Label>` (`:core-presentation`) binds `store.states` and `store.labels` through mappers.
+  - Logging routed through Napier via `LoggingStoreFactory` in `:core-presentation/di/CoreMVIKotlinModule.kt`.
+- [x] **Multi-module split.** Completed 2026-05-18. 15 modules — `:androidApp`, `:composeApp` (KMP shell), `:common`, `:common-ui`, `:common-resources`, `:core-domain`, `:core-navigation`, `:core-network`, `:core-presentation`, `:core-storage`, `:core-resources`, `:feature-guides:{api,impl,presentation,ui}`. Convention plugins `kmp-library`, `compose-multiplatform-setup`, `android-application-setup` live in `build-logic`.
 
 Remaining work, in order:
 
-1. **Multi-module split** (also fixes the AGP 9 + KMP `com.android.application` deprecation we currently bypass via `android.builtInKotlin=false` + `android.newDsl=false`).
-   - Per feature: `api`, `impl`, `presentation`, `ui` (matches the KMMTemplate playbook).
-   - Shared: `common`, `common-ui`, `core-domain`, `core-network`, `core-storage`, `core-navigation`, `core-presentation`.
-   - Convention plugins `kmp-feature-setup`, `kmp-library`, `compose-multiplatform-setup` get registered then.
-   - The `com.android.application` plugin moves to its own Android-only module depending on a shared KMP module.
+1. **moko-resources migration.**
+   - Replace Compose Resources (`composeResources/`) in `:common-resources` with moko-resources (`commonMain/moko-resources/base/`).
+   - Generated `MR.strings.*` replaces `Res.string.*`; `MR.files.*.readText()` replaces `Res.readBytes(...)`.
+   - Affects `:feature-guides:ui` (4 strings), `:composeApp/jvmMain/main.kt` (`app_name`), `:core-resources/ConstantResourcesDataSource` (JSON files).
 
-2. **moko-resources migration.**
-   - Replace `composeResources/values/strings.xml` with `commonMain/moko-resources/base/strings.xml`.
-   - Generated `MR.strings.*` replaces `Res.string.*`.
+2. **AGP 9 + KMP DSL cleanup.**
+   - Drop `android.builtInKotlin=false` and `android.newDsl=false` from `gradle.properties`.
+   - Migrate `build-logic/.../KmpLibraryPlugin.kt` from `com.android.library` to `com.android.kotlin.multiplatform.library`.
+   - Update `ProjectExtensions.kt` to use the new DSL types (`com.android.build.api.dsl.LibraryExtension` / `ApplicationExtension`).
+   - Drop `kotlin.android` from `AndroidApplicationSetupPlugin` (AGP 9 built-in Kotlin handles it).
+
+3. **iOS Kotlin/Native cache.**
+   - Restore `kotlin.native.cacheKind` default (remove the line in `gradle.properties`) once Supabase storage-kt no longer breaks the K/N compiler cache on iosSimulatorArm64.
 
 ## Implication for Today
 
-- Suggestions to split a feature into 4 modules are **out of scope** until step 1.
-- Suggestions involving `MR.strings` / moko-resources are **out of scope** until step 2.
+- `Res.string.*` references still work — `:common-resources` ships Compose Resources today.
+- Suggestions involving `MR.strings` / moko-resources are still **out of scope** until step 1.
+- Cross-feature dependencies are not allowed. `:feature-A:impl` may depend on `:feature-B:api` only if both features genuinely share that contract — otherwise hoist the shared logic into a `:core-*` module.
 
-For incremental work today: route new features through MVIKotlin (`Store` / `Intent` / `State` / `Label` + `BaseExecutor` + `Reducer`), expose them through `BaseViewModel<State, Label>` in `core/presentation/viewmodel/`, register dependencies in per-feature `<feature>/impl/di/*ImplModule.kt` (plus `core/di/AppModule.kt`) and inject via constructor params (`koinViewModel()` for VMs), place strings in `composeResources/values/strings.xml`.
+For incremental work today: route new features through MVIKotlin (`Store` / `Intent` / `State` / `Label` + `BaseExecutor` + `Reducer`), expose them through `BaseViewModel<State, Label>` in `:core-presentation`, register dependencies in per-feature `<feature>/impl/di/*ImplModule.kt` (plus `<feature>/presentation/di/*PresentationModule.kt` for VM + mapper bindings) and inject via constructor params (`koinViewModel()` for VMs in composables). Aggregate new modules in `:composeApp/core/di/AppModule.kt#appModule { includes(...) }`. Place strings in `:common-resources/composeResources/values/strings.xml`.
 
 ## Track planned helpers
 
@@ -42,5 +48,5 @@ These helpers already shipped and are now part of the baseline — keep them in 
 
 - `common/extensions/CoroutineExtensions.kt` with `coRunCatching` (rethrows `CancellationException`).
 - `common/extensions/ResultExtensions.kt` with `wrapResultSuccess` / `wrapResultFailure`.
-- Napier initialized on every platform entry (`AndroidApp.onCreate`, `jvmMain/main.kt`, iOS `MainViewController`).
+- Napier initialized on every platform entry (`:androidApp/AndroidApp.onCreate`, `:composeApp/jvmMain/main.kt`, `:composeApp/iosMain/MainViewController`).
 - `common/coroutines/CoroutineDispatchers` interface (+ `CoroutineDispatchersImpl`) — inject this, never reference `Dispatchers.IO` / `Dispatchers.Default` directly in `commonMain`.

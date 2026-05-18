@@ -1,5 +1,5 @@
 ---
-description: General project info — tech stack, package layout, naming conventions
+description: General project info — tech stack, module layout, naming conventions
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
@@ -11,67 +11,88 @@ alwaysApply: false
 - Kotlin 2.3.10 + Compose Multiplatform 1.10.1 (material3 1.9.0)
 - AGP 9.0.0, Android minSdk 26 / targetSdk 36 / compileSdk 36
 - Gradle 9.4.1, Java target 17
-- Apollo Kotlin 4.3.1 — Stratz GraphQL
-- Supabase Storage 3.1.0 — hero/item/ability icons
+- Apollo Kotlin 4.3.1 — Stratz GraphQL (in `:core-network`)
+- Supabase Storage 3.1.0 — hero/item/ability icons (in `:core-storage`)
 - Ktor 3.3.3 — OkHttp on Android+JVM, Darwin on iOS
 - Coil 3.2.0 — image loading
 - kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
 - compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
-- Koin 4.1.x for DI
+- Koin 4.1.x for DI (per-module Koin module functions; aggregated in `:composeApp`)
+- MVIKotlin 4.4.0 (BaseExecutor in `:core-presentation`)
+- moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`)
+- Napier 2.7.1
 
 ## Module Layout
 
-Single module: `:composeApp`. Targets `androidTarget()`, `jvm()`, `iosX64()`, `iosArm64()`, `iosSimulatorArm64()`. Multi-module split is planned (see `mobile-roadmap.mdc`).
+15 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
 
-```
-composeApp/src/
-├── commonMain/kotlin/dev/nonoxy/d2buildhelper/
-│   ├── App.kt
-│   ├── theme/
-│   ├── base/
-│   ├── core/
-│   │   ├── di/                # AppModule.kt + Koin.kt (initKoin)
-│   │   ├── data/
-│   │   └── graphql/
-│   ├── common/utils/
-│   ├── features/
-│   └── navigation/
-├── commonMain/composeResources/
-│   ├── values/strings.xml
-│   ├── files/constants/{heroes,items,abilities}.json
-│   └── font/
-├── androidMain/kotlin/...      # AndroidApp (initKoin), AppActivity, openUrl actual
-├── iosMain/kotlin/...          # MainViewController (initKoin), openUrl actual
-├── jvmMain/kotlin/...          # main(), openUrl actual
-└── commonTest/kotlin/...       # GetGuidesUseCaseTest, FakeGuidesDataSource
-```
+| Module | Type | Responsibility |
+|---|---|---|
+| `:androidApp` | Android-only | `com.android.application`, `AndroidApp`, `AppActivity`, manifest. |
+| `:composeApp` | KMP shell | `App.kt` + NavHost + `jvmMain/main.kt` desktop entry + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. |
+| `:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
+| `:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
+| `:common-resources` | KMP + Compose Resources | Shared `composeResources/` (strings, JSON constants, fonts). Generated `Res` in `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
+| `:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
+| `:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |
+| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseExecutor`, `BaseIosViewModel`, `coreMVIKotlinModule`. |
+| `:core-storage` | KMP | Supabase client + Supabase buildConfig. `coreStorageModule`. |
+| `:core-resources` | KMP | `ResourcesRepository(Impl)`, image/constants datasources, `coreResourcesModule`. |
+| `:feature-guides:api` | KMP | `GuidesStore` + Intent/State/Label + `Guide` model. |
+| `:feature-guides:impl` | KMP | Store factory/executor/reducer + repository + datasources + DTOs + `featureGuidesImplModule`. |
+| `:feature-guides:presentation` | KMP | `GuidesViewModel` + UI models + mappers + `featureGuidesPresentationModule`. |
+| `:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
 
-`build-logic/` is a composite build with shared Gradle utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`). Future convention plugins land here.
+`build-logic/` is a composite build with shared utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`) and the three convention plugins.
+
+## Package Conventions
+
+Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-package:
+
+| Module | Package |
+|---|---|
+| `:androidApp` | `.android` |
+| `:composeApp` | (top-level — `App.kt`, etc.) |
+| `:common` | `.common.*` |
+| `:common-ui` | `.common.ui` and `.common.ui.theme` |
+| `:common-resources` | `.common.resources` (generated `Res`) |
+| `:core-domain` | `.core.domain` |
+| `:core-navigation` | `.core.navigation` |
+| `:core-network` | `.core.network` (+ generated GraphQL in `.graphql`) |
+| `:core-presentation` | `.core.presentation.{viewmodel,mvikotlin,di}` |
+| `:core-storage` | `.core.storage` |
+| `:core-resources` | `.core.resources.{data,di}` |
+| `:feature-guides:api` | `.feature.guides.api.{store,domain}` |
+| `:feature-guides:impl` | `.feature.guides.impl.{data,domain,di}` |
+| `:feature-guides:presentation` | `.feature.guides.presentation.{models,mappers,di}` |
+| `:feature-guides:ui` | `.feature.guides.ui.{,views}` |
 
 ## Naming Conventions
-
-Package root: `dev.nonoxy.d2buildhelper`.
 
 | Entity | Pattern | Example |
 | --- | --- | --- |
 | ViewModel | `{Feature}ViewModel` | `GuidesViewModel` |
 | Screen composable | `{Feature}Screen` | `GuidesScreen` |
 | View composable | `{Feature}View` | `GuidesView` |
-| Sub-views directory | `views/` | `guides/presentation/ui/views/` |
-| ViewState sealed class | `{Feature}ViewState` | `GuidesViewState` |
-| Action sealed class | `{Feature}Action` | `GuidesAction` |
-| Event sealed class | `{Feature}Event` | `GuidesEvent` |
-| UseCase | `{Verb}{Subject}UseCase` | `GetGuidesUseCase`, `GetImagesUseCase` |
-| Remote DTO (GraphQL) | `{Entity}` in `core/data/api/{topic}/models/` | `Guide`, `DetailGuide` |
-| UI/domain model | `{Entity}UI` in `features/{feature}/domain/models/` | `GuideUI`, `HeroUI` |
-| Repository | `{Topic}Repository` | `ResourcesRepository` |
+| Sub-views directory | `views/` | `guides/ui/views/` |
+| Store interface | `{Feature}Store` | `GuidesStore` |
+| Store Intent | `{Feature}Store.Intent` | `GuidesStore.Intent` |
+| Store State | `{Feature}Store.State` | `GuidesStore.State` |
+| Store Label | `{Feature}Store.Label` | `GuidesStore.Label` |
+| UI state | `Ui{Feature}State` | `UiGuidesState` |
+| UI label | `Ui{Feature}Label` | `UiGuidesLabel` |
+| State mapper | `Ui{Feature}StateMapper` | `UiGuidesStateMapper` |
+| Label mapper | `Ui{Feature}LabelMapper` | `UiGuidesLabelMapper` |
+| Repository contract | `{Topic}Repository` | `GuidesRepository`, `ResourcesRepository` |
 | DataSource interface | `{Topic}Api` | `GuidesApi`, `ImageResourcesApi` |
 | DataSource impl | `{Topic}DataSource` | `GuidesDataSource`, `ImageResourcesDataSource` |
 | Mapper file | `{Topic}Mappers.kt` | `GuideMappers.kt` |
+| Koin module fun | `{moduleName}Module` | `commonModule`, `coreNetworkModule`, `featureGuidesImplModule` |
 
 ## Existing Features
 
-- `features/guides/` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
-- `features/detailGuide/` — placeholder screen for a single build, not yet implemented.
+- `:feature-guides:*` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
+- `features/detailGuide/` — placeholder screen still inside `:composeApp`, not yet implemented.
 
-Navigation routes are declared in `navigation/AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.
+Navigation routes are declared in `:core-navigation/.../AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.
