@@ -1,50 +1,54 @@
 ---
-description: Current architecture — BaseViewModel, Koin DI, Compose Navigation
+description: Current architecture — MVIKotlin Store, BaseViewModel<State, Label>, Koin DI, Compose Navigation
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
 
 # Architecture
 
-## BaseViewModel<State, Action, Event>
+## State management — MVIKotlin
 
-Custom unidirectional pattern (not MVIKotlin). Three roles:
+Each feature exposes a `Store` through `<feature>/api/store/<Feature>Store.kt` and implements it under `<feature>/impl/domain` with three classes:
 
-- **State** — sealed class (or data class) for what the UI renders. Examples: `GuidesViewState.Loading`, `GuidesViewState.Error`, `GuidesViewState.Display(...)`.
-- **Action** — sealed interface for one-time side effects to the UI (dialogs, navigation triggers). Examples: `GuidesAction.ShowHeroSearchDialog`.
-- **Event** — sealed interface for user/UI inputs that the ViewModel should react to. Examples: `GuidesEvent.HeroSearchValueChanged`, `GuidesEvent.SelectHeroInSearchDialog`.
+- `<Feature>StoreFactory` — assembles `Store<Intent, State, Label>` via the injected `StoreFactory` (provided by `core/mvikotlin/di/CoreMVIKotlinModule.kt` as `LoggingStoreFactory(DefaultStoreFactory())` wired through Napier).
+- `<Feature>Executor` — extends `core/mvikotlin/BaseExecutor<Intent, Action, State, Message, Label>`. Handles `Intent`s from the UI and `Action`s from the Bootstrapper; dispatches `Message`s to the Reducer and publishes `Label`s for one-shot side effects.
+- `<Feature>Reducer` — `Reducer<State, Message>`; pure `State.copy(...)`.
 
-Contract (from `base/BaseViewModel.kt`):
+`Action` and `Message` sealed types live inside the `StoreFactory` as `internal` companions.
 
-```kotlin
-abstract class BaseViewModel<State, Action, Event> {
-    protected val _viewStates: MutableStateFlow<State> = MutableStateFlow(initialState)
-    val viewStates: StateFlow<State> = _viewStates.asStateFlow()
+### Presentation layer
 
-    protected val _viewActions: MutableSharedFlow<Action> = MutableSharedFlow()
-    val viewActions: SharedFlow<Action> = _viewActions.asSharedFlow()
+- `<Feature>ViewModel` extends `core/presentation/viewmodel/BaseViewModel<UiState, UiLabel>` (which extends `androidx.lifecycle.ViewModel` and exposes `state: CStateFlow<State>` + `label: CFlow<Label>` for the iOS contract via moko-mvvm).
+- `bindAndStart { store.states.mapNotNull(stateMapper::map) bindTo ::acceptState; store.labels.mapNotNull(labelMapper::map) bindTo ::acceptLabel }` in `init`.
+- Public callbacks delegate to `store.accept(Intent.X)`.
+- `onCleared { store.dispose(); super.onCleared() }` is mandatory — the Store does not auto-dispose with the ViewModel.
 
-    abstract fun obtainEvent(event: Event)
-}
-```
+### UI layer
 
-Rules:
-- State updates only via `_viewStates.value = ...` (or `update { ... }`).
-- Actions emitted only via `_viewActions.emit(...)` from a coroutine on the ViewModel's scope.
-- All UI inputs go through `obtainEvent(...)`. No direct method calls on the ViewModel from the UI.
-- ViewModels are resolved at the Screen entry point via `koinViewModel<T>()`. Their constructors take dependencies as regular parameters (no defaults).
+- `<Feature>Screen` consumes the VM via `koinViewModel<Feature>ViewModel()`.
+- `state by vm.state.collectAsState()` + `LaunchedEffect(vm) { vm.label.collect { ... } }`.
+- Compose-side state mirrors (e.g., dialog visibility, text-field local mirror) live in `remember` / `rememberSaveable`.
+
+### Visibility
+
+- `Store`, `Intent`, `State`, `Label` — public (the Store API).
+- `StoreFactory`, `Executor`, `Reducer`, `Action`, `Message` — `internal`.
+- Mapper interfaces public, `Impl` classes `internal`.
+- `<Feature>ImplModule` (`<feature>/impl/di/`) is the only Koin entry consumed by `appModule`.
+
+Loading lives in `Store.State.isLoading: Boolean`. Errors in `Store.State.isError: Boolean`. One-shot effects (navigation, dialogs) flow through `Label`.
 
 ## Koin DI
 
-All bindings live in `core/di/AppModule.kt`:
+Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<feature>/impl/di/<Feature>ImplModule.kt` and are aggregated by `appModule`. The `core/mvikotlin/di/CoreMVIKotlinModule.kt` module exposes `StoreFactory`.
 
 - `single<T> { ... }` for clients (Apollo, Supabase), datasources, repositories.
-- `factoryOf(::UseCase)` for use-cases.
+- `factory { <Feature>StoreFactory(get(), ...).create() }` to expose a feature `Store` (the StoreFactory itself is `internal` and lives in the same module).
 - `viewModelOf(::SomeViewModel)` for view-models (via `koin-compose-viewmodel`).
-- `bind X::class` after `singleOf(::Impl)` to expose an `Api` interface.
+- `singleOf(::Impl) bind Api::class` to expose mappers and other interface-backed services.
 
 Resolve dependencies:
-- In classes (datasources, repos, use-cases, view-models): via **constructor parameters**. Koin wires them automatically. No `get()` inside class bodies.
+- In classes (datasources, repos, StoreFactories, executors, view-models): via **constructor parameters**. Koin wires them automatically. No `get()` inside class bodies.
 - In composables: `val vm: GuidesViewModel = koinViewModel()`.
 - Avoid `KoinPlatform.getKoin()` / `get()` outside DI module — that re-introduces service-locator pattern.
 

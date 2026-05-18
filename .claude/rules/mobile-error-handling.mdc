@@ -1,5 +1,5 @@
 ---
-description: Error handling — RequestResult, runCatching discipline, cancellation safety
+description: Error handling — coRunCatching in suspend, Result<T>, Napier logging
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
@@ -8,62 +8,46 @@ alwaysApply: false
 
 ## Repository contract
 
-Repositories return `Flow<RequestResult<T>>` (see `mobile-data-layer.mdc`). They never throw to the caller.
+Repositories return `suspend fun (): Result<T>` (see `mobile-data-layer.mdc`). They never throw to the caller.
 
 ```kotlin
-override fun getGuides(): Flow<RequestResult<List<Guide>>> = flow {
-    emit(RequestResult.InProgress)
-    runCatching { apolloClient.query(...).execute().dataOrThrow() }
-        .onSuccess { emit(RequestResult.Success(it.toDomain())) }
-        .onFailure { emit(RequestResult.Error(it)) }
-}
+override suspend fun getGuides(): Result<List<Guide>> = coRunCatching(
+    tryBlock = {
+        val data = apolloClient.query(...).execute().dataOrThrow()
+        data.toDomain()
+    },
+    catchBlock = { throwable ->
+        Napier.e(throwable = throwable, message = "GuidesRepository#getGuides failed")
+        throwable.wrapResultFailure()
+    },
+)
 ```
 
-## runCatching discipline
+## Discipline
 
-`runCatching` swallows `CancellationException`, which breaks structured concurrency in suspend contexts. Two rules:
+- In `suspend` code, use `coRunCatching { ... }` from `common/extensions/CoroutineExtensions.kt`. It rethrows `CancellationException` and converts other throwables to `Result.failure`. Optional second parameter `catchBlock: (Throwable) -> Result<T>` defaults to `{ it.wrapResultFailure() }`.
+- Plain `runCatching` is only acceptable in **non-suspend** call paths.
+- Repositories log via `Napier.e(throwable = ..., message = ...)` in their catch blocks; presentation code does not swallow errors silently. Executors log on failure paths via `Napier.e(...)` before dispatching `Message.SetError(true)`.
 
-1. **Never wrap a suspend block with `runCatching` and silently emit an error.** If you must, rethrow `CancellationException`:
-   ```kotlin
-   try { ... } catch (ce: CancellationException) {
-       throw ce
-   } catch (t: Throwable) {
-       emit(RequestResult.Error(t))
-   }
-   ```
-2. **A `coRunCatching` helper is planned** (`common/extensions/CoroutineExtensions.kt`). Once added, replace all current `runCatching` usages in suspend / `flow {}` blocks. Track this in `mobile-roadmap.mdc`.
+## Executor layer
 
-## UseCase layer
-
-UseCases pass through `RequestResult` and map success payloads. They do not catch — let the repository own error surfacing.
+Executors fold `Result<T>` into `Message`s for the Reducer and (when appropriate) `Label`s for the UI:
 
 ```kotlin
-fun invoke(): Flow<RequestResult<List<GuideUI>>> = repository.getGuides()
-    .map { result ->
-        when (result) {
-            is RequestResult.Success -> RequestResult.Success(result.data.map { it.toGuideUI() })
-            is RequestResult.Error -> result
-            RequestResult.InProgress -> result
-        }
+guidesRepository.getGuides()
+    .onSuccess { dispatch(Message.SetGuides(it)) }
+    .onFailure { throwable ->
+        Napier.e(throwable = throwable, message = "GuidesExecutor#loadGuides failed")
+        dispatch(Message.SetError(true))
     }
 ```
 
-## ViewModel layer
+Executors do not throw past the `BaseExecutor` boundary — every failure becomes a `Message` (and optionally a `Label`).
 
-ViewModels reduce `RequestResult` into `ViewState`:
+## ViewModel / UI layer
 
-```kotlin
-useCase.invoke().collect { result ->
-    _viewStates.value = when (result) {
-        RequestResult.InProgress -> GuidesViewState.Loading
-        is RequestResult.Error -> GuidesViewState.Error
-        is RequestResult.Success -> GuidesViewState.Display(...)
-    }
-}
-```
-
-ViewModels never log errors — logging is a repository responsibility (and currently absent, see roadmap).
+ViewModels never log errors — logging is a data-layer / executor responsibility. The UI renders `Ui*State.isError` and routes one-shot effects through `Ui*Label`. `println()` is forbidden — use `Napier.v / d / i / w / e`.
 
 ## Logging
 
-There is no logging library wired up yet. `println()` was removed in commit `64ce5e9` and must not be reintroduced. Add Napier (or similar) when introducing crash reporting; until then, errors surface only through `RequestResult.Error`.
+Napier is initialized once per platform entry with `Napier.base(DebugAntilog(...))` before `initKoin(...)`. The call appends antilogs — if an entry can be re-created (test scenarios), wrap with `Napier.takeLogarithm()` first to avoid duplicate sinks.

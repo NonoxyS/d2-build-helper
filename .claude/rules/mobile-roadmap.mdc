@@ -12,36 +12,35 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
 
 - [x] **Version bumps** — Kotlin 2.3.10, AGP 9.0.0, Compose MP 1.10.1, Ktor 3.3.3, Apollo 4.3.1, Coil 3.2.0 stable, Supabase 3.1.0, coroutines 1.10.2, serialization 1.10.0.
 - [x] **DI migration to Koin** — `core/di/AppModule.kt`, `koin-compose-viewmodel`, `koinViewModel()` in composables.
+- [x] **State management migration to MVIKotlin.** Completed 2026-05-18.
+  - Store / Intent / State / Label per feature, `BaseExecutor`, `Reducer`, `StoreFactory`.
+  - `BaseViewModel<State, Label>` (`core/presentation/viewmodel/`) binds `store.states` and `store.labels` through mappers.
+  - Logging routed through Napier via `LoggingStoreFactory` in `core/mvikotlin/di/CoreMVIKotlinModule.kt`.
 
 Remaining work, in order:
 
-1. **State management migration to MVIKotlin.**
-   - Introduces Store / Intent / State / Label per feature.
-   - `BaseViewModel<State, Action, Event>` → MVIKotlin `BaseViewModel` over `Store`.
-   - Reducer + Executor pattern, `StoreFactory` per feature.
-
-2. **Multi-module split** (also fixes the AGP 9 + KMP `com.android.application` deprecation we currently bypass via `android.builtInKotlin=false` + `android.newDsl=false`).
+1. **Multi-module split** (also fixes the AGP 9 + KMP `com.android.application` deprecation we currently bypass via `android.builtInKotlin=false` + `android.newDsl=false`).
    - Per feature: `api`, `impl`, `presentation`, `ui` (matches the KMMTemplate playbook).
    - Shared: `common`, `common-ui`, `core-domain`, `core-network`, `core-storage`, `core-navigation`, `core-presentation`.
    - Convention plugins `kmp-feature-setup`, `kmp-library`, `compose-multiplatform-setup` get registered then.
    - The `com.android.application` plugin moves to its own Android-only module depending on a shared KMP module.
 
-3. **moko-resources migration.**
+2. **moko-resources migration.**
    - Replace `composeResources/values/strings.xml` with `commonMain/moko-resources/base/strings.xml`.
    - Generated `MR.strings.*` replaces `Res.string.*`.
 
 ## Implication for Today
 
-- Suggestions involving `MVIKotlin Store` / `BaseExecutor` / `Reducer` are **out of scope** until step 1.
-- Suggestions to split a feature into 4 modules are **out of scope** until step 2.
-- Suggestions involving `MR.strings` / moko-resources are **out of scope** until step 3.
+- Suggestions to split a feature into 4 modules are **out of scope** until step 1.
+- Suggestions involving `MR.strings` / moko-resources are **out of scope** until step 2.
 
-For incremental work today: use `BaseViewModel<State, Action, Event>`, register dependencies in `core/di/AppModule.kt` and inject via constructor params (`koinViewModel()` for VMs), place strings in `composeResources/values/strings.xml`.
+For incremental work today: route new features through MVIKotlin (`Store` / `Intent` / `State` / `Label` + `BaseExecutor` + `Reducer`), expose them through `BaseViewModel<State, Label>` in `core/presentation/viewmodel/`, register dependencies in per-feature `<feature>/impl/di/*ImplModule.kt` (plus `core/di/AppModule.kt`) and inject via constructor params (`koinViewModel()` for VMs), place strings in `composeResources/values/strings.xml`.
 
 ## Track planned helpers
 
-These small additions can ship in any branch and unblock several roadmap steps:
+These helpers already shipped and are now part of the baseline — keep them in mind for new code:
 
 - `common/extensions/CoroutineExtensions.kt` with `coRunCatching` (rethrows `CancellationException`).
 - `common/extensions/ResultExtensions.kt` with `wrapResultSuccess` / `wrapResultFailure`.
-- Napier (or another KMP logger) initialized in Android `App` and iOS `MainViewController`.
+- Napier initialized on every platform entry (`AndroidApp.onCreate`, `jvmMain/main.kt`, iOS `MainViewController`).
+- `common/coroutines/CoroutineDispatchers` interface (+ `CoroutineDispatchersImpl`) — inject this, never reference `Dispatchers.IO` / `Dispatchers.Default` directly in `commonMain`.
