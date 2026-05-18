@@ -6,7 +6,7 @@
     <ID>CommentSpacing:App.ios.kt$//UIApplication.sharedApplication.openURL(nsUrl)</ID>
     <ID>CommentSpacing:App.ios.kt$//val nsUrl = url?.let { NSURL.URLWithString(it) } ?: return</ID>
     <ID>ComposableEventParameterNaming:HeroFilterDialogView.kt$onSearchValueChanged: (String) -&gt; Unit</ID>
-    <ID>ComposableFunctionName:App.kt$@Composable internal fun App()</ID>
+    <ID>ComposableFunctionName:App.kt$@Composable fun App()</ID>
     <ID>ComposableFunctionName:Type.kt$@Composable fun D2BuildHelperTypography()</ID>
     <ID>ComposableFunctionName:Type.kt$@Composable fun NotoSansFontFamily()</ID>
     <ID>CompositionLocalAllowlist:D2BuildHelperColors.kt$LocalD2BuildHelperColor</ID>

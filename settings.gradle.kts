@@ -34,6 +34,7 @@ dependencyResolutionManagement {
 
 includeBuild("build-logic")
 
+include(":androidApp")
 include(":composeApp")
 include(":common")
 include(":core-domain")

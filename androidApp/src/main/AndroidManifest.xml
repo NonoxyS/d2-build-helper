@@ -4,12 +4,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".AndroidApp"
+        android:name="dev.nonoxy.d2buildhelper.android.AndroidApp"
         android:icon="@android:drawable/ic_menu_compass"
         android:label="D2 Build Helper"
         android:theme="@android:style/Theme.Material.NoActionBar">
         <activity
-            android:name=".AppActivity"
+            android:name="dev.nonoxy.d2buildhelper.android.AppActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:launchMode="singleInstance"
             android:windowSoftInputMode="adjustPan"

@@ -18,7 +18,7 @@ import dev.nonoxy.d2buildhelper.core.navigation.LocalNavHost
 import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
 
 @Composable
-internal fun App() = D2BuildHelperTheme {
+fun App() = D2BuildHelperTheme {
     val platformContext = LocalPlatformContext.current
     val imageLoader = remember(platformContext) {
         ImageLoader.Builder(platformContext)
@@ -32,7 +32,7 @@ internal fun App() = D2BuildHelperTheme {
 }
 
 @Composable
-internal fun D2BuildHelperApp(
+fun D2BuildHelperApp(
     navController: NavHostController = rememberNavController()
 ) {
     CompositionLocalProvider(LocalNavHost provides navController) {
@@ -49,5 +49,3 @@ internal fun D2BuildHelperApp(
         }
     }
 }
-
-internal expect fun openUrl(url: String?)
