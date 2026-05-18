@@ -4,17 +4,14 @@ import androidx.lifecycle.viewModelScope
 import dev.nonoxy.d2buildhelper.base.BaseViewModel
 import dev.nonoxy.d2buildhelper.core.data.repository.guides.GuidesRepository
 import dev.nonoxy.d2buildhelper.core.data.repository.resources.ResourcesRepository
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero
 import dev.nonoxy.d2buildhelper.features.guides.domain.models.ImageResources
-import dev.nonoxy.d2buildhelper.features.guides.domain.models.Item
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesAction
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesEvent
 import dev.nonoxy.d2buildhelper.features.guides.presentation.models.GuidesViewState
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,29 +30,31 @@ internal class GuidesViewModel(
 
     private fun fetchData() {
         viewModelScope.launch {
-            val results = coroutineScope {
-                awaitAll(
-                    async { guidesRepository.getGuides() },
-                    async { resourcesRepository.getHeroImages() },
-                    async { resourcesRepository.getItemImages() },
-                    async { resourcesRepository.getAdditionalImages() },
+            val (guidesResult, heroResult, itemResult, additionalResult) = coroutineScope {
+                val guidesDef = async { guidesRepository.getGuides() }
+                val heroesDef = async { resourcesRepository.getHeroImages() }
+                val itemsDef = async { resourcesRepository.getItemImages() }
+                val additionalDef = async { resourcesRepository.getAdditionalImages() }
+                FetchResults(
+                    guides = guidesDef.await(),
+                    heroImages = heroesDef.await(),
+                    itemImages = itemsDef.await(),
+                    additionalImages = additionalDef.await(),
                 )
             }
-            if (results.any { it.isFailure }) {
+
+            val firstFailure = listOf(guidesResult, heroResult, itemResult, additionalResult)
+                .firstOrNull { it.isFailure }
+            if (firstFailure != null) {
+                Napier.e(throwable = firstFailure.exceptionOrNull(), message = "GuidesViewModel.fetchData failed")
                 viewState = GuidesViewState.Error
                 return@launch
             }
-            @Suppress("UNCHECKED_CAST")
-            val guides = (results[0] as Result<List<Guide>>).getOrThrow()
 
-            @Suppress("UNCHECKED_CAST")
-            val heroImages = (results[1] as Result<Map<Hero, String>>).getOrThrow()
-
-            @Suppress("UNCHECKED_CAST")
-            val itemImages = (results[2] as Result<Map<Item, String>>).getOrThrow()
-
-            @Suppress("UNCHECKED_CAST")
-            val additional = (results[3] as Result<Map<String, String>>).getOrThrow()
+            val guides = guidesResult.getOrThrow()
+            val heroImages = heroResult.getOrThrow()
+            val itemImages = itemResult.getOrThrow()
+            val additional = additionalResult.getOrThrow()
 
             val imageResources = ImageResources(
                 heroImages = heroImages,
@@ -115,3 +114,10 @@ internal class GuidesViewModel(
         }
     }
 }
+
+private data class FetchResults(
+    val guides: Result<List<dev.nonoxy.d2buildhelper.features.guides.domain.models.Guide>>,
+    val heroImages: Result<Map<dev.nonoxy.d2buildhelper.features.guides.domain.models.Hero, String>>,
+    val itemImages: Result<Map<dev.nonoxy.d2buildhelper.features.guides.domain.models.Item, String>>,
+    val additionalImages: Result<Map<String, String>>,
+)

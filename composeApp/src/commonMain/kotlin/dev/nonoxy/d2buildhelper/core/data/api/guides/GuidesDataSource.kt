@@ -22,9 +22,10 @@ internal class GuidesDataSource(
         coRunCatching(
             tryBlock = {
                 val response = apolloClient.query(GuidesQuery()).execute()
+                val ex = response.exception
                 when {
+                    ex != null -> throw ex
                     response.hasErrors() -> error("GraphQL errors: ${response.errors}")
-                    response.exception != null -> throw response.exception!!
                     else -> response.dataOrThrow().heroStats?.guideFilterNotNull()?.flatMap { guide ->
                         guide.guidesFilterNotNull()?.map { it.toGuideDto() } ?: emptyList()
                     } ?: emptyList()
@@ -43,9 +44,10 @@ internal class GuidesDataSource(
                 val response = apolloClient
                     .query(HeroGuidesQuery(heroId = Optional.present(heroId.toInt())))
                     .execute()
+                val ex = response.exception
                 when {
+                    ex != null -> throw ex
                     response.hasErrors() -> error("GraphQL errors: ${response.errors}")
-                    response.exception != null -> throw response.exception!!
                     else -> response.dataOrThrow().heroStats?.guideFilterNotNull()?.flatMap { guide ->
                         guide.guidesFilterNotNull()?.map { it.toGuideDto() } ?: emptyList()
                     } ?: emptyList()
