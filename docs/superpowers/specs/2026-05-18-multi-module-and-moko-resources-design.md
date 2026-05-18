@@ -329,6 +329,70 @@ Phase 3 mutates `gradle.properties` (removes flags), Xcode project, and the Andr
 
 The user-facing app behaviour does not change in any phase; rollback risk is build-system only.
 
+## AGP 9 + KMP DSL Cleanup (Follow-up Phase)
+
+Added 2026-05-19. Closes the temporary workaround introduced when AGP 9.0 shipped without a working KMP path for `com.android.library`.
+
+### Goal
+
+Drop the legacy DSL bypass flags and migrate `:core-*` / `:feature-*` modules to AGP 9's first-class KMP plugin `com.android.kotlin.multiplatform.library`.
+
+### Files
+
+- `gradle.properties` — remove:
+  - `android.builtInKotlin=false`
+  - `android.newDsl=false`
+  - explanatory comment that justified them.
+- `build-logic/src/main/kotlin/plugins/KmpLibraryPlugin.kt` — replace `apply(libs.plugins.android.library.get().pluginId)` with `apply(libs.plugins.android.kotlin.multiplatform.library.get().pluginId)`; remove the explicit `androidTarget { compilerOptions { ... } }` block (the new plugin owns the android compilation).
+- `build-logic/src/main/kotlin/plugins/AndroidApplicationSetupPlugin.kt` — drop the explicit `apply(libs.plugins.kotlin.android.get().pluginId)`. AGP 9 + the application plugin pull in Kotlin automatically once `android.builtInKotlin` is no longer disabled.
+- `build-logic/src/main/kotlin/extensions/ProjectExtensions.kt` — change `androidConfig` from `LibraryExtension` (com.android.build.gradle) to `KotlinMultiplatformAndroidLibraryExtension` (`com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension`). Confirm `androidAppConfig` keeps using `ApplicationExtension` from `com.android.build.api.dsl`; if a deprecation surfaces, follow the upgrade hint.
+
+### Expected DSL shape after migration
+
+```kotlin
+// KmpLibraryPlugin.kt
+kotlinMultiplatformConfig {
+    jvmToolchain(JAVA_VERSION)
+
+    androidLibrary {
+        namespace = derivedNamespace(target)
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        compilations.configureEach { kotlinSourceSets.configureEach { /* shared compilerOptions if needed */ } }
+    }
+    jvm()
+    iosX64(); iosArm64(); iosSimulatorArm64()
+}
+```
+
+(`androidLibrary { ... }` is a KMP-level DSL block exposed by the new plugin — replaces the project-level `androidConfig { }` extension.)
+
+### Verification
+
+Same matrix as the multi-module migration:
+
+```
+./gradlew detekt :androidApp:assembleDebug :androidApp:lintDebug \
+  :composeApp:jvmTest :composeApp:iosSimulatorArm64Test :feature-guides:impl:jvmTest
+```
+
+iOS simulator test pass is the load-bearing check — the previous reason for the bypass was that `com.android.library` produced an Android-only configuration that confused the KMP iOS compilation.
+
+### Risks
+
+- 12 KMP modules switch their Android plugin at once. A bug in `KmpLibraryPlugin` blasts everything.
+- `compileSdk`/`minSdk` plumbing moves from `defaultConfig { }` (legacy library DSL) to top-level `androidLibrary { }` (new KMP DSL). Property names may differ — confirm against AGP 9 release notes.
+- `:core-network` and `:core-storage` declare custom `buildConfigField(...)`. The new DSL exposes `buildConfig { defaults { ... } }` (or similar). Migrate these inline; keep them functional.
+- Detekt baseline may regenerate slightly because of moved/renamed plugin classes.
+
+### Rollback
+
+If the migration fails, restore the two `android.*` flags and revert `KmpLibraryPlugin.kt` / `ProjectExtensions.kt`. No code outside `build-logic/` and `gradle.properties` should be touched by this phase, which keeps rollback contained.
+
+### Out of Scope (for this phase)
+
+- Removing `kotlin.native.cacheKind=none`. Unrelated workaround for Supabase storage-kt; revisit when SDKs move.
+
 ## Out of Scope
 
 - `DetailGuide` feature implementation.
