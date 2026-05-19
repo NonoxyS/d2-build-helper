@@ -1,15 +1,13 @@
 package plugins
 
-import extensions.androidConfig
+import extensions.androidLibrary
 import extensions.commonMainDependencies
 import extensions.commonTestDependencies
 import extensions.kotlinMultiplatformConfig
 import extensions.libs
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.kotlin
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 class KmpLibraryPlugin : Plugin<Project> {
 
@@ -17,16 +15,17 @@ class KmpLibraryPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply(libs.plugins.multiplatform.get().pluginId)
-                apply(libs.plugins.android.library.get().pluginId)
+                apply(libs.plugins.android.kotlin.multiplatform.library.get().pluginId)
             }
 
             kotlinMultiplatformConfig {
                 jvmToolchain(JAVA_VERSION)
 
-                androidTarget {
-                    compilerOptions {
-                        jvmTarget.set(JvmTarget.JVM_17)
-                    }
+                @Suppress("UnstableApiUsage")
+                androidLibrary {
+                    namespace = derivedNamespace(target)
+                    compileSdk = libs.versions.android.compileSdk.get().toInt()
+                    minSdk = libs.versions.android.minSdk.get().toInt()
                 }
 
                 jvm()
@@ -43,18 +42,6 @@ class KmpLibraryPlugin : Plugin<Project> {
             commonTestDependencies {
                 implementation(kotlin("test"))
                 implementation(libs.kotlinx.coroutines.test)
-            }
-
-            androidConfig {
-                namespace = derivedNamespace(target)
-                compileSdk = libs.versions.android.compileSdk.get().toInt()
-                defaultConfig {
-                    minSdk = libs.versions.android.minSdk.get().toInt()
-                }
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
-                }
             }
         }
     }

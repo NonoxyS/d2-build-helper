@@ -1,7 +1,6 @@
 package extensions
 
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -16,12 +15,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 val Project.libs: LibrariesForLibs
     get() = the<LibrariesForLibs>()
 
-internal fun Project.androidConfig(configure: LibraryExtension.() -> Unit) {
-    extensions.configure<LibraryExtension>(configure)
-}
-
-internal fun Project.androidAppConfig(configure: BaseAppModuleExtension.() -> Unit) {
-    extensions.configure<BaseAppModuleExtension>(configure)
+internal fun Project.androidAppConfig(configure: ApplicationExtension.() -> Unit) {
+    extensions.configure<ApplicationExtension>(configure)
 }
 
 internal fun Project.androidKotlinConfig(configure: KotlinAndroidProjectExtension.() -> Unit) {
@@ -36,6 +31,15 @@ internal fun Project.kotlinJvmCompilerOptions(configure: KotlinJvmCompilerOption
 
 internal fun Project.kotlinMultiplatformConfig(configure: KotlinMultiplatformExtension.() -> Unit) {
     extensions.configure<KotlinMultiplatformExtension>(configure)
+}
+
+internal fun KotlinMultiplatformExtension.androidLibrary(
+    configure: com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension.() -> Unit,
+) {
+    (this as org.gradle.api.plugins.ExtensionAware).extensions.configure(
+        com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension::class.java,
+        configure,
+    )
 }
 
 internal fun Project.composeCompilerConfig(configure: ComposeCompilerGradlePluginExtension.() -> Unit) {
