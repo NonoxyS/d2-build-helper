@@ -1,8 +1,10 @@
 package plugins
 
 import extensions.androidLibraryConfig
+import extensions.androidMainDependencies
 import extensions.commonMainDependencies
 import extensions.commonTestDependencies
+import extensions.implementations
 import extensions.kotlinMultiplatformConfig
 import extensions.libs
 import org.gradle.api.Plugin
@@ -70,7 +72,19 @@ class KmpLibraryPlugin : Plugin<Project> {
 
     private fun Project.configureDependencies() {
         commonMainDependencies {
-            implementation(libs.kotlinx.coroutines.core)
+            implementations(
+                libs.koin.core,
+                libs.kotlinx.coroutines.core,
+                libs.kotlinx.datetime,
+                libs.napier,
+            )
+        }
+
+        androidMainDependencies {
+            implementations(
+                libs.koin.android,
+                libs.kotlinx.coroutines.android,
+            )
         }
 
         commonTestDependencies {

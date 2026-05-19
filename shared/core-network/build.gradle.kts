@@ -15,7 +15,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.apollo.runtime)
-            api(libs.koin.core)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)

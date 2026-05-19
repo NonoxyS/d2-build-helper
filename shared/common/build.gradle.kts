@@ -7,11 +7,3 @@ plugins {
 androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.common"
 }
-
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.koin.core)
-        }
-    }
-}

@@ -44,16 +44,11 @@ kotlin {
 
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.napier)
         }
 
         commonTest.dependencies {
             @OptIn(ExperimentalComposeLibrary::class)
             implementation(compose.uiTest)
-        }
-
-        androidMain.dependencies {
-            implementation(libs.kotlinx.coroutines.android)
         }
 
         jvmMain.dependencies {

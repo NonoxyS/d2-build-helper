@@ -17,11 +17,6 @@ kotlin {
             implementation(projects.shared.commonResources)
             implementation(projects.shared.coreNetwork)
             implementation(projects.shared.coreStorage)
-            api(libs.koin.core)
-            implementation(libs.napier)
-        }
-        androidMain.dependencies {
-            implementation(libs.koin.android)
         }
     }
 }

@@ -14,7 +14,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.supabase.storage)
-            api(libs.koin.core)
         }
     }
 }
