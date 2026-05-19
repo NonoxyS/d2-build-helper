@@ -73,3 +73,23 @@ sealed class AppScreens(val route: String) {
 `LocalNavHost` is a `staticCompositionLocalOf<NavHostController>` so descendants can navigate without prop drilling. Avoid passing `NavController` through composables when `LocalNavHost.current` is sufficient.
 
 When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage.
+
+## Build conventions
+
+Every `:feature-X:{api,impl,presentation,ui}` submodule applies exactly one plugin: `id("kmp-feature-setup")` (plus `id("json-serialization")` on `:impl` modules that read JSON). The plugin selects auto-wiring by submodule name — name must be one of `api`/`impl`/`presentation`/`ui`, otherwise the build fails.
+
+Auto-wired by `kmp-feature-setup` (do **not** redeclare in the module's `build.gradle.kts`):
+
+| Submodule | `commonMain` | Other |
+| --- | --- | --- |
+| `api` | `api(:core-domain)`, `api(mvikotlin.core)` | — |
+| `impl` | `api(<feature>:api)`, `implementation(:common, :core-domain, :core-presentation, koin.core, napier)` | `commonTest: implementation(mvikotlin.coroutines)` |
+| `presentation` | `api(<feature>:api)`, `api(:core-presentation)`, `implementation(:core-domain, :common, koin.core, koin.compose.viewmodel)` | — |
+| `ui` | applies `compose-multiplatform-setup`; `api(<feature>:presentation)`, `implementation(:common, :common-resources, :common-ui, :core-domain, :core-navigation, compose.material3, compose.ui.tooling.preview, koin.compose, koin.compose.viewmodel)` | `androidMain: implementation(compose.ui.tooling)` |
+
+Feature-specific dependencies (anything outside the table above) **stay in the module's `build.gradle.kts`**:
+
+- `:impl` reaches into `:core-network` / `:core-storage` / `:core-resources` only if that feature talks to those layers (`:feature-guides:impl` declares `:core-network` + `:core-resources`).
+- `:ui` adds extras like `compose.materialIconsExtended` (deprecated, pinned to 1.7.3 — flagged for migration to Material Symbols) feature-by-feature.
+
+Do not apply `kmp-library` directly to a feature submodule — `kmp-feature-setup` applies it transitively. Apply `kmp-library` only to `:common*` / `:core-*` (which are single-purpose KMP libraries, not feature splits).

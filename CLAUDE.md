@@ -26,7 +26,7 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Coil 3.2.0 (image loading).
 - Coroutines 1.10.2, kotlinx.serialization 1.10.0.
 - Android: compileSdk/targetSdk 36, minSdk 26.
-- Multi-module project (15 modules) with `build-logic` composite build hosting `kmp-library`, `compose-multiplatform-setup`, `android-application-setup`, and `json-serialization` convention plugins.
+- Multi-module project (15 modules) with `build-logic` composite build hosting `kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, and `json-serialization` convention plugins. `kmp-feature-setup` auto-wires per-submodule dependencies by name (`api`/`impl`/`presentation`/`ui`) — see `mobile-architecture.mdc#build-conventions`.
 - DI: Koin 4.1.x. Per-module Koin module functions; `:composeApp`'s `core/di/AppModule.kt` only aggregates includes.
 - MVIKotlin 4.4.0 (BaseExecutor in `:core-presentation`, LoggingStoreFactory wired through Napier).
 - Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on platform entry).
@@ -97,6 +97,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. `AppVersion.getVersionCode/Name` is invoked from `:androidApp/build.gradle.kts`.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
 - AGP 9 KMP modules use `com.android.kotlin.multiplatform.library` (applied by the `kmp-library` convention plugin). The `androidLibrary { }` DSL is configured through a typed helper in `build-logic/extensions/ProjectExtensions.kt` (`KotlinMultiplatformExtension.androidLibrary`).
+- Feature submodules (`:feature-X:api`/`impl`/`presentation`/`ui`) apply only `id("kmp-feature-setup")` — the plugin selects auto-wiring by submodule name and applies `kmp-library` (plus `compose-multiplatform-setup` for `:ui`) under the hood. Do not redeclare the dependencies listed in `mobile-architecture.mdc#build-conventions`; keep only feature-specific deps (e.g. `:core-network` on `:impl`) in the module's `build.gradle.kts`. New features must follow this skeleton — drift from the contract is a code-review smell.
 - All resources go through `:common-resources/src/commonMain/moko-resources/`. Basenames must be identifier-safe — moko mirrors them verbatim (`constant_heroes.json` → `MR.files.constant_heroes_json`, `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`). JSON content is read via the `FileContentReader` expect/actual (in `:core-resources`) injected through Koin — Android `FileResource.readText` needs a `Context`, so do not call moko file APIs directly from commonMain.
 - iOS Kotlin/Native cache is disabled (`kotlin.native.cacheKind=none` in `gradle.properties`) to work around a Supabase storage-kt build failure on iOS Simulator Arm64. Revisit once Supabase / Kotlin/Native versions move.
 - Git hooks live in `.githooks/`. Enable via `git config core.hooksPath .githooks`.

@@ -24,7 +24,7 @@ alwaysApply: false
 
 ## Module Layout
 
-15 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
+15 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
 
 | Module | Type | Responsibility |
 |---|---|---|
@@ -44,7 +44,7 @@ alwaysApply: false
 | `:feature-guides:presentation` | KMP | `GuidesViewModel` + UI models + mappers + `featureGuidesPresentationModule`. |
 | `:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
 
-`build-logic/` is a composite build with shared utilities (`AppVersion`, `GitCommitCountValueSource`, `JsonSerializationPlugin`) and the three convention plugins.
+`build-logic/` is a composite build with shared utilities (`AppVersion`, `GitCommitCountValueSource`) and the convention plugins. The `kmp-feature-setup` plugin selects auto-wiring by submodule name (`api`/`impl`/`presentation`/`ui`) — see `mobile-architecture.mdc#build-conventions` for the exact dependency contract.
 
 ## Package Conventions
 
