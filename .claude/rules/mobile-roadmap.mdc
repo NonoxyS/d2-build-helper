@@ -15,10 +15,17 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
 - [x] **State management migration to MVIKotlin.** Completed 2026-05-18.
   - Store / Intent / State / Label per feature, `BaseExecutor`, `Reducer`, `StoreFactory`.
   - `BaseViewModel<State, Label>` (`:shared:core-presentation`) binds `store.states` and `store.labels` through mappers.
-  - Logging routed through Napier via `LoggingStoreFactory` in `:shared:core-presentation/di/CoreMVIKotlinModule.kt`.
-- [x] **Multi-module split.** Completed 2026-05-18. 16 modules — `:android:app`, `:shared:main` (KMP shell), `:common`, `:common-ui`, `:shared:common-resources`, `:core-domain`, `:core-navigation`, `:core-network`, `:shared:core-presentation`, `:core-storage`, `:core-resources`, `:feature-guides:{api,impl,presentation,ui}`. Convention plugins `kmp-library`, `compose-multiplatform-setup`, `android-application-setup` live in `build-logic`.
+  - Logging routed through Napier via `LoggingStoreFactory` in `:shared:core-mvikotlin/di/CoreMVIKotlinModule.kt`.
+- [x] **Multi-module split.** Completed 2026-05-18. 16 modules under `android/` and `shared/`: `:android:app`, `:shared:main` (KMP shell), `:shared:common`, `:shared:common-ui`, `:shared:common-resources`, `:shared:core-domain`, `:shared:core-mvikotlin`, `:shared:core-navigation`, `:shared:core-network`, `:shared:core-presentation`, `:shared:core-resources`, `:shared:core-storage`, `:shared:feature-guides:{api,impl,presentation,ui}`. Convention plugins `kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization` live in `build-logic`.
 - [x] **moko-resources migration.** Completed 2026-05-19. `:shared:common-resources` switched from Compose Resources to moko-resources 0.26.1. `MR.strings.*`, `MR.files.*`, `MR.fonts.*` replace the `Res.*` accessors. Assets live under `:shared:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Android `FileResource.readText(Context)` is bridged through an expect/actual `FileContentReader` injected via Koin.
 - [x] **AGP 9 + KMP DSL cleanup.** Completed 2026-05-19. `KmpLibraryPlugin` now applies `com.android.kotlin.multiplatform.library` and configures the `androidLibrary { }` DSL. `gradle.properties` no longer carries `android.builtInKotlin=false`, `android.newDsl=false` or the temporary `android.sourceset.disallowProvider=false` bypass. `AndroidApplicationSetupPlugin` no longer applies `kotlin.android` (AGP 9 built-in Kotlin handles it). `ProjectExtensions` uses `com.android.build.api.dsl.ApplicationExtension`.
+- [x] **KMMTemplate alignment.** Completed 2026-05-19.
+  - `kmp-feature-setup` convention plugin auto-wires feature submodules by name (`api`/`impl`/`presentation`/`ui`); feature scripts apply only the alias and add feature-specific deps.
+  - `:shared:core-mvikotlin` extracted from `:core-presentation` — owns `BaseExecutor`, `coreMVIKotlinModule`, and the `mvikotlin-core/main/logging/coroutines` re-exports.
+  - Modules physically moved under `android/` and `shared/` directories to match KMMTemplate layout; settings include paths and `projects.*` accessors updated accordingly.
+  - Baseline KMP dependencies centralised in `KmpLibraryPlugin` (kotlin stdlib, coroutines-core, serialization-json, Napier, moko-resources) — modules no longer redeclare these.
+  - JVM/Desktop target removed (Android + iOS only): no `jvm()` in `KmpLibraryPlugin`, no `jvmMain` source sets, no `compose.desktop {}` block, `kotlinx-coroutines-swing` dropped from the catalog.
+  - Module scripts switched to flat `commonMainDependencies {}` / `androidMainDependencies {}` / `iosMainDependencies {}` extension-call syntax (vs. nested `kotlin { sourceSets { … } }`).
 
 Remaining work, in order:
 
@@ -41,5 +48,5 @@ These helpers already shipped and are now part of the baseline — keep them in 
 
 - `common/extensions/CoroutineExtensions.kt` with `coRunCatching` (rethrows `CancellationException`).
 - `common/extensions/ResultExtensions.kt` with `wrapResultSuccess` / `wrapResultFailure`.
-- Napier initialized on every platform entry (`:android:app/AndroidApp.onCreate`, `:shared:main/jvmMain/main.kt`, `:shared:main/iosMain/MainViewController`).
+- Napier initialized on every platform entry (`:android:app/AndroidApp.onCreate`, `:shared:main/iosMain/MainViewController`).
 - `common/coroutines/CoroutineDispatchers` interface (+ `CoroutineDispatchersImpl`) — inject this, never reference `Dispatchers.IO` / `Dispatchers.Default` directly in `commonMain`.
