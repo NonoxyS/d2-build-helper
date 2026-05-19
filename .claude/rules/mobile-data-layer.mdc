@@ -48,4 +48,4 @@ Rules:
 
 ## Local JSON Constants
 
-`composeApp/src/commonMain/composeResources/files/constants/{heroes,items,abilities}.json` ships with the app. `core/data/local/resources/constants/ConstantResourcesDataSource` reads them via `Res.readBytes(...)` and deserializes with `kotlinx.serialization`. These models (`Hero`, `Item`, `Ability`) are domain entities, not DTOs — they are consumed as-is by features.
+`shared/common-resources/src/commonMain/moko-resources/files/constant_{heroes,items,abilities}.json` ships with the app. `:shared:core-resources/.../data/local/constants/ConstantResourcesDataSource` reads them through the `FileContentReader` expect/actual (Android needs `Context`, JVM/iOS do not) and deserializes with `kotlinx.serialization`. These models (`Hero`, `Item`, `Ability`) are domain entities, not DTOs — they are consumed as-is by features.

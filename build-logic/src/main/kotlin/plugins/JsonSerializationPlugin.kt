@@ -12,16 +12,16 @@ class JsonSerializationPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply(libs.plugins.kotlinx.serialization.get().pluginId)
+                apply(libs.plugins.kotlin.serialization.get().pluginId)
 
                 when {
-                    hasPlugin(libs.plugins.multiplatform.get().pluginId) -> {
+                    hasPlugin(libs.plugins.kotlin.multiplatform.get().pluginId) -> {
                         commonMainDependencies {
                             implementation(libs.kotlinx.serialization.json)
                         }
                     }
 
-                    hasPlugin(libs.plugins.android.application.get().pluginId) -> {
+                    hasPlugin(libs.plugins.androidApplication.get().pluginId) -> {
                         dependencies {
                             implementation(libs.kotlinx.serialization.json)
                         }

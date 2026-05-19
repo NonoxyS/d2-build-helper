@@ -8,9 +8,9 @@ alwaysApply: false
 
 ## Apollo (Stratz GraphQL)
 
-- GraphQL queries: `composeApp/src/commonMain/kotlin/dev/nonoxy/d2buildhelper/core/graphql/*.graphql`.
-- Schema: `core/graphql/schema.graphqls` (Stratz dump, ~252 KB).
-- Apollo config in `composeApp/build.gradle.kts`:
+- GraphQL queries: `core-network/src/commonMain/graphql/*.graphql`.
+- Schema: `core-network/src/commonMain/graphql/schema.graphqls` (Stratz dump, ~252 KB).
+- Apollo config in `core-network/build.gradle.kts`:
   ```kotlin
   apollo {
       service("api") {

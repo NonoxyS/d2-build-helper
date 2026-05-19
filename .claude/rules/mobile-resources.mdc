@@ -1,49 +1,68 @@
 ---
-description: Resources — composeResources strings, fonts, JSON constants
+description: Resources — moko-resources strings, fonts, JSON constants
 globs: **/*.{kt,kts,xml,json}
 alwaysApply: false
 ---
 
 # Resources
 
-Resources live under `composeApp/src/commonMain/composeResources/`. Generated accessor: `dev.nonoxy.d2buildhelper.resources.Res`.
+Resources live in `:shared:common-resources/src/commonMain/moko-resources/`. The dedicated `:common-resources` module owns them and re-exports the generated `MR` accessor in package `dev.nonoxy.d2buildhelper.common.resources`.
+
+## Layout
+
+```
+common-resources/src/commonMain/moko-resources/
+  base/strings.xml          # default locale
+  files/*.json              # JSON constants bundled with the app
+  fonts/*.ttf               # custom typefaces
+```
+
+Basenames must be identifier-safe — moko mirrors them verbatim in the generated accessor:
+
+- `constant_heroes.json` → `MR.files.constant_heroes_json`
+- `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`
 
 ## Strings
 
-`composeResources/values/strings.xml`:
+`moko-resources/base/strings.xml`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="guides_top_bar_title">Guides</string>
-    <string name="guides_filter_hero">Hero</string>
+    <string name="all_heroes">All heroes</string>
+    <string name="hero_filter">Hero filter</string>
 </resources>
 ```
 
 Usage:
 
 ```kotlin
-import dev.nonoxy.d2buildhelper.resources.Res
-import dev.nonoxy.d2buildhelper.resources.guides_top_bar_title
-import org.jetbrains.compose.resources.stringResource
+import dev.icerock.moko.resources.compose.stringResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
 
-Text(text = stringResource(Res.string.guides_top_bar_title))
+Text(text = stringResource(MR.strings.all_heroes))
 ```
 
-Naming: `{feature}_{element}_{description}`. Shared strings: `{element}_{description}`.
+Naming: `{feature}_{element}_{description}` for feature-scoped strings; `{element}_{description}` for shared ones.
 
 No hardcoded user-facing strings in composables. Logs and debug text are allowed inline.
 
 ## Fonts
 
-`composeResources/font/` holds custom typeface files. Loaded via `Font(Res.font.{name})` in `theme/Type.kt`.
+Custom typefaces live in `moko-resources/fonts/`. `theme/Type.kt` (in `:shared:common-ui`) builds the `FontFamily` via `dev.icerock.moko.resources.compose.asFont`:
+
+```kotlin
+val regular = MR.fonts.notosans_regular.asFont(weight = FontWeight.Normal)
+val bold = MR.fonts.notosans_bold.asFont(weight = FontWeight.Bold)
+val family = FontFamily(listOfNotNull(regular, bold))
+```
+
+`asFont` is nullable on platforms that fail to load the typeface — fall back to `FontFamily.Default`.
 
 ## JSON Constants
 
-`composeResources/files/constants/{heroes,items,abilities}.json` ship statically with the app. Read at runtime via `Res.readBytes("files/constants/heroes.json")`, then decode with `kotlinx.serialization.json.Json` configured in `ConstantResourcesDataSource`.
+`moko-resources/files/constant_{heroes,items,abilities}.json` ship statically with the app. `MR.files.constant_X_json.readText()` is **not** in commonMain because Android requires a `Context`.
 
-If a JSON file grows past a few hundred KB or starts to need frequent updates, move it to Supabase Storage (similar to icons) — bundling large blobs slows down the build and bloats every release.
+Read JSON content through the `FileContentReader` expect/actual helper in `:shared:core-resources/.../data/local/constants/`. Inject it via Koin, then call `fileContentReader.read(MR.files.constant_heroes_json)`. The `bindFileContentReader` helper in `coreResourcesModule` wires the Android `Context` from Koin automatically.
 
-## Migration note
-
-The project does **not** use moko-resources today; do not import `dev.icerock.moko.resources.*` types. A migration to moko-resources is planned (see `mobile-roadmap.mdc`). Until then, all resource access goes through Compose's `Res.*` API.
+If a JSON file grows past a few hundred KB or needs frequent updates, move it to Supabase Storage (similar to icons) — bundling large blobs slows down the build and bloats every release.

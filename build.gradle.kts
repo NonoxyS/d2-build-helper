@@ -1,11 +1,28 @@
 plugins {
-    alias(libs.plugins.multiplatform).apply(false)
-    alias(libs.plugins.compose.compiler).apply(false)
-    alias(libs.plugins.compose).apply(false)
-    alias(libs.plugins.android.application).apply(false)
-    alias(libs.plugins.buildConfig).apply(false)
-    alias(libs.plugins.kotlinx.serialization).apply(false)
-    alias(libs.plugins.apollo).apply(false)
+    // Android
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidLibrary) apply false
+
+    // Kotlin
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.multiplatformAndroidLibrary) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+
+    // Compose
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.compose.compiler) apply false
+
+    // Other
+    alias(libs.plugins.buildConfig) apply false
+    alias(libs.plugins.apollo) apply false
+    alias(libs.plugins.moko.resources) apply false
+
+    // Convention plugins
+    alias(libs.plugins.conventionPlugin.kmpLibrary) apply false
+    alias(libs.plugins.conventionPlugin.kmpFeatureSetup) apply false
+    alias(libs.plugins.conventionPlugin.composeMultiplatformSetup) apply false
+    alias(libs.plugins.conventionPlugin.jsonSerialization) apply false
+    alias(libs.plugins.conventionPlugin.androidApplicationSetup) apply false
 
     alias(libs.plugins.detekt)
 }

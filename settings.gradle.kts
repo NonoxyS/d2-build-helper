@@ -34,4 +34,26 @@ dependencyResolutionManagement {
 
 includeBuild("build-logic")
 
-include(":composeApp")
+// Android specific modules
+include(":android:app")
+
+// Shared common and core modules
+include(":shared:main")
+
+include(":shared:common")
+include(":shared:common-ui")
+include(":shared:common-resources")
+
+include(":shared:core-domain")
+include(":shared:core-mvikotlin")
+include(":shared:core-presentation")
+include(":shared:core-navigation")
+include(":shared:core-network")
+include(":shared:core-storage")
+include(":shared:core-resources")
+
+// Shared feature modules
+include(":shared:feature-guides:api")
+include(":shared:feature-guides:impl")
+include(":shared:feature-guides:presentation")
+include(":shared:feature-guides:ui")

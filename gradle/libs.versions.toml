@@ -2,6 +2,7 @@
 
 # Build
 agp = "9.0.0"
+javaVersion = "17"
 kotlin = "2.3.10"
 buildConfig = "4.1.1"
 
@@ -16,6 +17,7 @@ android-targetSdk = "36"
 
 # Kotlin
 kotlinx-coroutines = "1.10.2"
+kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.10.0"
 
 # Compose Multiplatform
@@ -43,6 +45,7 @@ coil = "3.2.0"
 mvikotlin = "4.4.0"
 napier = "2.7.1"
 moko-mvvm = "0.16.1"
+moko-resources = "0.26.1"
 
 # Linting
 detekt = "1.23.8"
@@ -61,8 +64,8 @@ gradleplugin-composeMultiplatform = { module = "org.jetbrains.compose:compose-gr
 # Kotlin
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 # Compose Multiplatform — explicit dependencies (DSL accessors are deprecated since 1.10)
@@ -73,6 +76,8 @@ compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.r
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }
+compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose" }
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 
 # AndroidX
@@ -109,6 +114,8 @@ napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 # moko-mvvm (CFlow/CStateFlow)
 moko-mvvm-flow = { module = "dev.icerock.moko:mvvm-flow", version.ref = "moko-mvvm" }
+moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko-resources" }
+moko-resources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko-resources" }
 
 # Detekt plugins
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
@@ -118,11 +125,29 @@ detekt-compose-twitter = { module = "com.twitter.compose.rules:detekt", version.
 
 [plugins]
 
-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+# Convention plugins (composite build — empty version)
+conventionPlugin-kmpLibrary = { id = "kmp-library", version = "" }
+conventionPlugin-kmpFeatureSetup = { id = "kmp-feature-setup", version = "" }
+conventionPlugin-composeMultiplatformSetup = { id = "compose-multiplatform-setup", version = "" }
+conventionPlugin-jsonSerialization = { id = "json-serialization", version = "" }
+conventionPlugin-androidApplicationSetup = { id = "android-application-setup", version = "" }
+
+# Android
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+
+# Kotlin
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-multiplatformAndroidLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+# Compose
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
-android-application = { id = "com.android.application", version.ref = "agp" }
+
+# Other
 buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
+moko-resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko-resources" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

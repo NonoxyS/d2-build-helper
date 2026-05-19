@@ -54,7 +54,6 @@ Resolve dependencies:
 
 `core/di/Koin.kt#initKoin(appDeclaration)` is the single entry point. It is idempotent (`KoinPlatform.getKoinOrNull()` guard). Called from:
 - `AndroidApp.onCreate` with `androidContext(this)`.
-- `jvmMain/main.kt` before `application { }`.
 - iOS `MainViewController` factory inside `ComposeUIViewController(configure = { initKoin() })`.
 
 `ImageLoader` (Coil 3) is **not** in Koin — it requires `PlatformContext` from Compose and is built inside `App.kt` then exposed via `LocalImageLoader`.
@@ -73,3 +72,28 @@ sealed class AppScreens(val route: String) {
 `LocalNavHost` is a `staticCompositionLocalOf<NavHostController>` so descendants can navigate without prop drilling. Avoid passing `NavController` through composables when `LocalNavHost.current` is sufficient.
 
 When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage.
+
+## Build conventions
+
+Every `:shared:feature-X:{api,impl,presentation,ui}` submodule applies exactly one convention plugin: `alias(libs.plugins.conventionPlugin.kmpFeatureSetup)` (plus `alias(libs.plugins.conventionPlugin.jsonSerialization)` on `:impl` modules that read JSON, and `alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)` on `:ui` modules). The plugin selects auto-wiring by submodule name — name must be one of `api`/`impl`/`presentation`/`ui`, otherwise the build fails.
+
+Auto-wired by `kmp-feature-setup` (do **not** redeclare in the module's `build.gradle.kts`):
+
+| Submodule | `commonMain` |
+| --- | --- |
+| `api` | `implementation(:shared:core-domain, :shared:core-mvikotlin, compose.runtime)` (compose-runtime for stability inference; compose-compiler plugin auto-applied) |
+| `impl` | `implementation(:shared:core-domain, :shared:common, sibling :api, :shared:core-mvikotlin)` |
+| `presentation` | `implementation(:shared:core-domain, :shared:common, sibling :api, :shared:core-mvikotlin, compose.runtime)`; `api(:shared:core-presentation, koin.compose.viewmodel)` (compose-compiler plugin auto-applied) |
+| `ui` | `implementation(:shared:core-domain, :shared:common, sibling :api, :shared:core-navigation, :shared:common-resources, :shared:common-ui, koin.compose.viewmodel, moko.resources.compose, composeBundle (runtime + foundation + ui + material3), sibling :presentation)` |
+
+Notes:
+- `:ui` modules must additionally apply `alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)` — `kmp-feature-setup` does NOT auto-apply it (matches KMMTemplate).
+- Each module sets its own Android `namespace` via `androidLibraryConfig { namespace = "..." }` (do not centralize namespace derivation).
+
+Feature-specific dependencies (anything outside the table above) **stay in the module's `build.gradle.kts`**:
+
+- `:impl` reaches into `:shared:core-network` / `:shared:core-storage` / `:shared:core-resources` only if that feature talks to those layers (`:shared:feature-guides:impl` declares `:shared:core-network` + `:shared:core-resources`).
+- `:ui` adds extras like `compose.materialIconsExtended` (deprecated, pinned to 1.7.3 — flagged for migration to Material Symbols) feature-by-feature.
+- `:impl` declares `commonTest.dependencies { implementation(libs.mvikotlin.coroutines) }` when it needs the MVIKotlin test helpers.
+
+Do not apply `kmp-library` directly to a feature submodule — `kmp-feature-setup` applies it transitively. Apply `kmp-library` only to `:shared:common*` / `:shared:core-*` (which are single-purpose KMP libraries, not feature splits).
