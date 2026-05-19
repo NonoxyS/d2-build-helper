@@ -18,13 +18,13 @@ alwaysApply: false
 - kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
 - compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
 - Koin 4.1.x for DI (per-module Koin module functions; aggregated in `:composeApp`)
-- MVIKotlin 4.4.0 (BaseExecutor in `:core-presentation`)
+- MVIKotlin 4.4.0 (BaseExecutor + `coreMVIKotlinModule` in `:core-mvikotlin`)
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`)
 - Napier 2.7.1
 
 ## Module Layout
 
-15 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
+16 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
 
 | Module | Type | Responsibility |
 |---|---|---|
@@ -36,7 +36,8 @@ alwaysApply: false
 | `:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
 | `:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
 | `:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |
-| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseExecutor`, `BaseIosViewModel`, `coreMVIKotlinModule`. |
+| `:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule`. Re-exports `mvikotlin-core/main/logging/coroutines`. |
+| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:core-mvikotlin`). |
 | `:core-storage` | KMP | Supabase client + Supabase buildConfig. `coreStorageModule`. |
 | `:core-resources` | KMP | `ResourcesRepository(Impl)`, image/constants datasources, `coreResourcesModule`. |
 | `:feature-guides:api` | KMP | `GuidesStore` + Intent/State/Label + `Guide` model. |
@@ -60,7 +61,8 @@ Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-pack
 | `:core-domain` | `.core.domain` |
 | `:core-navigation` | `.core.navigation` |
 | `:core-network` | `.core.network` (+ generated GraphQL in `.graphql`) |
-| `:core-presentation` | `.core.presentation.{viewmodel,mvikotlin,di}` |
+| `:core-mvikotlin` | `.core.mvikotlin` and `.core.mvikotlin.di` |
+| `:core-presentation` | `.core.presentation.viewmodel` |
 | `:core-storage` | `.core.storage` |
 | `:core-resources` | `.core.resources.{data,di}` |
 | `:feature-guides:api` | `.feature.guides.api.{store,domain}` |

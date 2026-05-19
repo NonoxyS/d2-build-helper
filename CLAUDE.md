@@ -26,9 +26,9 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Coil 3.2.0 (image loading).
 - Coroutines 1.10.2, kotlinx.serialization 1.10.0.
 - Android: compileSdk/targetSdk 36, minSdk 26.
-- Multi-module project (15 modules) with `build-logic` composite build hosting `kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, and `json-serialization` convention plugins. `kmp-feature-setup` auto-wires per-submodule dependencies by name (`api`/`impl`/`presentation`/`ui`) — see `mobile-architecture.mdc#build-conventions`.
+- Multi-module project (16 modules) with `build-logic` composite build hosting `kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, and `json-serialization` convention plugins. `kmp-feature-setup` auto-wires per-submodule dependencies by name (`api`/`impl`/`presentation`/`ui`) — see `mobile-architecture.mdc#build-conventions`.
 - DI: Koin 4.1.x. Per-module Koin module functions; `:composeApp`'s `core/di/AppModule.kt` only aggregates includes.
-- MVIKotlin 4.4.0 (BaseExecutor in `:core-presentation`, LoggingStoreFactory wired through Napier).
+- MVIKotlin 4.4.0 (BaseExecutor + `coreMVIKotlinModule` in `:core-mvikotlin`, LoggingStoreFactory wired through Napier).
 - Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on platform entry).
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`).
 - State management: MVIKotlin `Store` per feature + `BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
@@ -39,7 +39,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 
 ## Architecture
 
-15 modules. Conventions: `:feature-*` modules nest their layers (`:feature-X:api`/`impl`/`presentation`/`ui`); `:core-*` and `:common*` are single. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`.
+16 modules. Conventions: `:feature-*` modules nest their layers (`:feature-X:api`/`impl`/`presentation`/`ui`); `:core-*` and `:common*` are single. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`.
 
 | Module | Type | Responsibility |
 |---|---|---|
@@ -51,7 +51,8 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | `:core-domain` | KMP | App-wide pure domain models: `Hero`, `Item`, `Ability`, `ImageResources`. |
 | `:core-navigation` | KMP + Compose | `AppScreens` sealed routes, `LocalNavHost`. |
 | `:core-network` | KMP | `ApolloClient` + GraphQL queries + Stratz schema + buildConfig (Stratz) + per-platform Ktor engines, `coreNetworkModule` Koin. |
-| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseExecutor`, `BaseIosViewModel`, `coreMVIKotlinModule` (LoggingStoreFactory via Napier). |
+| `:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule` (binds `StoreFactory` to `LoggingStoreFactory(DefaultStoreFactory())` via Napier). Re-exports `mvikotlin-core/main/logging/coroutines`. |
+| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:core-mvikotlin` for `Store`/`BindingsBuilder`). |
 | `:core-storage` | KMP | Supabase client + buildConfig (Supabase), `coreStorageModule` Koin. |
 | `:core-resources` | KMP | `ResourcesRepository` + Impl + datasources (`ImageResourcesApi/DataSource`, `ConstantResourcesDataSource`), `coreResourcesModule` Koin. |
 | `:feature-guides:api` | KMP | `GuidesStore` contract (Intent/State/Label) + `Guide`, `PlayerStats`, `ItemPurchase`, `MatchPlayerPosition`. |

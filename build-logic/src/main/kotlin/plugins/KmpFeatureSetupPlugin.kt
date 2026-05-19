@@ -57,7 +57,7 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
             api(featureApi)
             implementation(project(":common"))
             implementation(project(":core-domain"))
-            implementation(project(":core-presentation"))
+            implementation(project(":core-mvikotlin"))
             implementation(libs.koin.core)
             implementation(libs.napier)
         }

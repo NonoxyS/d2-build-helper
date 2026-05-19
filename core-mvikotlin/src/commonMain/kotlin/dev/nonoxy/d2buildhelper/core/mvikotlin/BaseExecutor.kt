@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.core.presentation.mvikotlin
+package dev.nonoxy.d2buildhelper.core.mvikotlin
 
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import kotlinx.coroutines.Dispatchers

@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.core.presentation.di
+package dev.nonoxy.d2buildhelper.core.mvikotlin.di
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.logging.logger.Logger

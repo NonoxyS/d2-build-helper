@@ -83,7 +83,7 @@ Auto-wired by `kmp-feature-setup` (do **not** redeclare in the module's `build.g
 | Submodule | `commonMain` | Other |
 | --- | --- | --- |
 | `api` | `api(:core-domain)`, `api(mvikotlin.core)` | — |
-| `impl` | `api(<feature>:api)`, `implementation(:common, :core-domain, :core-presentation, koin.core, napier)` | `commonTest: implementation(mvikotlin.coroutines)` |
+| `impl` | `api(<feature>:api)`, `implementation(:common, :core-domain, :core-mvikotlin, koin.core, napier)` | `commonTest: implementation(mvikotlin.coroutines)` |
 | `presentation` | `api(<feature>:api)`, `api(:core-presentation)`, `implementation(:core-domain, :common, koin.core, koin.compose.viewmodel)` | — |
 | `ui` | applies `compose-multiplatform-setup`; `api(<feature>:presentation)`, `implementation(:common, :common-resources, :common-ui, :core-domain, :core-navigation, compose.material3, compose.ui.tooling.preview, koin.compose, koin.compose.viewmodel)` | `androidMain: implementation(compose.ui.tooling)` |
 
