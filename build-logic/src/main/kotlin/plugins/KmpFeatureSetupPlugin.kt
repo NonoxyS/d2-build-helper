@@ -43,20 +43,20 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
         val implModuleDependencies = when (project.isApiModule) {
             true -> null
             false -> listOfNotNull(
-                project(":common"),
+                project(":shared:common"),
                 project.getApiModule(),
             )
         }
 
         val presentationModuleDependencies = listOf(
-            project(":core-presentation"),
+            project(":shared:core-presentation"),
             libs.koin.compose.viewmodel,
         ).takeIf { project.isPresentationModule }
 
         val uiModuleDependencies = listOf(
-            project(":core-navigation"),
-            project(":common-resources"),
-            project(":common-ui"),
+            project(":shared:core-navigation"),
+            project(":shared:common-resources"),
+            project(":shared:common-ui"),
             libs.koin.compose.viewmodel,
             libs.moko.resources.compose,
             *composeBundle,
@@ -65,12 +65,12 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
         ).takeIf { project.isUiModule }
 
         val commonDependencies = listOf(
-            project(":core-domain"),
+            project(":shared:core-domain"),
         )
 
         val nonUiModuleDependencies = when (project.isUiModule) {
             true -> null
-            false -> project(":core-mvikotlin").asList()
+            false -> project(":shared:core-mvikotlin").asList()
         }
 
         commonMainDependencies {

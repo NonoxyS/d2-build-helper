@@ -12,8 +12,8 @@ androidLibraryConfig {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.coreNetwork)
-            implementation(projects.coreResources)
+            implementation(projects.shared.coreNetwork)
+            implementation(projects.shared.coreResources)
         }
         commonTest.dependencies {
             implementation(libs.mvikotlin.coroutines)

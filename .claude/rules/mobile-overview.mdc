@@ -11,39 +11,39 @@ alwaysApply: false
 - Kotlin 2.3.10 + Compose Multiplatform 1.10.1 (material3 1.9.0)
 - AGP 9.0.0, Android minSdk 26 / targetSdk 36 / compileSdk 36
 - Gradle 9.4.1, Java target 17
-- Apollo Kotlin 4.3.1 — Stratz GraphQL (in `:core-network`)
-- Supabase Storage 3.1.0 — hero/item/ability icons (in `:core-storage`)
+- Apollo Kotlin 4.3.1 — Stratz GraphQL (in `:shared:core-network`)
+- Supabase Storage 3.1.0 — hero/item/ability icons (in `:shared:core-storage`)
 - Ktor 3.3.3 — OkHttp on Android+JVM, Darwin on iOS
 - Coil 3.2.0 — image loading
 - kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
 - compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
-- Koin 4.1.x for DI (per-module Koin module functions; aggregated in `:composeApp`)
-- MVIKotlin 4.4.0 (BaseExecutor + `coreMVIKotlinModule` in `:core-mvikotlin`)
+- Koin 4.1.x for DI (per-module Koin module functions; aggregated in `:shared:main`)
+- MVIKotlin 4.4.0 (BaseExecutor + `coreMVIKotlinModule` in `:shared:core-mvikotlin`)
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`)
 - Napier 2.7.1
 
 ## Module Layout
 
-16 modules. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
+16 modules under `android/` and `shared/`. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
 
 | Module | Type | Responsibility |
 |---|---|---|
-| `:androidApp` | Android-only | `com.android.application`, `AndroidApp`, `AppActivity`, manifest. |
-| `:composeApp` | KMP shell | `App.kt` + NavHost + `jvmMain/main.kt` desktop entry + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. |
-| `:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
-| `:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
-| `:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, JSON files, fonts). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |
-| `:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
-| `:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
-| `:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |
-| `:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule`. Re-exports `mvikotlin-core/main/logging/coroutines`. |
-| `:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:core-mvikotlin`). |
-| `:core-storage` | KMP | Supabase client + Supabase buildConfig. `coreStorageModule`. |
-| `:core-resources` | KMP | `ResourcesRepository(Impl)`, image/constants datasources, `coreResourcesModule`. |
-| `:feature-guides:api` | KMP | `GuidesStore` + Intent/State/Label + `Guide` model. |
-| `:feature-guides:impl` | KMP | Store factory/executor/reducer + repository + datasources + DTOs + `featureGuidesImplModule`. |
-| `:feature-guides:presentation` | KMP | `GuidesViewModel` + UI models + mappers + `featureGuidesPresentationModule`. |
-| `:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
+| `:android:app` | Android-only | `com.android.application`, `AndroidApp`, `AppActivity`, manifest. |
+| `:shared:main` | KMP shell | `App.kt` + NavHost + `jvmMain/main.kt` desktop entry + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. |
+| `:shared:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
+| `:shared:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
+| `:shared:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, JSON files, fonts). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:shared:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
+| `:shared:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
+| `:shared:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |
+| `:shared:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule`. Re-exports `mvikotlin-core/main/logging/coroutines`. |
+| `:shared:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:shared:core-mvikotlin`). |
+| `:shared:core-storage` | KMP | Supabase client + Supabase buildConfig. `coreStorageModule`. |
+| `:shared:core-resources` | KMP | `ResourcesRepository(Impl)`, image/constants datasources, `coreResourcesModule`. |
+| `:shared:feature-guides:api` | KMP | `GuidesStore` + Intent/State/Label + `Guide` model. |
+| `:shared:feature-guides:impl` | KMP | Store factory/executor/reducer + repository + datasources + DTOs + `featureGuidesImplModule`. |
+| `:shared:feature-guides:presentation` | KMP | `GuidesViewModel` + UI models + mappers + `featureGuidesPresentationModule`. |
+| `:shared:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
 
 `build-logic/` is a composite build with shared utilities (`AppVersion`, `GitCommitCountValueSource`) and the convention plugins. The `kmp-feature-setup` plugin selects auto-wiring by submodule name (`api`/`impl`/`presentation`/`ui`) — see `mobile-architecture.mdc#build-conventions` for the exact dependency contract.
 
@@ -53,22 +53,22 @@ Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-pack
 
 | Module | Package |
 |---|---|
-| `:androidApp` | `.android` |
-| `:composeApp` | (top-level — `App.kt`, etc.) |
-| `:common` | `.common.*` |
-| `:common-ui` | `.common.ui` and `.common.ui.theme` |
-| `:common-resources` | `.common.resources` (generated `Res`) |
-| `:core-domain` | `.core.domain` |
-| `:core-navigation` | `.core.navigation` |
-| `:core-network` | `.core.network` (+ generated GraphQL in `.graphql`) |
-| `:core-mvikotlin` | `.core.mvikotlin` and `.core.mvikotlin.di` |
-| `:core-presentation` | `.core.presentation.viewmodel` |
-| `:core-storage` | `.core.storage` |
-| `:core-resources` | `.core.resources.{data,di}` |
-| `:feature-guides:api` | `.feature.guides.api.{store,domain}` |
-| `:feature-guides:impl` | `.feature.guides.impl.{data,domain,di}` |
-| `:feature-guides:presentation` | `.feature.guides.presentation.{models,mappers,di}` |
-| `:feature-guides:ui` | `.feature.guides.ui.{,views}` |
+| `:android:app` | `.android` |
+| `:shared:main` | (top-level — `App.kt`, etc.) |
+| `:shared:common` | `.common.*` |
+| `:shared:common-ui` | `.common.ui` and `.common.ui.theme` |
+| `:shared:common-resources` | `.common.resources` (generated `Res`) |
+| `:shared:core-domain` | `.core.domain` |
+| `:shared:core-navigation` | `.core.navigation` |
+| `:shared:core-network` | `.core.network` (+ generated GraphQL in `.graphql`) |
+| `:shared:core-mvikotlin` | `.core.mvikotlin` and `.core.mvikotlin.di` |
+| `:shared:core-presentation` | `.core.presentation.viewmodel` |
+| `:shared:core-storage` | `.core.storage` |
+| `:shared:core-resources` | `.core.resources.{data,di}` |
+| `:shared:feature-guides:api` | `.feature.guides.api.{store,domain}` |
+| `:shared:feature-guides:impl` | `.feature.guides.impl.{data,domain,di}` |
+| `:shared:feature-guides:presentation` | `.feature.guides.presentation.{models,mappers,di}` |
+| `:shared:feature-guides:ui` | `.feature.guides.ui.{,views}` |
 
 ## Naming Conventions
 
@@ -94,7 +94,7 @@ Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-pack
 
 ## Existing Features
 
-- `:feature-guides:*` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
-- `features/detailGuide/` — placeholder screen still inside `:composeApp`, not yet implemented.
+- `:shared:feature-guides:*` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
+- `features/detailGuide/` — placeholder screen still inside `:shared:main`, not yet implemented.
 
-Navigation routes are declared in `:core-navigation/.../AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.
+Navigation routes are declared in `:shared:core-navigation/.../AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.

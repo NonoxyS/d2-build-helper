@@ -9,7 +9,7 @@ plugins {
 }
 
 androidLibraryConfig {
-    namespace = "dev.nonoxy.d2buildhelper.composeApp"
+    namespace = "dev.nonoxy.d2buildhelper.main"
 }
 
 kotlin {
@@ -22,19 +22,19 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.common)
-            implementation(projects.coreDomain)
-            implementation(projects.commonResources)
-            implementation(projects.corePresentation)
-            implementation(projects.coreNavigation)
-            implementation(projects.commonUi)
-            implementation(projects.coreNetwork)
-            implementation(projects.coreStorage)
-            implementation(projects.coreResources)
-            implementation(projects.featureGuides.api)
-            implementation(projects.featureGuides.impl)
-            implementation(projects.featureGuides.presentation)
-            implementation(projects.featureGuides.ui)
+            implementation(projects.shared.common)
+            implementation(projects.shared.coreDomain)
+            implementation(projects.shared.commonResources)
+            implementation(projects.shared.corePresentation)
+            implementation(projects.shared.coreNavigation)
+            implementation(projects.shared.commonUi)
+            implementation(projects.shared.coreNetwork)
+            implementation(projects.shared.coreStorage)
+            implementation(projects.shared.coreResources)
+            implementation(projects.shared.featureGuides.api)
+            implementation(projects.shared.featureGuides.impl)
+            implementation(projects.shared.featureGuides.presentation)
+            implementation(projects.shared.featureGuides.ui)
 
             implementation(libs.compose.material3)
             implementation(compose.materialIconsExtended)

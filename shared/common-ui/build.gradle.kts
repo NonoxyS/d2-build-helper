@@ -14,7 +14,7 @@ kotlin {
         commonMain.dependencies {
             api(libs.coil)
             api(libs.coil.network.ktor)
-            api(projects.commonResources)
+            api(projects.shared.commonResources)
             implementation(libs.compose.material3)
         }
         androidMain.dependencies {

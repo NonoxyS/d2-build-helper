@@ -11,13 +11,13 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
 ## Migration Order
 
 - [x] **Version bumps** — Kotlin 2.3.10, AGP 9.0.0, Compose MP 1.10.1, Ktor 3.3.3, Apollo 4.3.1, Coil 3.2.0 stable, Supabase 3.1.0, coroutines 1.10.2, serialization 1.10.0.
-- [x] **DI migration to Koin** — per-module Koin module functions; `:composeApp/core/di/AppModule.kt` aggregates includes.
+- [x] **DI migration to Koin** — per-module Koin module functions; `:shared:main/core/di/AppModule.kt` aggregates includes.
 - [x] **State management migration to MVIKotlin.** Completed 2026-05-18.
   - Store / Intent / State / Label per feature, `BaseExecutor`, `Reducer`, `StoreFactory`.
-  - `BaseViewModel<State, Label>` (`:core-presentation`) binds `store.states` and `store.labels` through mappers.
-  - Logging routed through Napier via `LoggingStoreFactory` in `:core-presentation/di/CoreMVIKotlinModule.kt`.
-- [x] **Multi-module split.** Completed 2026-05-18. 15 modules — `:androidApp`, `:composeApp` (KMP shell), `:common`, `:common-ui`, `:common-resources`, `:core-domain`, `:core-navigation`, `:core-network`, `:core-presentation`, `:core-storage`, `:core-resources`, `:feature-guides:{api,impl,presentation,ui}`. Convention plugins `kmp-library`, `compose-multiplatform-setup`, `android-application-setup` live in `build-logic`.
-- [x] **moko-resources migration.** Completed 2026-05-19. `:common-resources` switched from Compose Resources to moko-resources 0.26.1. `MR.strings.*`, `MR.files.*`, `MR.fonts.*` replace the `Res.*` accessors. Assets live under `:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Android `FileResource.readText(Context)` is bridged through an expect/actual `FileContentReader` injected via Koin.
+  - `BaseViewModel<State, Label>` (`:shared:core-presentation`) binds `store.states` and `store.labels` through mappers.
+  - Logging routed through Napier via `LoggingStoreFactory` in `:shared:core-presentation/di/CoreMVIKotlinModule.kt`.
+- [x] **Multi-module split.** Completed 2026-05-18. 16 modules — `:android:app`, `:shared:main` (KMP shell), `:common`, `:common-ui`, `:shared:common-resources`, `:core-domain`, `:core-navigation`, `:core-network`, `:shared:core-presentation`, `:core-storage`, `:core-resources`, `:feature-guides:{api,impl,presentation,ui}`. Convention plugins `kmp-library`, `compose-multiplatform-setup`, `android-application-setup` live in `build-logic`.
+- [x] **moko-resources migration.** Completed 2026-05-19. `:shared:common-resources` switched from Compose Resources to moko-resources 0.26.1. `MR.strings.*`, `MR.files.*`, `MR.fonts.*` replace the `Res.*` accessors. Assets live under `:shared:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Android `FileResource.readText(Context)` is bridged through an expect/actual `FileContentReader` injected via Koin.
 - [x] **AGP 9 + KMP DSL cleanup.** Completed 2026-05-19. `KmpLibraryPlugin` now applies `com.android.kotlin.multiplatform.library` and configures the `androidLibrary { }` DSL. `gradle.properties` no longer carries `android.builtInKotlin=false`, `android.newDsl=false` or the temporary `android.sourceset.disallowProvider=false` bypass. `AndroidApplicationSetupPlugin` no longer applies `kotlin.android` (AGP 9 built-in Kotlin handles it). `ProjectExtensions` uses `com.android.build.api.dsl.ApplicationExtension`.
 
 Remaining work, in order:
@@ -27,13 +27,13 @@ Remaining work, in order:
 
 ## Implication for Today
 
-- All resources live in `:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Use `MR.strings.*`, `MR.files.*`, `MR.fonts.*` — `Res.*` is gone.
+- All resources live in `:shared:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Use `MR.strings.*`, `MR.files.*`, `MR.fonts.*` — `Res.*` is gone.
 - moko 0.26.x file basenames must be identifier-safe (`constant_heroes.json`, `NotoSans-Regular.ttf`). The generated accessor mirrors the basename verbatim (`MR.files.constant_heroes_json`, `MR.fonts.notosans_regular`).
-- Android `FileResource.readText(Context)` is not in commonMain. New consumers of JSON/text files must go through the `FileContentReader` expect/actual helper (`:core-resources`) or its analogue, not raw moko APIs.
-- KMP modules apply `com.android.kotlin.multiplatform.library` (via the `kmp-library` convention plugin). The legacy `com.android.library` DSL is no longer applied to KMP modules. `:androidApp` continues to use `com.android.application` through the `android-application-setup` plugin.
-- Cross-feature dependencies are not allowed. `:feature-A:impl` may depend on `:feature-B:api` only if both features genuinely share that contract — otherwise hoist the shared logic into a `:core-*` module.
+- Android `FileResource.readText(Context)` is not in commonMain. New consumers of JSON/text files must go through the `FileContentReader` expect/actual helper (`:shared:core-resources`) or its analogue, not raw moko APIs.
+- KMP modules apply `com.android.kotlin.multiplatform.library` (via the `kmp-library` convention plugin). The legacy `com.android.library` DSL is no longer applied to KMP modules. `:android:app` continues to use `com.android.application` through the `android-application-setup` plugin.
+- Cross-feature dependencies are not allowed. `:shared:feature-A:impl` may depend on `:feature-B:api` only if both features genuinely share that contract — otherwise hoist the shared logic into a `:core-*` module.
 
-For incremental work today: route new features through MVIKotlin (`Store` / `Intent` / `State` / `Label` + `BaseExecutor` + `Reducer`), expose them through `BaseViewModel<State, Label>` in `:core-presentation`, register dependencies in per-feature `<feature>/impl/di/*ImplModule.kt` (plus `<feature>/presentation/di/*PresentationModule.kt` for VM + mapper bindings) and inject via constructor params (`koinViewModel()` for VMs in composables). Aggregate new modules in `:composeApp/core/di/AppModule.kt#appModule { includes(...) }`. Place strings in `:common-resources/src/commonMain/moko-resources/base/strings.xml`.
+For incremental work today: route new features through MVIKotlin (`Store` / `Intent` / `State` / `Label` + `BaseExecutor` + `Reducer`), expose them through `BaseViewModel<State, Label>` in `:shared:core-presentation`, register dependencies in per-feature `<feature>/impl/di/*ImplModule.kt` (plus `<feature>/presentation/di/*PresentationModule.kt` for VM + mapper bindings) and inject via constructor params (`koinViewModel()` for VMs in composables). Aggregate new modules in `:shared:main/core/di/AppModule.kt#appModule { includes(...) }`. Place strings in `:shared:common-resources/src/commonMain/moko-resources/base/strings.xml`.
 
 ## Track planned helpers
 
@@ -41,5 +41,5 @@ These helpers already shipped and are now part of the baseline — keep them in 
 
 - `common/extensions/CoroutineExtensions.kt` with `coRunCatching` (rethrows `CancellationException`).
 - `common/extensions/ResultExtensions.kt` with `wrapResultSuccess` / `wrapResultFailure`.
-- Napier initialized on every platform entry (`:androidApp/AndroidApp.onCreate`, `:composeApp/jvmMain/main.kt`, `:composeApp/iosMain/MainViewController`).
+- Napier initialized on every platform entry (`:android:app/AndroidApp.onCreate`, `:shared:main/jvmMain/main.kt`, `:shared:main/iosMain/MainViewController`).
 - `common/coroutines/CoroutineDispatchers` interface (+ `CoroutineDispatchersImpl`) — inject this, never reference `Dispatchers.IO` / `Dispatchers.Default` directly in `commonMain`.

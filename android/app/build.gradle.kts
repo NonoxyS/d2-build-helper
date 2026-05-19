@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.composeApp)
+    implementation(projects.shared.main)
     implementation(libs.androidx.activityCompose)
     implementation(libs.koin.android)
     implementation(libs.napier)

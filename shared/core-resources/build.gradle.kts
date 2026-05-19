@@ -12,11 +12,11 @@ androidLibraryConfig {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(projects.coreDomain)
-            implementation(projects.common)
-            implementation(projects.commonResources)
-            implementation(projects.coreNetwork)
-            implementation(projects.coreStorage)
+            api(projects.shared.coreDomain)
+            implementation(projects.shared.common)
+            implementation(projects.shared.commonResources)
+            implementation(projects.shared.coreNetwork)
+            implementation(projects.shared.coreStorage)
             api(libs.koin.core)
             implementation(libs.napier)
         }
