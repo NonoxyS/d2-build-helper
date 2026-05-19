@@ -8,10 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dev.nonoxy.d2buildhelper.common.resources.Res
-import dev.nonoxy.d2buildhelper.common.resources.error_loading
-import dev.nonoxy.d2buildhelper.common.resources.retry
-import org.jetbrains.compose.resources.stringResource
+import dev.icerock.moko.resources.compose.stringResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
 
 @Composable
 internal fun GuidesErrorView(onRetry: () -> Unit) {
@@ -20,7 +18,7 @@ internal fun GuidesErrorView(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(stringResource(Res.string.error_loading))
-        Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+        Text(stringResource(MR.strings.error_loading))
+        Button(onClick = onRetry) { Text(stringResource(MR.strings.retry)) }
     }
 }

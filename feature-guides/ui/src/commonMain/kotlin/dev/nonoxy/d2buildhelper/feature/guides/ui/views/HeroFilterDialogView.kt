@@ -36,10 +36,9 @@ import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.common.resources.Res
-import dev.nonoxy.d2buildhelper.common.resources.hero_filter
+import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
-import org.jetbrains.compose.resources.stringResource
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 internal fun HeroFilterDialog(
@@ -77,7 +76,7 @@ internal fun HeroFilterDialog(
                     },
                     placeholder = {
                         Text(
-                            text = stringResource(Res.string.hero_filter),
+                            text = stringResource(MR.strings.hero_filter),
                             style = D2BuildHelperTheme.typography.bodyMedium,
                         )
                     },

@@ -43,7 +43,7 @@ coil = "3.2.0"
 mvikotlin = "4.4.0"
 napier = "2.7.1"
 moko-mvvm = "0.16.1"
-moko-resources = "0.24.5"
+moko-resources = "0.26.1"
 
 # Linting
 detekt = "1.23.8"

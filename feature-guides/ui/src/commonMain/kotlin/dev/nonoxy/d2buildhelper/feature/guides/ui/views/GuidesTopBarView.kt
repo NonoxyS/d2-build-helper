@@ -22,10 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import dev.nonoxy.d2buildhelper.common.resources.Res
-import dev.nonoxy.d2buildhelper.common.resources.all_heroes
+import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
-import org.jetbrains.compose.resources.stringResource
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun GuidesTopBar(
@@ -55,7 +54,7 @@ private fun HeroSelectButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(Res.string.all_heroes),
+            text = stringResource(MR.strings.all_heroes),
             color = D2BuildHelperTheme.colors.primaryText,
             style = D2BuildHelperTheme.typography.bodySmall,
             modifier = Modifier
