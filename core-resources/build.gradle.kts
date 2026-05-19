@@ -1,6 +1,12 @@
+import extensions.androidLibraryConfig
+
 plugins {
-    id("kmp-library")
-    id("json-serialization")
+    alias(libs.plugins.conventionPlugin.kmpLibrary)
+    alias(libs.plugins.conventionPlugin.jsonSerialization)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.core.resources"
 }
 
 kotlin {

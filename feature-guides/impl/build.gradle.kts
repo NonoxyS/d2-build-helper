@@ -1,6 +1,12 @@
+import extensions.androidLibraryConfig
+
 plugins {
-    id("kmp-feature-setup")
-    id("json-serialization")
+    alias(libs.plugins.conventionPlugin.kmpFeatureSetup)
+    alias(libs.plugins.conventionPlugin.jsonSerialization)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.feature.guides.impl"
 }
 
 kotlin {
@@ -8,6 +14,9 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.coreNetwork)
             implementation(projects.coreResources)
+        }
+        commonTest.dependencies {
+            implementation(libs.mvikotlin.coroutines)
         }
     }
 }

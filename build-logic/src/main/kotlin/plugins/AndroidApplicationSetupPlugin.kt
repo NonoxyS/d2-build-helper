@@ -14,8 +14,8 @@ class AndroidApplicationSetupPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply(libs.plugins.android.application.get().pluginId)
-                apply(libs.plugins.compose.asProvider().get().pluginId)
+                apply(libs.plugins.androidApplication.get().pluginId)
+                apply(libs.plugins.compose.multiplatform.get().pluginId)
                 apply(libs.plugins.compose.compiler.get().pluginId)
             }
 

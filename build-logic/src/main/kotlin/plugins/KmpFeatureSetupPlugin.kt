@@ -1,12 +1,12 @@
 package plugins
 
-import extensions.androidMainDependencies
+import extensions.apis
+import extensions.asList
 import extensions.commonMainDependencies
-import extensions.commonTestDependencies
 import extensions.getApiModule
 import extensions.getPresentationModule
+import extensions.implementations
 import extensions.isApiModule
-import extensions.isImplModule
 import extensions.isPresentationModule
 import extensions.isUiModule
 import extensions.libs
@@ -18,87 +18,71 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             applyPlugins()
-            wireDependencies()
+            configureFeatureModuleDependencies()
         }
     }
 
     private fun Project.applyPlugins() {
         with(pluginManager) {
-            apply("kmp-library")
-            if (isUiModule) {
-                apply("compose-multiplatform-setup")
+            apply(libs.plugins.conventionPlugin.kmpLibrary.get().pluginId)
+
+            if (project.isApiModule || project.isPresentationModule) {
+                // Need for inferring stability of public models
+                apply(libs.plugins.compose.compiler.get().pluginId)
             }
         }
     }
 
-    private fun Project.wireDependencies() {
-        when {
-            isApiModule -> wireApiModule()
-            isImplModule -> wireImplModule()
-            isPresentationModule -> wirePresentationModule()
-            isUiModule -> wireUiModule()
-            else -> error(
-                "kmp-feature-setup applied to '$path' but module name must be one of: " +
-                    "api, impl, presentation, ui",
+    private fun Project.configureFeatureModuleDependencies() {
+
+        // Need for inferring stability of public models
+        val composeRuntimeApiPresentationModuleDependencies = listOf(
+            libs.compose.runtime,
+        ).takeIf { project.isApiModule || project.isPresentationModule }
+
+        val implModuleDependencies = when (project.isApiModule) {
+            true -> null
+            false -> listOfNotNull(
+                project(":common"),
+                project.getApiModule(),
             )
         }
-    }
 
-    private fun Project.wireApiModule() {
-        commonMainDependencies {
-            api(project(":core-domain"))
-            api(libs.mvikotlin.core)
-        }
-    }
+        val presentationModuleDependencies = listOf(
+            project(":core-presentation"),
+            libs.koin.compose.viewmodel,
+        ).takeIf { project.isPresentationModule }
 
-    private fun Project.wireImplModule() {
-        val featureApi = requireSibling(getApiModule(), kind = "api")
-        commonMainDependencies {
-            api(featureApi)
-            implementation(project(":common"))
-            implementation(project(":core-domain"))
-            implementation(project(":core-mvikotlin"))
-            implementation(libs.koin.core)
-            implementation(libs.napier)
-        }
-        commonTestDependencies {
-            implementation(libs.mvikotlin.coroutines)
-        }
-    }
+        val uiModuleDependencies = listOf(
+            project(":core-navigation"),
+            project(":common-resources"),
+            project(":common-ui"),
+            libs.koin.compose.viewmodel,
+            libs.moko.resources.compose,
+            *composeBundle,
+        ).plus(
+            project.getPresentationModule()?.asList().orEmpty(),
+        ).takeIf { project.isUiModule }
 
-    private fun Project.wirePresentationModule() {
-        val featureApi = requireSibling(getApiModule(), kind = "api")
-        commonMainDependencies {
-            api(featureApi)
-            api(project(":core-presentation"))
-            implementation(project(":core-domain"))
-            implementation(project(":common"))
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose.viewmodel)
-        }
-    }
-
-    private fun Project.wireUiModule() {
-        val featurePresentation = requireSibling(getPresentationModule(), kind = "presentation")
-        commonMainDependencies {
-            api(featurePresentation)
-            implementation(project(":common"))
-            implementation(project(":common-resources"))
-            implementation(project(":common-ui"))
-            implementation(project(":core-domain"))
-            implementation(project(":core-navigation"))
-            implementation(libs.compose.material3)
-            implementation(libs.compose.ui.tooling.preview)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-        }
-        androidMainDependencies {
-            implementation(libs.compose.ui.tooling)
-        }
-    }
-
-    private fun Project.requireSibling(sibling: Project?, kind: String): Project = sibling
-        ?: error(
-            "kmp-feature-setup on '$path': sibling :$kind submodule not found under '${parent?.path}'.",
+        val commonDependencies = listOf(
+            project(":core-domain"),
         )
+
+        val nonUiModuleDependencies = when (project.isUiModule) {
+            true -> null
+            false -> project(":core-mvikotlin").asList()
+        }
+
+        commonMainDependencies {
+            implementations(
+                *commonDependencies.toTypedArray(),
+                *implModuleDependencies?.toTypedArray().orEmpty(),
+                *uiModuleDependencies?.toTypedArray().orEmpty(),
+                *composeRuntimeApiPresentationModuleDependencies?.toTypedArray().orEmpty(),
+                *nonUiModuleDependencies?.toTypedArray().orEmpty(),
+            )
+
+            apis(*presentationModuleDependencies?.toTypedArray().orEmpty())
+        }
+    }
 }

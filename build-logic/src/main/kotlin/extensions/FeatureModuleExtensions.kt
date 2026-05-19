@@ -32,3 +32,5 @@ internal fun Project.getPresentationModule(): Project? = parent
     ?.childProjects
     ?.values
     ?.firstOrNull { it.isPresentationModule }
+
+internal fun <T> T.asList(): List<T> = listOf(this)

@@ -1,6 +1,6 @@
 package plugins
 
-import extensions.androidLibrary
+import extensions.androidLibraryConfig
 import extensions.commonMainDependencies
 import extensions.commonTestDependencies
 import extensions.kotlinMultiplatformConfig
@@ -8,54 +8,74 @@ import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.kotlin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 class KmpLibraryPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply(libs.plugins.multiplatform.get().pluginId)
-                apply(libs.plugins.android.kotlin.multiplatform.library.get().pluginId)
-            }
+            applyPlugins()
+            configureKotlin()
+            configureAndroid()
+            configureJvm()
+            configureIos()
+            configureDependencies()
+        }
+    }
 
-            kotlinMultiplatformConfig {
-                jvmToolchain(JAVA_VERSION)
+    private fun Project.applyPlugins() {
+        with(pluginManager) {
+            apply(libs.plugins.kotlin.multiplatform.get().pluginId)
+            apply(libs.plugins.kotlin.multiplatformAndroidLibrary.get().pluginId)
+        }
+    }
 
-                @Suppress("UnstableApiUsage")
-                androidLibrary {
-                    namespace = derivedNamespace(target)
-                    compileSdk = libs.versions.android.compileSdk.get().toInt()
-                    minSdk = libs.versions.android.minSdk.get().toInt()
-                }
+    private fun Project.configureKotlin() {
+        kotlinMultiplatformConfig {
+            jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-                jvm()
-
-                iosX64()
-                iosArm64()
-                iosSimulatorArm64()
-            }
-
-            commonMainDependencies {
-                implementation(libs.kotlinx.coroutines.core)
-            }
-
-            commonTestDependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
+            compilerOptions {
+                freeCompilerArgs.addAll(
+                    "-Xcontext-parameters",
+                    "-Xexpect-actual-classes",
+                )
             }
         }
     }
 
-    private fun derivedNamespace(project: Project): String {
-        val segments = project.path
-            .removePrefix(":")
-            .split(":", "-")
-            .map { it.replace(Regex("[^A-Za-z0-9]"), "") }
-            .filter { it.isNotEmpty() }
-        return (listOf("dev", "nonoxy", "d2buildhelper") + segments).joinToString(".")
+    private fun Project.configureAndroid() {
+        androidLibraryConfig {
+            compileSdk = libs.versions.android.compileSdk.get().toInt()
+            minSdk = libs.versions.android.minSdk.get().toInt()
+
+            compilerOptions {
+                jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
+            }
+        }
     }
 
-    companion object {
-        private const val JAVA_VERSION = 17
+    private fun Project.configureJvm() {
+        kotlinMultiplatformConfig {
+            jvm()
+        }
+    }
+
+    private fun Project.configureIos() {
+        kotlinMultiplatformConfig {
+            iosX64()
+            iosArm64()
+            iosSimulatorArm64()
+        }
+    }
+
+    private fun Project.configureDependencies() {
+        commonMainDependencies {
+            implementation(libs.kotlinx.coroutines.core)
+        }
+
+        commonTestDependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

@@ -1,5 +1,12 @@
+import extensions.androidLibraryConfig
+
 plugins {
-    id("kmp-feature-setup")
+    alias(libs.plugins.conventionPlugin.kmpFeatureSetup)
+    alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.feature.guides.ui"
 }
 
 kotlin {

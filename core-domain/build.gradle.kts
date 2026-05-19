@@ -1,3 +1,9 @@
+import extensions.androidLibraryConfig
+
 plugins {
-    id("kmp-library")
+    alias(libs.plugins.conventionPlugin.kmpLibrary)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.core.domain"
 }

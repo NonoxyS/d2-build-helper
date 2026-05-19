@@ -1,6 +1,12 @@
+import extensions.androidLibraryConfig
+
 plugins {
-    id("kmp-library")
-    id("compose-multiplatform-setup")
+    alias(libs.plugins.conventionPlugin.kmpLibrary)
+    alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.common.ui"
 }
 
 kotlin {

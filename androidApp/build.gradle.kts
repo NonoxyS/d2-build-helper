@@ -1,7 +1,7 @@
 import utils.AppVersion
 
 plugins {
-    id("android-application-setup")
+    alias(libs.plugins.conventionPlugin.androidApplicationSetup)
 }
 
 android {

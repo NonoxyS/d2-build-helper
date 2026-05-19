@@ -1,9 +1,14 @@
+import extensions.androidLibraryConfig
 import java.util.Properties
 
 plugins {
-    id("kmp-library")
+    alias(libs.plugins.conventionPlugin.kmpLibrary)
     alias(libs.plugins.apollo)
     alias(libs.plugins.buildConfig)
+}
+
+androidLibraryConfig {
+    namespace = "dev.nonoxy.d2buildhelper.core.network"
 }
 
 kotlin {
