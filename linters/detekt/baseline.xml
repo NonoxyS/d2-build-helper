@@ -6,7 +6,6 @@
     <ID>ComposableEventParameterNaming:HeroFilterDialogView.kt$onSearchValueChanged: (String) -&gt; Unit</ID>
     <ID>ComposableFunctionName:App.kt$@Composable fun App()</ID>
     <ID>ComposableFunctionName:Type.kt$@Composable fun D2BuildHelperTypography()</ID>
-    <ID>ComposableFunctionName:Type.kt$@Composable fun NotoSansFontFamily()</ID>
     <ID>CompositionLocalAllowlist:D2BuildHelperColors.kt$LocalD2BuildHelperColor</ID>
     <ID>CompositionLocalAllowlist:LocalImageLoader.kt$LocalImageLoader</ID>
     <ID>CompositionLocalAllowlist:LocalNavHost.kt$LocalNavHost</ID>

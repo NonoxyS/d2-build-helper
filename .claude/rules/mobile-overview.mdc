@@ -32,7 +32,7 @@ alwaysApply: false
 | `:composeApp` | KMP shell | `App.kt` + NavHost + `jvmMain/main.kt` desktop entry + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. |
 | `:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
 | `:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
-| `:common-resources` | KMP + Compose Resources | Shared `composeResources/` (strings, JSON constants, fonts). Generated `Res` in `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, JSON files, fonts). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |
 | `:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
 | `:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
 | `:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |

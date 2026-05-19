@@ -32,7 +32,7 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on platform entry).
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`).
 - State management: MVIKotlin `Store` per feature + `BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
-- Resources: still served by Compose Resources from `:common-resources` (strings.xml, JSON constants, fonts). moko-resources migration is a planned follow-up.
+- Resources: moko-resources 0.26.1 in `:common-resources` (generated `MR` in package `dev.nonoxy.d2buildhelper.common.resources`). Assets under `src/commonMain/moko-resources/{base, files, fonts}/`.
 - Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal (in `:core-navigation`).
 
 API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `SUPABASE_*` is read by `:core-storage/build.gradle.kts`, `STRATZ_*` by `:core-network/build.gradle.kts`.
@@ -47,7 +47,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | `:composeApp` | KMP shell | `App.kt`, NavHost wiring, `jvmMain/main.kt` desktop entry, `iosMain/main.kt` iOS framework entry. Composition Root for Koin (`initKoin`). |
 | `:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule` Koin. |
 | `:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme` (+ platform `SystemAppearance` actuals). |
-| `:common-resources` | KMP + Compose Resources | Shared strings.xml, JSON constants under `composeResources/files/constants/`, fonts. `Res` accessor lives in package `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:common-resources` | KMP + moko-resources | Shared `strings.xml`, JSON constants and fonts under `moko-resources/{base, files, fonts}/`. `MR` accessor lives in package `dev.nonoxy.d2buildhelper.common.resources`. |
 | `:core-domain` | KMP | App-wide pure domain models: `Hero`, `Item`, `Ability`, `ImageResources`. |
 | `:core-navigation` | KMP + Compose | `AppScreens` sealed routes, `LocalNavHost`. |
 | `:core-network` | KMP | `ApolloClient` + GraphQL queries + Stratz schema + buildConfig (Stratz) + per-platform Ktor engines, `coreNetworkModule` Koin. |
@@ -78,7 +78,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews, local-mirror text inputs |
 | `mobile-data-layer.mdc` | DTO / domain split, `suspend fun (): Result<T>` repositories, mappers, repository cache, `CoroutineDispatchers` |
 | `mobile-network.mdc` | Apollo (GraphQL) in `:core-network`, Supabase Storage in `:core-storage`, BuildConfig keys per-module |
-| `mobile-resources.mdc` | `:common-resources` (Compose Resources today; moko-resources planned) |
+| `mobile-resources.mdc` | `:common-resources` (moko-resources 0.26.x — `MR.strings/files/fonts`) |
 | `mobile-error-handling.mdc` | `coRunCatching` in suspend, `Result<T>` surfacing, Napier logging in repos/executors |
 | `mobile-code-rules.mdc` | Access modifiers, member ordering, NPE-safety |
 | `mobile-roadmap.mdc` | Remaining migrations (moko-resources, AGP9+KMP DSL cleanup) |
@@ -96,7 +96,8 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 - Apollo config lives in `:core-network/build.gradle.kts` under `apollo { service("api") { ... } }`. buildConfig for Stratz keys also there. Supabase keys live in `:core-storage/build.gradle.kts` buildConfig. API keys must be in `local.properties`.
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. `AppVersion.getVersionCode/Name` is invoked from `:androidApp/build.gradle.kts`.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
-- AGP 9 + KMP via `com.android.library` requires legacy DSL flags `android.builtInKotlin=false` and `android.newDsl=false` in `gradle.properties`. These are deprecated; the cleanup hinges on migrating `build-logic` to the new `com.android.kotlin.multiplatform.library` plugin (see `mobile-roadmap.mdc`).
+- AGP 9 KMP modules use `com.android.kotlin.multiplatform.library` (applied by the `kmp-library` convention plugin). The `androidLibrary { }` DSL is configured through a typed helper in `build-logic/extensions/ProjectExtensions.kt` (`KotlinMultiplatformExtension.androidLibrary`).
+- All resources go through `:common-resources/src/commonMain/moko-resources/`. Basenames must be identifier-safe — moko mirrors them verbatim (`constant_heroes.json` → `MR.files.constant_heroes_json`, `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`). JSON content is read via the `FileContentReader` expect/actual (in `:core-resources`) injected through Koin — Android `FileResource.readText` needs a `Context`, so do not call moko file APIs directly from commonMain.
 - iOS Kotlin/Native cache is disabled (`kotlin.native.cacheKind=none` in `gradle.properties`) to work around a Supabase storage-kt build failure on iOS Simulator Arm64. Revisit once Supabase / Kotlin/Native versions move.
 - Git hooks live in `.githooks/`. Enable via `git config core.hooksPath .githooks`.
 - CI lives in `.github/workflows/`. PRs to `master`, `develop`, `develop-cmp` run Detekt + Android Lint (`:androidApp:lintDebug`) + SwiftLint + SwiftFormat.
