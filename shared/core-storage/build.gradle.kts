@@ -1,4 +1,5 @@
 import extensions.androidLibraryConfig
+import extensions.commonMainDependencies
 import java.util.Properties
 
 plugins {
@@ -10,12 +11,8 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.core.storage"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.supabase.storage)
-        }
-    }
+commonMainDependencies {
+    api(libs.supabase.storage)
 }
 
 buildConfig {

@@ -13,7 +13,7 @@ alwaysApply: false
 - Gradle 9.4.1, Java target 17
 - Apollo Kotlin 4.3.1 — Stratz GraphQL (in `:shared:core-network`)
 - Supabase Storage 3.1.0 — hero/item/ability icons (in `:shared:core-storage`)
-- Ktor 3.3.3 — OkHttp on Android+JVM, Darwin on iOS
+- Ktor 3.3.3 — OkHttp on Android, Darwin on iOS
 - Coil 3.2.0 — image loading
 - kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
 - compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
@@ -24,12 +24,12 @@ alwaysApply: false
 
 ## Module Layout
 
-16 modules under `android/` and `shared/`. KMP layout per module: `src/{commonMain,commonTest,androidMain,jvmMain,iosMain}/kotlin/...`. Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
+16 modules under `android/` and `shared/`. KMP layout per module: `src/{commonMain,commonTest,androidMain,iosMain}/kotlin/...`. Targets: Android + iOS only (no JVM/Desktop). Convention plugins (`kmp-library`, `kmp-feature-setup`, `compose-multiplatform-setup`, `android-application-setup`, `json-serialization`) live in `build-logic`.
 
 | Module | Type | Responsibility |
 |---|---|---|
 | `:android:app` | Android-only | `com.android.application`, `AndroidApp`, `AppActivity`, manifest. |
-| `:shared:main` | KMP shell | `App.kt` + NavHost + `jvmMain/main.kt` desktop entry + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. |
+| `:shared:main` | KMP shell | `App.kt` + NavHost + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. Targets: Android + iOS. |
 | `:shared:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
 | `:shared:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
 | `:shared:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, JSON files, fonts). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |

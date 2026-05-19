@@ -1,4 +1,5 @@
 import extensions.androidLibraryConfig
+import extensions.commonMainDependencies
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
@@ -9,10 +10,6 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.core.navigation"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.compose.navigation)
-        }
-    }
+commonMainDependencies {
+    api(libs.compose.navigation)
 }

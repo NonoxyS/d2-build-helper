@@ -1,4 +1,5 @@
 import extensions.androidLibraryConfig
+import extensions.commonMainDependencies
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpFeatureSetup)
@@ -9,10 +10,6 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.feature.guides.ui"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            implementation(compose.materialIconsExtended)
-        }
-    }
+commonMainDependencies {
+    implementation(libs.compose.material.icons.extended)
 }

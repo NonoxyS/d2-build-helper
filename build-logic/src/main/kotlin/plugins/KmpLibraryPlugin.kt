@@ -3,13 +3,11 @@ package plugins
 import extensions.androidLibraryConfig
 import extensions.androidMainDependencies
 import extensions.commonMainDependencies
-import extensions.commonTestDependencies
 import extensions.implementations
 import extensions.kotlinMultiplatformConfig
 import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 class KmpLibraryPlugin : Plugin<Project> {
@@ -19,7 +17,6 @@ class KmpLibraryPlugin : Plugin<Project> {
             applyPlugins()
             configureKotlin()
             configureAndroid()
-            configureJvm()
             configureIos()
             configureDependencies()
         }
@@ -53,12 +50,9 @@ class KmpLibraryPlugin : Plugin<Project> {
             compilerOptions {
                 jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
             }
-        }
-    }
 
-    private fun Project.configureJvm() {
-        kotlinMultiplatformConfig {
-            jvm()
+            @Suppress("UnstableApiUsage")
+            withHostTestBuilder { }
         }
     }
 
@@ -85,11 +79,6 @@ class KmpLibraryPlugin : Plugin<Project> {
                 libs.koin.android,
                 libs.kotlinx.coroutines.android,
             )
-        }
-
-        commonTestDependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

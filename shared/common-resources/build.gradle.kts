@@ -1,5 +1,6 @@
 import dev.icerock.gradle.MRVisibility
 import extensions.androidLibraryConfig
+import extensions.commonMainDependencies
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
@@ -11,13 +12,9 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.common.resources"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.moko.resources)
-            api(libs.moko.resources.compose)
-        }
-    }
+commonMainDependencies {
+    api(libs.moko.resources)
+    api(libs.moko.resources.compose)
 }
 
 multiplatformResources {

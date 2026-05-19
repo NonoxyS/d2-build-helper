@@ -1,4 +1,7 @@
 import extensions.androidLibraryConfig
+import extensions.androidMainDependencies
+import extensions.commonMainDependencies
+import extensions.iosMainDependencies
 import java.util.Properties
 
 plugins {
@@ -11,21 +14,16 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.core.network"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.apollo.runtime)
-        }
-        androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-        }
-        jvmMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
-        }
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
-        }
-    }
+commonMainDependencies {
+    api(libs.apollo.runtime)
+}
+
+androidMainDependencies {
+    implementation(libs.ktor.client.okhttp)
+}
+
+iosMainDependencies {
+    implementation(libs.ktor.client.darwin)
 }
 
 apollo {

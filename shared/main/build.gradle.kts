@@ -1,6 +1,6 @@
 import extensions.androidLibraryConfig
-import org.jetbrains.compose.ExperimentalComposeLibrary
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import extensions.commonMainDependencies
+import extensions.commonTestDependencies
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -19,53 +19,33 @@ kotlin {
             isStatic = true
         }
     }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(projects.shared.common)
-            implementation(projects.shared.coreDomain)
-            implementation(projects.shared.commonResources)
-            implementation(projects.shared.corePresentation)
-            implementation(projects.shared.coreNavigation)
-            implementation(projects.shared.commonUi)
-            implementation(projects.shared.coreNetwork)
-            implementation(projects.shared.coreStorage)
-            implementation(projects.shared.coreResources)
-            implementation(projects.shared.featureGuides.api)
-            implementation(projects.shared.featureGuides.impl)
-            implementation(projects.shared.featureGuides.presentation)
-            implementation(projects.shared.featureGuides.ui)
-
-            implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(libs.compose.ui.tooling.preview)
-
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-        }
-
-        commonTest.dependencies {
-            @OptIn(ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
-        }
-
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
-        }
-    }
 }
 
-compose.desktop {
-    application {
-        mainClass = "MainKt"
+commonMainDependencies {
+    implementation(projects.shared.common)
+    implementation(projects.shared.coreDomain)
+    implementation(projects.shared.commonResources)
+    implementation(projects.shared.corePresentation)
+    implementation(projects.shared.coreNavigation)
+    implementation(projects.shared.commonUi)
+    implementation(projects.shared.coreNetwork)
+    implementation(projects.shared.coreStorage)
+    implementation(projects.shared.coreResources)
+    implementation(projects.shared.featureGuides.api)
+    implementation(projects.shared.featureGuides.impl)
+    implementation(projects.shared.featureGuides.presentation)
+    implementation(projects.shared.featureGuides.ui)
 
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "dev.nonoxy.d2buildhelper.desktopApp"
-            packageVersion = "1.0.0"
-        }
-    }
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.compose.ui.tooling.preview)
+
+    implementation(libs.androidx.lifecycle.viewmodelCompose)
+
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+}
+
+commonTestDependencies {
+    implementation(libs.compose.ui.test)
 }

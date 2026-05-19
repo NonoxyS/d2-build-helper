@@ -1,17 +1,15 @@
 # d2-build-helper
 
-Dota 2 build helper — Compose Multiplatform app (Android, Desktop/JVM, iOS) that surfaces hero builds and stats from high-rating matches. Data sources: Stratz GraphQL API (via Apollo) and Supabase Storage (for icons). Local JSON for hero/item/ability constants.
+Dota 2 build helper — Compose Multiplatform app (Android, iOS) that surfaces hero builds and stats from high-rating matches. Data sources: Stratz GraphQL API (via Apollo) and Supabase Storage (for icons). Local JSON for hero/item/ability constants.
 
 ## Build Commands
 
 ```shell
-./gradlew :android:app:assembleDebug              # Android debug APK
-./gradlew :shared:main:run                         # Desktop (JVM)
+./gradlew :android:app:assembleDebug                       # Android debug APK
+./gradlew :android:app:lintDebug                            # Android Lint
+./gradlew :shared:feature-guides:impl:testAndroidHostTest  # commonTest tests run on Android host JVM
 ./gradlew :shared:main:iosSimulatorArm64Test
-./gradlew :shared:main:jvmTest
-./gradlew :shared:feature-guides:impl:jvmTest
-./gradlew :android:app:lintDebug                   # Android Lint
-./gradlew detekt                                    # Static analysis (Kotlin, all modules)
+./gradlew detekt                                            # Static analysis (Kotlin, all modules)
 ```
 
 iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
@@ -22,7 +20,7 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Gradle 9.4.1.
 - Apollo Kotlin 4.3.1 (Stratz GraphQL).
 - Supabase 3.1.0 (storage only — for hero/item/ability icons).
-- Ktor 3.3.3 (OkHttp on Android+JVM, Darwin on iOS).
+- Ktor 3.3.3 (OkHttp on Android, Darwin on iOS).
 - Coil 3.2.0 (image loading).
 - Coroutines 1.10.2, kotlinx.serialization 1.10.0.
 - Android: compileSdk/targetSdk 36, minSdk 26.
@@ -44,7 +42,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | Module | Type | Responsibility |
 |---|---|---|
 | `:android:app` | Android-only | `com.android.application` entry. `AndroidApp`, `AppActivity`, manifest. Package `dev.nonoxy.d2buildhelper.android`. |
-| `:shared:main` | KMP shell | `App.kt`, NavHost wiring, `jvmMain/main.kt` desktop entry, `iosMain/main.kt` iOS framework entry. Composition Root for Koin (`initKoin`). |
+| `:shared:main` | KMP shell | `App.kt`, NavHost wiring, `iosMain/main.kt` iOS framework entry. Composition Root for Koin (`initKoin`). Targets: Android + iOS. |
 | `:shared:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule` Koin. |
 | `:shared:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme` (+ platform `SystemAppearance` actuals). |
 | `:shared:common-resources` | KMP + moko-resources | Shared `strings.xml`, JSON constants and fonts under `moko-resources/{base, files, fonts}/`. `MR` accessor lives in package `dev.nonoxy.d2buildhelper.common.resources`. |
@@ -93,7 +91,7 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 - `BaseViewModel.onCleared()` must call `store.dispose()` (Store does not auto-dispose with the VM) — see `GuidesViewModel`.
 - `Napier.base(DebugAntilog(...))` is called once per platform entry, before `initKoin(...)`. The call appends antilogs — if an entry can be re-created (test scenarios), wrap with `Napier.takeLogarithm()` first to avoid duplicate sinks.
 - Feature DI: per-module Koin module functions (`commonModule`, `coreNetworkModule`, `coreStorageModule`, `coreResourcesModule`, `coreMVIKotlinModule`, `featureGuidesImplModule`, `featureGuidesPresentationModule`). `:shared:main/core/di/AppModule.kt` only aggregates via `includes(...)` — no per-class bindings live in shell. Use `koinViewModel<T>()` in composables.
-- `initKoin()` is called from each platform entry point (`:android:app/AndroidApp.onCreate`, `:shared:main/jvmMain/main.kt` before `application{}`, and the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
+- `initKoin()` is called from each platform entry point (`:android:app/AndroidApp.onCreate`, the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
 - Apollo config lives in `:shared:core-network/build.gradle.kts` under `apollo { service("api") { ... } }`. buildConfig for Stratz keys also there. Supabase keys live in `:shared:core-storage/build.gradle.kts` buildConfig. API keys must be in `local.properties`.
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. `AppVersion.getVersionCode/Name` is invoked from `:android:app/build.gradle.kts`.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.

@@ -1,4 +1,5 @@
 import extensions.androidLibraryConfig
+import extensions.commonMainDependencies
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
@@ -9,14 +10,10 @@ androidLibraryConfig {
     namespace = "dev.nonoxy.d2buildhelper.core.resources"
 }
 
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            api(projects.shared.coreDomain)
-            implementation(projects.shared.common)
-            implementation(projects.shared.commonResources)
-            implementation(projects.shared.coreNetwork)
-            implementation(projects.shared.coreStorage)
-        }
-    }
+commonMainDependencies {
+    api(projects.shared.coreDomain)
+    implementation(projects.shared.common)
+    implementation(projects.shared.commonResources)
+    implementation(projects.shared.coreNetwork)
+    implementation(projects.shared.coreStorage)
 }

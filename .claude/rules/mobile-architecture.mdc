@@ -54,7 +54,6 @@ Resolve dependencies:
 
 `core/di/Koin.kt#initKoin(appDeclaration)` is the single entry point. It is idempotent (`KoinPlatform.getKoinOrNull()` guard). Called from:
 - `AndroidApp.onCreate` with `androidContext(this)`.
-- `jvmMain/main.kt` before `application { }`.
 - iOS `MainViewController` factory inside `ComposeUIViewController(configure = { initKoin() })`.
 
 `ImageLoader` (Coil 3) is **not** in Koin — it requires `PlatformContext` from Compose and is built inside `App.kt` then exposed via `LocalImageLoader`.
