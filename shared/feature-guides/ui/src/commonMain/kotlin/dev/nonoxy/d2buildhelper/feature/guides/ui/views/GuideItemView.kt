@@ -1,5 +1,6 @@
 package dev.nonoxy.d2buildhelper.feature.guides.ui.views
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import dev.icerock.moko.resources.ImageResource
+import dev.icerock.moko.resources.compose.painterResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
@@ -59,14 +63,11 @@ internal fun GuideItemView(
         HeroNameRow(
             hero = guide.hero,
             heroImageUrl = imageResources.heroImages[guide.hero] ?: "",
-            positionImageUrl = imageResources.additionalImages[guide.playerStats.position.title]
-                ?: ""
+            position = guide.playerStats.position
         )
         MatchStatsRow(
             guide = guide,
-            sideImageUrl = imageResources.additionalImages[
-                if (guide.playerStats.isRadiant) "radiant_square"
-                else "dire_square"] ?: ""
+            isRadiant = guide.playerStats.isRadiant
         )
         ItemRow(
             guide = guide,
@@ -79,19 +80,23 @@ internal fun GuideItemView(
 private fun HeroNameRow(
     hero: Hero,
     heroImageUrl: String,
-    positionImageUrl: String
+    position: MatchPlayerPosition
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = positionImageUrl,
-            contentDescription = null,
-            imageLoader = LocalImageLoader.current,
-            modifier = Modifier.size(18.dp)
-        )
+        val positionIcon = position.iconResource()
+        if (positionIcon != null) {
+            Image(
+                painter = painterResource(positionIcon),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(18.dp))
+        }
 
         AsyncImage(
             model = heroImageUrl,
@@ -111,7 +116,7 @@ private fun HeroNameRow(
 @Composable
 private fun MatchStatsRow(
     guide: Guide,
-    sideImageUrl: String
+    isRadiant: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -125,10 +130,11 @@ private fun MatchStatsRow(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        AsyncImage(
-            model = sideImageUrl,
+        Image(
+            painter = painterResource(
+                if (isRadiant) MR.images.radiant_square else MR.images.dire_square
+            ),
             contentDescription = null,
-            imageLoader = LocalImageLoader.current,
             modifier = Modifier.size(16.dp).clip(RoundedCornerShape(4.dp))
         )
 
@@ -228,6 +234,17 @@ private fun ItemRow(
 private fun Map<Item, String>.findByItemId(id: Short): String? =
     entries.firstOrNull { it.key.id == id }?.value
 
+private fun MatchPlayerPosition.iconResource(): ImageResource? = when (this) {
+    MatchPlayerPosition.POSITION_1 -> MR.images.position_1
+    MatchPlayerPosition.POSITION_2 -> MR.images.position_2
+    MatchPlayerPosition.POSITION_3 -> MR.images.position_3
+    MatchPlayerPosition.POSITION_4 -> MR.images.position_4
+    MatchPlayerPosition.POSITION_5 -> MR.images.position_5
+    MatchPlayerPosition.UNKNOWN,
+    MatchPlayerPosition.FILTERED,
+    MatchPlayerPosition.ALL -> null
+}
+
 @Composable
 private fun ItemWithBuyTime(
     itemPurchase: ItemPurchase?,
@@ -292,13 +309,10 @@ private fun GuideItemView_Preview() {
                         heroId = 1,
                         shortName = "antimage",
                         "Anti-Mage"
-                    ) to "https://ojxuhaplumzopsbihjkf.supabase.co/storage/v1/object/public/d2bh_images/hero_icons/antimage_minimap_icon.png"
+                    ) to "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/antimage.png"
                 ),
                 itemImages = emptyMap(),
                 abilityImages = emptyMap(),
-                additionalImages = mapOf(
-                    "POSITION_1" to "https://ojxuhaplumzopsbihjkf.supabase.co/storage/v1/object/public/d2bh_images/additional_icons/POSITION_1.png"
-                )
             )
         )
     }

@@ -20,11 +20,9 @@ jobs:
 
       - name: Provision local.properties
         env:
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
           STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
         run: |
           cat > local.properties <<EOF
-          SUPABASE_API_KEY=${SUPABASE_API_KEY:-ci-stub}
           STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
           EOF
 
@@ -55,11 +53,9 @@ jobs:
 
       - name: Provision local.properties
         env:
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
           STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
         run: |
           cat > local.properties <<EOF
-          SUPABASE_API_KEY=${SUPABASE_API_KEY:-ci-stub}
           STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
           EOF
 

@@ -15,6 +15,7 @@ common-resources/src/commonMain/moko-resources/
   base/strings.xml          # default locale
   files/*.json              # JSON constants bundled with the app
   fonts/*.ttf               # custom typefaces
+  images/*.png              # bundled chrome icons (positions, Radiant/Dire)
 ```
 
 Basenames must be identifier-safe — moko mirrors them verbatim in the generated accessor:
@@ -59,10 +60,25 @@ val family = FontFamily(listOfNotNull(regular, bold))
 
 `asFont` is nullable on platforms that fail to load the typeface — fall back to `FontFamily.Default`.
 
+## Images
+
+App-chrome icons (position icons, Radiant/Dire squares) live in `moko-resources/images/` and render through `dev.icerock.moko.resources.compose.painterResource`:
+
+```kotlin
+import dev.icerock.moko.resources.compose.painterResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
+
+Image(painter = painterResource(MR.images.position_1), contentDescription = null)
+```
+
+Image files **must** carry a moko scale suffix `@{n}x` — e.g. `position_1@1x.png`. Without it moko emits the `MR.images` accessor but no Android `drawable`, and the build fails with `Unresolved reference 'drawable'`. The accessor name strips the suffix (`position_1@1x.png` → `MR.images.position_1`).
+
+Only bundle static app chrome here. Game-entity icons (heroes, items, abilities) are Steam CDN URLs built by `IconUrls` — see `mobile-network.mdc`.
+
 ## JSON Constants
 
 `moko-resources/files/constant_{heroes,items,abilities}.json` ship statically with the app. `MR.files.constant_X_json.readText()` is **not** in commonMain because Android requires a `Context`.
 
 Read JSON content through the `FileContentReader` expect/actual helper in `:shared:core-resources/.../data/local/constants/`. Inject it via Koin, then call `fileContentReader.read(MR.files.constant_heroes_json)`. The `bindFileContentReader` helper in `coreResourcesModule` wires the Android `Context` from Koin automatically.
 
-If a JSON file grows past a few hundred KB or needs frequent updates, move it to Supabase Storage (similar to icons) — bundling large blobs slows down the build and bloats every release.
+If a JSON file grows large or needs frequent updates, fetch it from Stratz instead of bundling — the game-constants migration to Stratz GraphQL `Constants` is the planned path (see `mobile-roadmap.mdc`).

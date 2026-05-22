@@ -47,7 +47,6 @@ private fun GuidesView_Preview() {
                     heroImages = emptyMap(),
                     itemImages = emptyMap(),
                     abilityImages = emptyMap(),
-                    additionalImages = emptyMap(),
                 ),
                 isLoading = false,
                 isError = false,

@@ -42,7 +42,7 @@ Loading lives in `Store.State.isLoading: Boolean`. Errors in `Store.State.isErro
 
 Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<feature>/impl/di/<Feature>ImplModule.kt` and are aggregated by `appModule`. The `core/mvikotlin/di/CoreMVIKotlinModule.kt` module exposes `StoreFactory`.
 
-- `single<T> { ... }` for clients (Apollo, Supabase), datasources, repositories.
+- `single<T> { ... }` for clients (Apollo), datasources, repositories.
 - `factory { <Feature>StoreFactory(get(), ...).create() }` to expose a feature `Store` (the StoreFactory itself is `internal` and lives in the same module).
 - `viewModelOf(::SomeViewModel)` for view-models (via `koin-compose-viewmodel`).
 - `singleOf(::Impl) bind Api::class` to expose mappers and other interface-backed services.
@@ -92,7 +92,7 @@ Notes:
 
 Feature-specific dependencies (anything outside the table above) **stay in the module's `build.gradle.kts`**:
 
-- `:impl` reaches into `:shared:core-network` / `:shared:core-storage` / `:shared:core-resources` only if that feature talks to those layers (`:shared:feature-guides:impl` declares `:shared:core-network` + `:shared:core-resources`).
+- `:impl` reaches into `:shared:core-network` / `:shared:core-resources` only if that feature talks to those layers (`:shared:feature-guides:impl` declares `:shared:core-network` + `:shared:core-resources`).
 - `:ui` adds extras like `compose.materialIconsExtended` (deprecated, pinned to 1.7.3 — flagged for migration to Material Symbols) feature-by-feature.
 - `:impl` declares `commonTest.dependencies { implementation(libs.mvikotlin.coroutines) }` when it needs the MVIKotlin test helpers.
 

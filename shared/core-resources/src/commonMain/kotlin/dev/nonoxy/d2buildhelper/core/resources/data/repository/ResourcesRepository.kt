@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.core.resources.data.repository
 
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
-import dev.nonoxy.d2buildhelper.core.resources.data.api.image.ImageResourcesApi
+import dev.nonoxy.d2buildhelper.core.resources.data.IconUrls
 import dev.nonoxy.d2buildhelper.core.resources.data.local.constants.ConstantResources
 import dev.nonoxy.d2buildhelper.core.resources.data.local.constants.models.AbilityDto
 import dev.nonoxy.d2buildhelper.core.resources.data.local.constants.models.HeroDto
@@ -17,11 +17,9 @@ interface ResourcesRepository {
     suspend fun getHeroImages(): Result<Map<Hero, String>>
     suspend fun getItemImages(): Result<Map<Item, String>>
     suspend fun getAbilityImages(): Result<Map<Ability, String>>
-    suspend fun getAdditionalImages(): Result<Map<String, String>>
 }
 
 internal class ResourcesRepositoryImpl(
-    private val imageResourcesApi: ImageResourcesApi,
     private val constantResources: ConstantResources,
     private val dispatchers: CoroutineDispatchers,
 ) : ResourcesRepository {
@@ -34,14 +32,12 @@ internal class ResourcesRepositoryImpl(
     private var heroImagesCache: Map<Hero, String>? = null
     private var itemImagesCache: Map<Item, String>? = null
     private var abilityImagesCache: Map<Ability, String>? = null
-    private var additionalImagesCache: Map<String, String>? = null
 
     override suspend fun getHeroImages(): Result<Map<Hero, String>> {
         heroImagesCache?.let { return Result.success(it) }
         return ensureHeroes().mapCatching { heroes ->
-            val urls = imageResourcesApi.getHeroImageUrls(heroes).getOrThrow()
             val domain = withContext(dispatchers.default) {
-                urls.mapKeys { (dto, _) -> dto.toDomain() }
+                heroes.associate { dto -> dto.toDomain() to IconUrls.hero(dto.shortName) }
             }
             heroImagesCache = domain
             domain
@@ -51,9 +47,8 @@ internal class ResourcesRepositoryImpl(
     override suspend fun getItemImages(): Result<Map<Item, String>> {
         itemImagesCache?.let { return Result.success(it) }
         return ensureItems().mapCatching { items ->
-            val urls = imageResourcesApi.getItemImageUrls(items).getOrThrow()
             val domain = withContext(dispatchers.default) {
-                urls.mapKeys { (dto, _) -> dto.toDomain() }
+                items.associate { dto -> dto.toDomain() to IconUrls.item(dto.shortName) }
             }
             itemImagesCache = domain
             domain
@@ -63,18 +58,12 @@ internal class ResourcesRepositoryImpl(
     override suspend fun getAbilityImages(): Result<Map<Ability, String>> {
         abilityImagesCache?.let { return Result.success(it) }
         return ensureAbilities().mapCatching { abilities ->
-            val urls = imageResourcesApi.getAbilityImageUrls(abilities).getOrThrow()
             val domain = withContext(dispatchers.default) {
-                urls.mapKeys { (dto, _) -> dto.toDomain() }
+                abilities.associate { dto -> dto.toDomain() to IconUrls.ability(dto.name) }
             }
             abilityImagesCache = domain
             domain
         }
-    }
-
-    override suspend fun getAdditionalImages(): Result<Map<String, String>> {
-        additionalImagesCache?.let { return Result.success(it) }
-        return imageResourcesApi.getAdditionalImageUrls().onSuccess { additionalImagesCache = it }
     }
 
     private suspend fun ensureHeroes(): Result<List<HeroDto>> = constantsMutex.withLock {

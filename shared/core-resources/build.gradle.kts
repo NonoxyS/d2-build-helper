@@ -15,5 +15,4 @@ commonMainDependencies {
     implementation(projects.shared.common)
     implementation(projects.shared.commonResources)
     implementation(projects.shared.coreNetwork)
-    implementation(projects.shared.coreStorage)
 }

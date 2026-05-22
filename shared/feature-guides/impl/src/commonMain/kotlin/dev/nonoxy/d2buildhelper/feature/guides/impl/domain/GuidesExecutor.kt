@@ -64,15 +64,13 @@ internal class GuidesExecutor(
             val guidesDef = async { guidesRepository.getGuides() }
             val heroesDef = async { resourcesRepository.getHeroImages() }
             val itemsDef = async { resourcesRepository.getItemImages() }
-            val additionalDef = async { resourcesRepository.getAdditionalImages() }
             LoadResults(
                 guides = guidesDef.await(),
                 heroImages = heroesDef.await(),
                 itemImages = itemsDef.await(),
-                additional = additionalDef.await(),
             )
         }
-        val firstFailure = listOf(results.guides, results.heroImages, results.itemImages, results.additional)
+        val firstFailure = listOf(results.guides, results.heroImages, results.itemImages)
             .firstOrNull { it.isFailure }
         if (firstFailure != null) {
             Napier.e(throwable = firstFailure.exceptionOrNull(), message = "GuidesExecutor.loadInitial failed")
@@ -85,12 +83,11 @@ internal class GuidesExecutor(
         val guides = results.guides.getOrThrow()
         val heroImages = results.heroImages.getOrThrow()
         val itemImages = results.itemImages.getOrThrow()
-        val additional = results.additional.getOrThrow()
         val imageResources = ImageResources(
             heroImages = heroImages,
             itemImages = itemImages,
+            // abilities are not shown on the guides screen
             abilityImages = emptyMap(),
-            additionalImages = additional,
         )
         val sortedHeroFiltered = withContext(dispatchers.default) {
             heroImages.toList().sortedBy { (hero, _) -> hero.displayName }.toMap()
@@ -143,6 +140,5 @@ internal class GuidesExecutor(
         val guides: Result<List<Guide>>,
         val heroImages: Result<Map<Hero, String>>,
         val itemImages: Result<Map<Item, String>>,
-        val additional: Result<Map<String, String>>,
     )
 }

@@ -56,7 +56,6 @@ class GuidesExecutorTest {
                 ),
             ),
             itemImages = Result.success(mapOf(item(10) to "url_10")),
-            additionalImages = Result.success(emptyMap()),
         )
         val store = GuidesStoreFactory(
             storeFactory = DefaultStoreFactory(),
@@ -116,7 +115,6 @@ class GuidesExecutorTest {
         val resources = FakeResourcesRepository(
             heroImages = Result.success(mapOf(hero(1, "A") to "url")),
             itemImages = Result.success(emptyMap()),
-            additionalImages = Result.success(emptyMap()),
         )
         val store = GuidesStoreFactory(
             storeFactory = DefaultStoreFactory(),

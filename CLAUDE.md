@@ -1,6 +1,6 @@
 # d2-build-helper
 
-Dota 2 build helper — Compose Multiplatform app (Android, iOS) that surfaces hero builds and stats from high-rating matches. Data sources: Stratz GraphQL API (via Apollo) and Supabase Storage (for icons). Local JSON for hero/item/ability constants.
+Dota 2 build helper — Compose Multiplatform app (Android, iOS) that surfaces hero builds and stats from high-rating matches. Data source: Stratz GraphQL API (via Apollo). Hero/item/ability icons come from the public Steam CDN; local JSON for hero/item/ability constants.
 
 ## Build Commands
 
@@ -19,7 +19,6 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Kotlin 2.3.10, Compose Multiplatform 1.10.1 (material3 1.9.0), AGP 9.0.0, Java target 17.
 - Gradle 9.4.1.
 - Apollo Kotlin 4.3.1 (Stratz GraphQL).
-- Supabase 3.1.0 (storage only — for hero/item/ability icons).
 - Ktor 3.3.3 (OkHttp on Android, Darwin on iOS).
 - Coil 3.2.0 (image loading).
 - Coroutines 1.10.2, kotlinx.serialization 1.10.0.
@@ -30,10 +29,10 @@ iOS: open `iosApp/iosApp.xcodeproj` in Xcode.
 - Napier 2.7.1 (logger; `Napier.base(DebugAntilog(...))` on platform entry).
 - moko-mvvm 0.16.1 (CFlow/CStateFlow for iOS contract on `BaseViewModel`).
 - State management: MVIKotlin `Store` per feature + `BaseViewModel<State, Label>` (`bindAndStart` binds `store.states`/`store.labels` through mappers).
-- Resources: moko-resources 0.26.1 in `:shared:common-resources` (generated `MR` in package `dev.nonoxy.d2buildhelper.common.resources`). Assets under `src/commonMain/moko-resources/{base, files, fonts}/`.
+- Resources: moko-resources 0.26.1 in `:shared:common-resources` (generated `MR` in package `dev.nonoxy.d2buildhelper.common.resources`). Assets under `src/commonMain/moko-resources/{base, files, fonts, images}/`.
 - Navigation: `compose-navigation` 2.9.2 + `AppScreens` sealed routes + `LocalNavHost` CompositionLocal (in `:shared:core-navigation`).
 
-API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `SUPABASE_*` is read by `:shared:core-storage/build.gradle.kts`, `STRATZ_*` by `:shared:core-network/build.gradle.kts`.
+The Stratz API key comes from `local.properties` (`STRATZ_API_KEY`), read by `:shared:core-network/build.gradle.kts`.
 
 ## Architecture
 
@@ -51,8 +50,8 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | `:shared:core-network` | KMP | `ApolloClient` + GraphQL queries + Stratz schema + buildConfig (Stratz) + per-platform Ktor engines, `coreNetworkModule` Koin. |
 | `:shared:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule` (binds `StoreFactory` to `LoggingStoreFactory(DefaultStoreFactory())` via Napier). Re-exports `mvikotlin-core/main/logging/coroutines`. |
 | `:shared:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:shared:core-mvikotlin` for `Store`/`BindingsBuilder`). |
-| `:shared:core-storage` | KMP | Supabase client + buildConfig (Supabase), `coreStorageModule` Koin. |
-| `:shared:core-resources` | KMP | `ResourcesRepository` + Impl + datasources (`ImageResourcesApi/DataSource`, `ConstantResourcesDataSource`), `coreResourcesModule` Koin. |
+| `:shared:core-storage` | KMP | Thin shell — reserved for future on-device persistent storage (DataStore/SQLDelight). No source yet. |
+| `:shared:core-resources` | KMP | `ResourcesRepository(Impl)` (builds Steam CDN icon URLs via `IconUrls`), `ConstantResourcesDataSource`, `FileContentReader`, `coreResourcesModule` Koin. |
 | `:shared:feature-guides:api` | KMP | `GuidesStore` contract (Intent/State/Label) + `Guide`, `PlayerStats`, `ItemPurchase`, `MatchPlayerPosition`. |
 | `:shared:feature-guides:impl` | KMP | `GuidesStoreFactory`, `GuidesExecutor`, `GuidesReducer`, `GuidesRepository(Impl)`, `GuidesApi/DataSource` + DTO/mappers, `featureGuidesImplModule` Koin. |
 | `:shared:feature-guides:presentation` | KMP | `GuidesViewModel`, `UiGuidesState`, `UiGuidesLabel`, mapper interfaces + impls, `featureGuidesPresentationModule` Koin. |
@@ -76,11 +75,11 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 | `mobile-architecture.mdc` | MVIKotlin Store/Executor/Reducer, `BaseViewModel<State, Label>`, Koin per-module modules, Compose Navigation, dependency invariants |
 | `mobile-compose.mdc` | Recomposition optimization, composable splitting, Previews, local-mirror text inputs |
 | `mobile-data-layer.mdc` | DTO / domain split, `suspend fun (): Result<T>` repositories, mappers, repository cache, `CoroutineDispatchers` |
-| `mobile-network.mdc` | Apollo (GraphQL) in `:shared:core-network`, Supabase Storage in `:shared:core-storage`, BuildConfig keys per-module |
+| `mobile-network.mdc` | Apollo (GraphQL) in `:shared:core-network`, Steam CDN icon URLs, BuildConfig keys |
 | `mobile-resources.mdc` | `:shared:common-resources` (moko-resources 0.26.x — `MR.strings/files/fonts`) |
 | `mobile-error-handling.mdc` | `coRunCatching` in suspend, `Result<T>` surfacing, Napier logging in repos/executors |
 | `mobile-code-rules.mdc` | Access modifiers, member ordering, NPE-safety |
-| `mobile-roadmap.mdc` | Remaining migrations (moko-resources, AGP9+KMP DSL cleanup) |
+| `mobile-roadmap.mdc` | Completed migrations and remaining work (game constants from Stratz) |
 
 ## Key Gotchas
 
@@ -90,16 +89,16 @@ API keys come from `local.properties` (`SUPABASE_API_KEY`, `STRATZ_API_KEY`). `S
 - `CoroutineDispatchers` is the only way to obtain dispatchers in commonMain — inject it. `common/coroutines/Dispatchers.kt` contains a load-bearing `import kotlinx.coroutines.IO` (guarded by `@file:Suppress("UnusedImport")`) needed for Kotlin/Native — do not remove it.
 - `BaseViewModel.onCleared()` must call `store.dispose()` (Store does not auto-dispose with the VM) — see `GuidesViewModel`.
 - `Napier.base(DebugAntilog(...))` is called once per platform entry, before `initKoin(...)`. The call appends antilogs — if an entry can be re-created (test scenarios), wrap with `Napier.takeLogarithm()` first to avoid duplicate sinks.
-- Feature DI: per-module Koin module functions (`commonModule`, `coreNetworkModule`, `coreStorageModule`, `coreResourcesModule`, `coreMVIKotlinModule`, `featureGuidesImplModule`, `featureGuidesPresentationModule`). `:shared:main/core/di/AppModule.kt` only aggregates via `includes(...)` — no per-class bindings live in shell. Use `koinViewModel<T>()` in composables.
+- Feature DI: per-module Koin module functions (`commonModule`, `coreNetworkModule`, `coreResourcesModule`, `coreMVIKotlinModule`, `featureGuidesImplModule`, `featureGuidesPresentationModule`). `:shared:main/core/di/AppModule.kt` only aggregates via `includes(...)` — no per-class bindings live in shell. Use `koinViewModel<T>()` in composables.
 - `initKoin()` is called from each platform entry point (`:android:app/AndroidApp.onCreate`, the iOS `MainViewController` factory). It's idempotent — safe to call from re-created entry points.
-- Apollo config lives in `:shared:core-network/build.gradle.kts` under `apollo { service("api") { ... } }`. buildConfig for Stratz keys also there. Supabase keys live in `:shared:core-storage/build.gradle.kts` buildConfig. API keys must be in `local.properties`.
+- Apollo config lives in `:shared:core-network/build.gradle.kts` under `apollo { service("api") { ... } }`. buildConfig for the Stratz key also there. The Stratz API key must be in `local.properties`.
 - Versioning: `versionCode` is derived from `git rev-list --count HEAD` and `versionName` from `appVersion-major.appVersion-minor.{commitCount}` in `gradle/libs.versions.toml`. `AppVersion.getVersionCode/Name` is invoked from `:android:app/build.gradle.kts`.
 - All deps go through `gradle/libs.versions.toml`. No version literals in `build.gradle.kts`.
 - Catalog plugin aliases follow KMMTemplate convention: `kotlin-multiplatform`, `compose-multiplatform`, `androidApplication`, etc. Convention plugins are exposed as catalog plugin aliases under `conventionPlugin-*` (e.g. `conventionPlugin-kmpLibrary`) so module scripts use `alias(libs.plugins.conventionPlugin.kmpLibrary)` instead of `id("kmp-library")` strings.
 - AGP 9 KMP modules use `com.android.kotlin.multiplatform.library` (applied by the `kmp-library` convention plugin). The `androidLibrary { }` DSL is configured through a typed helper in `build-logic/extensions/ProjectExtensions.kt` (`Project.androidLibraryConfig`). Modules set their own `androidLibraryConfig { namespace = "..." }` block (do not centralize namespace derivation).
 - Feature submodules (`:shared:feature-X:api`/`impl`/`presentation`/`ui`) apply only `alias(libs.plugins.conventionPlugin.kmpFeatureSetup)` — the plugin selects auto-wiring by submodule name and applies `kmp-library` (plus `compose-compiler` for `:api`/`:presentation` modules to infer stability) under the hood. `:ui` modules must additionally apply `alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)` themselves. Do not redeclare the dependencies listed in `mobile-architecture.mdc#build-conventions`; keep only feature-specific deps (e.g. `:shared:core-network` on `:impl`) in the module's `build.gradle.kts`. New features must follow this skeleton — drift from the contract is a code-review smell.
 - All resources go through `:shared:common-resources/src/commonMain/moko-resources/`. Basenames must be identifier-safe — moko mirrors them verbatim (`constant_heroes.json` → `MR.files.constant_heroes_json`, `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`). JSON content is read via the `FileContentReader` expect/actual (in `:shared:core-resources`) injected through Koin — Android `FileResource.readText` needs a `Context`, so do not call moko file APIs directly from commonMain.
-- iOS Kotlin/Native cache is disabled (`kotlin.native.cacheKind=none` in `gradle.properties`) to work around a Supabase storage-kt build failure on iOS Simulator Arm64. Revisit once Supabase / Kotlin/Native versions move.
+- Hero/item/ability icons are Steam CDN URLs built by `IconUrls` (`:shared:core-resources`) from `shortName`/`name` — no network call to enumerate them. Position and Radiant/Dire icons are app chrome, bundled as moko-resources images in `:shared:common-resources/src/commonMain/moko-resources/images/` (image files need a `@{n}x` scale suffix, e.g. `position_1@1x.png`, or moko emits no Android drawable).
 - Git hooks live in `.githooks/`. Enable via `git config core.hooksPath .githooks`.
 - CI lives in `.github/workflows/`. PRs to `master`, `develop`, `develop-cmp` run Detekt + Android Lint (`:android:app:lintDebug`) + SwiftLint + SwiftFormat.
 - Detekt baseline at `linters/detekt/baseline.xml` — regenerate with `./gradlew detektBaseline` after intentional rule changes.

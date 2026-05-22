@@ -36,7 +36,6 @@ koin = "4.1.1"
 # Network / GraphQL / Backend
 apollo = "4.3.1"
 ktor = "3.3.3"
-supabase = "3.1.0"
 
 # Images
 coil = "3.2.0"
@@ -97,7 +96,6 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollo" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
-supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabase" }
 
 # Images
 coil = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coil" }
