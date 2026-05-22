@@ -20,11 +20,9 @@ jobs:
 
       - name: Provision local.properties
         env:
-          STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
           D2BH_API_KEY: ${{ secrets.D2BH_API_KEY }}
         run: |
           cat > local.properties <<EOF
-          STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
           D2BH_API_KEY=${D2BH_API_KEY:-ci-stub}
           EOF
 
@@ -55,11 +53,9 @@ jobs:
 
       - name: Provision local.properties
         env:
-          STRATZ_API_KEY: ${{ secrets.STRATZ_API_KEY }}
           D2BH_API_KEY: ${{ secrets.D2BH_API_KEY }}
         run: |
           cat > local.properties <<EOF
-          STRATZ_API_KEY=${STRATZ_API_KEY:-ci-stub}
           D2BH_API_KEY=${D2BH_API_KEY:-ci-stub}
           EOF
 

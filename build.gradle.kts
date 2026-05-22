@@ -14,7 +14,6 @@ plugins {
 
     // Other
     alias(libs.plugins.buildConfig) apply false
-    alias(libs.plugins.apollo) apply false
     alias(libs.plugins.moko.resources) apply false
 
     // Convention plugins
