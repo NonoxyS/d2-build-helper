@@ -1,6 +1,6 @@
 # d2-build-helper
 
-Compose Multiplatform application (Android, Desktop/JVM, iOS) that shows hero builds and statistics from high-rating Dota 2 matches. Data: Stratz GraphQL + Supabase Storage.
+Compose Multiplatform application (Android, iOS) that shows hero builds and statistics from high-rating Dota 2 matches. Data: d2bh-backend REST proxy (`d2bh-api.nonoxy.dev`).
 
 ## Before running
 
@@ -10,8 +10,8 @@ Compose Multiplatform application (Android, Desktop/JVM, iOS) that shows hero bu
 
   ```properties
   sdk.dir=/path/to/Android/sdk
-  SUPABASE_API_KEY=...
-  STRATZ_API_KEY=...
+  D2BH_API_KEY=...
+  # D2BH_ENVIRONMENT=prod   # optional, prod or dev (default: prod)
   ```
 
 ## Building

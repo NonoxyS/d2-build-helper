@@ -4,7 +4,7 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository.GuidesRepository
+import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import dev.nonoxy.d2buildhelper.core.resources.data.repository.ResourcesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent

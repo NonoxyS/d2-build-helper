@@ -26,17 +26,27 @@ The project is mid-evolution. Several patterns from the broader KMMTemplate play
   - Baseline KMP dependencies centralised in `KmpLibraryPlugin` (kotlin stdlib, coroutines-core, serialization-json, Napier, moko-resources) — modules no longer redeclare these.
   - JVM/Desktop target removed (Android + iOS only): no `jvm()` in `KmpLibraryPlugin`, no `jvmMain` source sets, no `compose.desktop {}` block, `kotlinx-coroutines-swing` dropped from the catalog.
   - Module scripts switched to flat `commonMainDependencies {}` / `androidMainDependencies {}` / `iosMainDependencies {}` extension-call syntax (vs. nested `kotlin { sourceSets { … } }`).
+- [x] **Supabase removal → Steam CDN.** Completed 2026-05-20. Phase 0 in `docs/strategy.md`.
+  - Hero/item/ability icons built as Steam CDN URLs by `IconUrls` (`:shared:core-resources`); the Supabase listing layer (`ImageResourcesApi`/`ImageResourcesDataSource`) is gone, collapsed into `ResourcesRepositoryImpl`.
+  - Position and Radiant/Dire icons bundled as moko-resources images (`:shared:common-resources/.../moko-resources/images/`).
+  - `:shared:core-storage` reduced to a thin shell — no Supabase SDK, no buildConfig; reserved for future on-device persistent storage.
+  - `kotlin.native.cacheKind=none` removed from `gradle.properties` — the iOS K/N compiler cache is restored (Supabase storage-kt was the blocker).
+- [x] **Apollo→Ktor REST cutover + KMMTemplate navigation migration.** Completed 2026-05-22.
+  - Apollo/GraphQL stack removed from `:shared:core-network`; replaced by `KtorClient`/`KtorClientImpl`/`NetworkEnvironment` + `coreNetworkKtorModule`.
+  - `:shared:core-resources` migrated to commonMain-only: `ConstantsApiClient(Impl)` hitting REST `GET /v1/constants`; bundled `constant_*.json` files deleted; `FileContentReader`/`IconUrls`/`ConstantResourcesDataSource` removed.
+  - `:shared:feature-guides:impl` migrated: `GuidesApiClient(Impl)` hitting REST `GET /v1/guides`; `Remote*Response` DTOs replace Apollo-generated types.
+  - Navigation migrated to `Screen` marker interface + `@Serializable` route objects (`GuidesRoute`) + per-feature `ScreenApi` (`NavGraphBuilder.composableGuidesScreen()`). `AppScreens`/`LocalNavHost` removed.
+  - Backend API key: `D2BH_API_KEY` in `local.properties`; `D2BH_ENVIRONMENT` optional.
 
 Remaining work, in order:
 
-1. **iOS Kotlin/Native cache.**
-   - Restore `kotlin.native.cacheKind` default (remove the line in `gradle.properties`) once Supabase storage-kt no longer breaks the K/N compiler cache on iosSimulatorArm64.
+1. *(Previously: Game constants from Stratz — superseded by the proxy cutover above. Constants now served by `GET /v1/constants`.)*
 
 ## Implication for Today
 
-- All resources live in `:shared:common-resources/src/commonMain/moko-resources/{base, files, fonts}/`. Use `MR.strings.*`, `MR.files.*`, `MR.fonts.*` — `Res.*` is gone.
-- moko 0.26.x file basenames must be identifier-safe (`constant_heroes.json`, `NotoSans-Regular.ttf`). The generated accessor mirrors the basename verbatim (`MR.files.constant_heroes_json`, `MR.fonts.notosans_regular`).
-- Android `FileResource.readText(Context)` is not in commonMain. New consumers of JSON/text files must go through the `FileContentReader` expect/actual helper (`:shared:core-resources`) or its analogue, not raw moko APIs.
+- App-bundled resources live in `:shared:common-resources/src/commonMain/moko-resources/{base, fonts, images}/`. Use `MR.strings.*`, `MR.fonts.*`, `MR.images.*` — `Res.*` is gone. There are no longer bundled JSON constants files.
+- moko 0.26.x file basenames must be identifier-safe (`NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`).
+- Hero/item/ability constants (heroes, items, abilities, icon URLs) come from `GET /v1/constants` via `ConstantsApiClient` in `:shared:core-resources` — do not bundle or construct them on the client.
 - KMP modules apply `com.android.kotlin.multiplatform.library` (via the `kmp-library` convention plugin). The legacy `com.android.library` DSL is no longer applied to KMP modules. `:android:app` continues to use `com.android.application` through the `android-application-setup` plugin.
 - Cross-feature dependencies are not allowed. `:shared:feature-A:impl` may depend on `:feature-B:api` only if both features genuinely share that contract — otherwise hoist the shared logic into a `:core-*` module.
 

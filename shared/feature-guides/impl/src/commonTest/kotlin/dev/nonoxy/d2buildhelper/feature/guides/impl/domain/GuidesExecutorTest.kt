@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain
 
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository.GuidesRepository
+import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeResourcesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
@@ -56,7 +56,6 @@ class GuidesExecutorTest {
                 ),
             ),
             itemImages = Result.success(mapOf(item(10) to "url_10")),
-            additionalImages = Result.success(emptyMap()),
         )
         val store = GuidesStoreFactory(
             storeFactory = DefaultStoreFactory(),
@@ -116,7 +115,6 @@ class GuidesExecutorTest {
         val resources = FakeResourcesRepository(
             heroImages = Result.success(mapOf(hero(1, "A") to "url")),
             itemImages = Result.success(emptyMap()),
-            additionalImages = Result.success(emptyMap()),
         )
         val store = GuidesStoreFactory(
             storeFactory = DefaultStoreFactory(),

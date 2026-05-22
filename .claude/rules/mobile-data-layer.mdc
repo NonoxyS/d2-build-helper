@@ -10,20 +10,40 @@ alwaysApply: false
 
 | Layer | Location | Purpose |
 | --- | --- | --- |
-| Remote DTO | `core/data/api/{topic}/models/*Dto.kt` and Apollo-generated classes under `core/graphql/` | Wire format (GraphQL responses, Supabase storage payloads) |
-| Domain model | `features/{feature}/domain/models/` | Domain shape consumed by features |
+| Remote DTO | `data/network/models/Remote*Response.kt` inside each feature or `:shared:core-resources` | Wire format (REST responses from d2bh-backend) |
+| Domain model | `features/{feature}/domain/models/` or `:shared:core-domain` | Domain shape consumed by features |
 
 Rules:
-- Apollo-generated types live in `dev.nonoxy.d2buildhelper.graphql.*` and are treated as DTOs. They never leak past the repository.
-- Hand-written DTOs live under `core/data/...` with the `Dto` suffix and are `internal` (only the data layer touches them).
-- Domain models live next to their consumer (`features/<feature>/domain/models/`) without the `Dto` suffix.
+- Remote DTOs are named `Remote*Response`, annotated `@Serializable`, with explicit `@SerialName` on every field. They are `internal data class`.
+- Domain models live next to their consumer (`features/<feature>/domain/models/`) without the `Response` suffix.
 - DTO→domain mapping is the **repository's** responsibility, not a separate UseCase. The repository is the boundary; everything outside the repository sees domain types.
 
 ## Repository contract
 
 Repositories expose `suspend fun (): Result<T>` (one-shot). No Flow boilerplate unless a feature truly observes a live stream.
 
+Repositories wrap network calls with:
+
+```kotlin
+withContext(dispatchers.io) {
+    coRunCatching {
+        // delegate to *ApiClient
+    }.also { result ->
+        result.exceptionOrNull()?.let { Napier.e(throwable = it, message = "...") }
+    }
+}
+```
+
 Errors surface as `Result.failure(throwable)` via the `coRunCatching { ... }` helper from `common/extensions/CoroutineExtensions.kt`. Loading is tracked as a `Store.State.isLoading: Boolean` flag, not a Result variant. See `mobile-error-handling.mdc`.
+
+## Network client convention
+
+Each data-source area has a pair:
+
+- `*ApiClient` interface — declares suspend methods returning raw data (or `Result<T>`).
+- `*ApiClientImpl` class — delegates to `KtorClient.executeQuery(...)`.
+
+This keeps `KtorClient` (`:shared:core-network`) out of the repository; only `*ApiClient` crosses the boundary into the repository.
 
 ## Dispatchers
 
@@ -33,19 +53,15 @@ Note: on Kotlin/Native, `Dispatchers.IO` is exposed via an extension property �
 
 ## Mappers
 
-Mappers live next to the data they convert. For Apollo → domain conversion: `core/data/api/{topic}/mappers/{Topic}Mappers.kt`. For other conversions, prefer extension functions colocated with the target type.
+Mappers live next to the data they convert. For REST → domain conversion: free-standing `internal fun Remote*Response.toDomain(): DomainType = ...` colocated in the repository or a dedicated `mappers/` file alongside the DTOs.
 
-Style: free-standing `internal fun ApolloType.toDomain(): DomainType = ...`. UI-state mappers (Store `State`/`Label` → `Ui*State`/`Ui*Label`) live under `features/<feature>/presentation/mappers/` as `Api` + `internal class Impl`, bound through `<feature>/impl/di/<Feature>ImplModule.kt` with `singleOf(::Impl) bind Api::class`.
+UI-state mappers (Store `State`/`Label` → `Ui*State`/`Ui*Label`) live under `features/<feature>/presentation/mappers/` as `Api` + `internal class Impl`, bound through `<feature>/impl/di/<Feature>ImplModule.kt` with `singleOf(::Impl) bind Api::class`.
 
 ## Repository Cache
 
-`ResourcesRepository` (`core/data/repository/resources/`) aggregates remote and local sources and caches them in memory.
+`ResourcesRepository` (`:shared:core-resources`) fetches constants from `GET /v1/constants` via `ConstantsApiClient` and caches them in memory.
 
 Rules:
 - Cache keys live inside the repository as private constants.
 - No TTL today. If you add one, document it in the repository file and surface it in the constructor (e.g., `ttl: Duration = 1.hours`).
 - Repositories never throw to the caller; wrap exceptions via `coRunCatching { ... }` so they emerge as `Result.failure(throwable)`. Log in the catch block with `Napier.e(throwable = ..., message = ...)`.
-
-## Local JSON Constants
-
-`shared/common-resources/src/commonMain/moko-resources/files/constant_{heroes,items,abilities}.json` ships with the app. `:shared:core-resources/.../data/local/constants/ConstantResourcesDataSource` reads them through the `FileContentReader` expect/actual (Android needs `Context`, JVM/iOS do not) and deserializes with `kotlinx.serialization`. These models (`Hero`, `Item`, `Ability`) are domain entities, not DTOs — they are consumed as-is by features.

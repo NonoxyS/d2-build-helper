@@ -8,26 +8,18 @@
     <ID>ComposableFunctionName:Type.kt$@Composable fun D2BuildHelperTypography()</ID>
     <ID>CompositionLocalAllowlist:D2BuildHelperColors.kt$LocalD2BuildHelperColor</ID>
     <ID>CompositionLocalAllowlist:LocalImageLoader.kt$LocalImageLoader</ID>
-    <ID>CompositionLocalAllowlist:LocalNavHost.kt$LocalNavHost</ID>
     <ID>CompositionLocalAllowlist:Theme.kt$LocalThemeIsDark</ID>
     <ID>CompositionLocalAllowlist:Type.kt$LocalD2BuildHelperTypography</ID>
     <ID>Filename:main.kt$.main.kt</ID>
-    <ID>FinalNewline:DetailGuideScreen.kt$dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen.kt</ID>
     <ID>FinalNewline:TimeConverter.kt$dev.nonoxy.d2buildhelper.common.utils.TimeConverter.kt</ID>
-    <ID>FinalNewline:main.kt$.main.kt</ID>
-    <ID>MaximumLineLength:GuideItemView.kt$ </ID>
     <ID>ModifierHeightWithText:GuidesTopBarView.kt$height(IntrinsicSize.Min)</ID>
     <ID>ModifierMissing:GuidesTopBarView.kt$GuidesTopBar</ID>
-    <ID>MultiLineIfElse:GuideItemView.kt$"dire_square"</ID>
-    <ID>MultiLineIfElse:GuideItemView.kt$"radiant_square"</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$""</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"${if (seconds / 60 &gt;= 10) seconds / 60 else "0${seconds / 60}"}:" + "${if (seconds % 60 &gt;= 10) seconds % 60 else "0${seconds % 60}"}"</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"00:00"</ID>
-    <ID>NoBlankLineBeforeRbrace:DetailGuideScreen.kt$ </ID>
     <ID>UnstableCollections:GuideItemView.kt$Map&lt;Item, String&gt;</ID>
     <ID>UnstableCollections:GuideListView.kt$List&lt;Guide&gt;</ID>
     <ID>UnstableCollections:HeroFilterDialogView.kt$Map&lt;Hero, String&gt;</ID>
-    <ID>Wrapping:GuideItemView.kt$[</ID>
     <ID>Wrapping:HeroFilterDialogView.kt$(</ID>
   </CurrentIssues>
 </SmellBaseline>

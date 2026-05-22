@@ -5,17 +5,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.crossfade
 import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
-import dev.nonoxy.d2buildhelper.features.detailGuide.DetailGuideScreen
-import dev.nonoxy.d2buildhelper.feature.guides.ui.GuidesScreen
-import dev.nonoxy.d2buildhelper.core.navigation.AppScreens
-import dev.nonoxy.d2buildhelper.core.navigation.LocalNavHost
 import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.core.navigation.GuidesRoute
+import dev.nonoxy.d2buildhelper.feature.guides.ui.api.composableGuidesScreen
 
 @Composable
 fun App() = D2BuildHelperTheme {
@@ -32,20 +29,13 @@ fun App() = D2BuildHelperTheme {
 }
 
 @Composable
-fun D2BuildHelperApp(
+private fun D2BuildHelperApp(
     navController: NavHostController = rememberNavController()
 ) {
-    CompositionLocalProvider(LocalNavHost provides navController) {
-        NavHost(
-            navController = navController,
-            startDestination = AppScreens.Guides.route
-        ) {
-            composable(route = AppScreens.Guides.route) {
-                GuidesScreen()
-            }
-            composable(route = AppScreens.DetailGuide.route) {
-                DetailGuideScreen()
-            }
-        }
+    NavHost(
+        navController = navController,
+        startDestination = GuidesRoute,
+    ) {
+        composableGuidesScreen()
     }
 }

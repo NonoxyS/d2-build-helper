@@ -12,12 +12,9 @@ Repositories return `suspend fun (): Result<T>` (see `mobile-data-layer.mdc`). T
 
 ```kotlin
 override suspend fun getGuides(): Result<List<Guide>> = coRunCatching(
-    tryBlock = {
-        val data = apolloClient.query(...).execute().dataOrThrow()
-        data.toDomain()
-    },
+    tryBlock = { apiClient.getGuides().getOrThrow().guides.map { it.toDomain() } },
     catchBlock = { throwable ->
-        Napier.e(throwable = throwable, message = "GuidesRepository#getGuides failed")
+        Napier.e(throwable = throwable, message = "GuidesRepositoryImpl.getGuides failed")
         throwable.wrapResultFailure()
     },
 )

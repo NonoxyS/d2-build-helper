@@ -1,13 +1,15 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository
 
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.api.models.GuideDto
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.api.models.HeroDto
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.api.models.ItemPurchaseDto
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.api.models.MatchPlayerPositionType
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.api.models.PlayerStatsDto
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApi
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApiClient
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideHeroResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidePlayerResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidesPageResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteItemPurchaseResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemotePaginationResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -18,37 +20,35 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class GuidesRepositoryTest {
 
+    private fun page(vararg guides: RemoteGuideResponse) = RemoteGuidesPageResponse(
+        pagination = RemotePaginationResponse(page = 0, pageSize = 50, hasMore = false),
+        guides = guides.toList(),
+    )
+
     @Test
     fun `getGuides maps DTO to domain and orders end items by time with nulls last`() = runTest {
-        val dto = GuideDto(
-            hero = HeroDto(heroId = 1, shortName = "antimage", displayName = "Anti-Mage"),
-            steamAccountId = 1L,
+        val dto = RemoteGuideResponse(
             matchId = 100L,
+            steamAccountId = 1L,
             durationSeconds = 1800,
-            playerStats = PlayerStatsDto(
-                position = MatchPlayerPositionType.POSITION_1,
+            hero = RemoteGuideHeroResponse(id = 1, shortName = "antimage", displayName = "Anti-Mage"),
+            player = RemoteGuidePlayerResponse(
+                position = "POSITION_1",
                 isRadiant = true,
-                kills = 10.toByte(),
-                deaths = 1.toByte(),
-                assists = 5.toByte(),
-                impact = 70.toShort(),
-                endItem0Id = 42.toShort(),
-                endItem1Id = 43.toShort(),
-                endItem2Id = null,
-                endItem3Id = null,
-                endItem4Id = null,
-                endItem5Id = null,
-                endBackpack0Id = null,
-                endBackpack1Id = null,
-                endBackpack2Id = null,
-                endNeutralItemId = null,
+                kills = 10,
+                deaths = 1,
+                assists = 5,
+                impact = 70,
+                finalItemIds = listOf(42, 43),
+                backpackItemIds = emptyList(),
+                neutralItemId = null,
                 itemPurchases = listOf(
-                    ItemPurchaseDto(itemId = 42, time = 200),
-                    ItemPurchaseDto(itemId = 43, time = 100),
+                    RemoteItemPurchaseResponse(itemId = 42, time = 200),
+                    RemoteItemPurchaseResponse(itemId = 43, time = 100),
                 ),
             ),
         )
-        val api = FakeGuidesApi(guides = Result.success(listOf(dto)))
+        val api = FakeGuidesApiClient(guides = Result.success(page(dto)))
         val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
 
         val result = repo.getGuides().getOrThrow()
@@ -59,14 +59,16 @@ class GuidesRepositoryTest {
         assertEquals(MatchPlayerPosition.POSITION_1, guide.playerStats.position)
         val purchases = guide.playerStats.sortedEndItemPurchases
         assertEquals(2, purchases.size)
+        assertEquals(43.toShort(), purchases[0].itemId)
         assertEquals(100, purchases[0].time)
+        assertEquals(42.toShort(), purchases[1].itemId)
         assertEquals(200, purchases[1].time)
     }
 
     @Test
     fun `getGuides surfaces upstream failure unchanged`() = runTest {
         val boom = IllegalStateException("network")
-        val api = FakeGuidesApi(guides = Result.failure(boom))
+        val api = FakeGuidesApiClient(guides = Result.failure(boom))
         val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
 
         val result = repo.getGuides()
@@ -77,42 +79,52 @@ class GuidesRepositoryTest {
 
     @Test
     fun `getGuides applies fallbacks for nullable DTO fields`() = runTest {
-        val dto = GuideDto(
-            hero = HeroDto(heroId = 5, shortName = "drow", displayName = "Drow Ranger"),
-            steamAccountId = 99L,
+        val dto = RemoteGuideResponse(
             matchId = 200L,
-            durationSeconds = 1500,
-            playerStats = PlayerStatsDto(
-                position = null,
-                isRadiant = null,
-                kills = 0.toByte(),
-                deaths = 0.toByte(),
-                assists = 0.toByte(),
-                impact = null,
-                endItem0Id = null,
-                endItem1Id = null,
-                endItem2Id = null,
-                endItem3Id = null,
-                endItem4Id = null,
-                endItem5Id = null,
-                endBackpack0Id = null,
-                endBackpack1Id = null,
-                endBackpack2Id = null,
-                endNeutralItemId = null,
-                itemPurchases = null,
-            ),
+            steamAccountId = 99L,
+            durationSeconds = null,
+            hero = RemoteGuideHeroResponse(id = 5, shortName = null, displayName = null),
+            player = RemoteGuidePlayerResponse(),
         )
         val repo: GuidesRepository = GuidesRepositoryImpl(
-            FakeGuidesApi(guides = Result.success(listOf(dto))),
+            FakeGuidesApiClient(guides = Result.success(page(dto))),
             TestCoroutineDispatchers(),
         )
 
-        val stats = repo.getGuides().getOrThrow().single().playerStats
+        val guide = repo.getGuides().getOrThrow().single()
+        val stats = guide.playerStats
 
+        assertEquals("", guide.hero.shortName)
+        assertEquals("", guide.hero.displayName)
+        assertEquals(0, guide.durationSeconds)
         assertEquals(MatchPlayerPosition.UNKNOWN, stats.position)
         assertEquals(true, stats.isRadiant)
         assertEquals(25.toShort(), stats.impact)
         assertNull(stats.endNeutralItemId)
         assertTrue(stats.sortedEndItemPurchases.isEmpty())
+    }
+
+    @Test
+    fun `getHeroGuides reads the hero-specific page and maps it to domain`() = runTest {
+        val heroDto = RemoteGuideResponse(
+            matchId = 300L,
+            steamAccountId = 7L,
+            durationSeconds = 2400,
+            hero = RemoteGuideHeroResponse(id = 8, shortName = "juggernaut", displayName = "Juggernaut"),
+            player = RemoteGuidePlayerResponse(position = "POSITION_1", isRadiant = false),
+        )
+        val api = FakeGuidesApiClient(
+            guides = Result.success(page()),
+            heroGuides = Result.success(page(heroDto)),
+        )
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+
+        val result = repo.getHeroGuides(heroId = 8).getOrThrow()
+
+        assertEquals(1, result.size)
+        val guide = result.single()
+        assertEquals(8.toShort(), guide.hero.heroId)
+        assertEquals("Juggernaut", guide.hero.displayName)
+        assertEquals(false, guide.playerStats.isRadiant)
     }
 }
