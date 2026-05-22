@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain
 
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository.GuidesRepository
+import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import dev.nonoxy.d2buildhelper.core.resources.data.repository.ResourcesRepository
 import dev.nonoxy.d2buildhelper.core.mvikotlin.BaseExecutor
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent

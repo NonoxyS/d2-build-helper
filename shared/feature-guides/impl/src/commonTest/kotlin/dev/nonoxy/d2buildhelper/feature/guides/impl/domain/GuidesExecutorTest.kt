@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain
 
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository.GuidesRepository
+import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeResourcesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
