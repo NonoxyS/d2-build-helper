@@ -11,9 +11,7 @@ alwaysApply: false
 - Kotlin 2.3.10 + Compose Multiplatform 1.10.1 (material3 1.9.0)
 - AGP 9.0.0, Android minSdk 26 / targetSdk 36 / compileSdk 36
 - Gradle 9.4.1, Java target 17
-- Apollo Kotlin 4.3.1 — Stratz GraphQL (in `:shared:core-network`)
-- Supabase Storage 3.1.0 — hero/item/ability icons (in `:shared:core-storage`)
-- Ktor 3.3.3 — OkHttp on Android, Darwin on iOS
+- Ktor 3.3.3 REST client — d2bh-backend proxy (OkHttp on Android, Darwin on iOS)
 - Coil 3.2.0 — image loading
 - kotlinx.coroutines 1.10.2, kotlinx.serialization 1.10.0
 - compose-navigation 2.9.2, MP lifecycle-viewmodel 2.9.6
@@ -32,16 +30,16 @@ alwaysApply: false
 | `:shared:main` | KMP shell | `App.kt` + NavHost + `iosMain/main.kt` iOS framework entry. Composition Root for Koin. Targets: Android + iOS. |
 | `:shared:common` | KMP | `coRunCatching`, `ResultExtensions`, `OneTimeEvent`, `TimeConverter`, `Mapper`, `CoroutineDispatchers`, `commonModule`. |
 | `:shared:common-ui` | KMP + Compose | `LocalImageLoader`, `D2BuildHelperTheme`. |
-| `:shared:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, JSON files, fonts). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |
+| `:shared:common-resources` | KMP + moko-resources | Shared `moko-resources/` (strings, fonts, images). Generated `MR` in `dev.nonoxy.d2buildhelper.common.resources`. |
 | `:shared:core-domain` | KMP | App-wide pure models: `Hero`, `Item`, `Ability`, `ImageResources`. |
-| `:shared:core-navigation` | KMP + Compose | `AppScreens`, `LocalNavHost`. |
-| `:shared:core-network` | KMP | Apollo + GraphQL + Stratz buildConfig + Ktor engines. `coreNetworkModule`. |
+| `:shared:core-navigation` | KMP + Compose | `Screen` marker interface, `@Serializable` route objects (`GuidesRoute`), `NavigationUtils`. |
+| `:shared:core-network` | KMP | `KtorClient`/`KtorClientImpl` + `NetworkEnvironment` + `coreNetworkKtorModule`, aggregated by `coreNetworkModule`. |
 | `:shared:core-mvikotlin` | KMP | `BaseExecutor`, `coreMVIKotlinModule`. Re-exports `mvikotlin-core/main/logging/coroutines`. |
 | `:shared:core-presentation` | KMP | `BaseViewModel<S,L>`, `BaseIosViewModel` (depends on `:shared:core-mvikotlin`). |
-| `:shared:core-storage` | KMP | Supabase client + Supabase buildConfig. `coreStorageModule`. |
-| `:shared:core-resources` | KMP | `ResourcesRepository(Impl)`, image/constants datasources, `coreResourcesModule`. |
+| `:shared:core-storage` | KMP | Thin shell — reserved for future on-device persistent storage. No source yet. |
+| `:shared:core-resources` | KMP | `ConstantsApiClient(Impl)` (REST `GET /v1/constants`), `ResourcesRepository(Impl)`, `coreResourcesModule`. |
 | `:shared:feature-guides:api` | KMP | `GuidesStore` + Intent/State/Label + `Guide` model. |
-| `:shared:feature-guides:impl` | KMP | Store factory/executor/reducer + repository + datasources + DTOs + `featureGuidesImplModule`. |
+| `:shared:feature-guides:impl` | KMP | Store factory/executor/reducer + repository + `GuidesApiClient(Impl)` + `Remote*Response` DTOs + `featureGuidesImplModule`. |
 | `:shared:feature-guides:presentation` | KMP | `GuidesViewModel` + UI models + mappers + `featureGuidesPresentationModule`. |
 | `:shared:feature-guides:ui` | KMP + Compose | `GuidesScreen` + sub-views. |
 
@@ -57,10 +55,10 @@ Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-pack
 | `:shared:main` | (top-level — `App.kt`, etc.) |
 | `:shared:common` | `.common.*` |
 | `:shared:common-ui` | `.common.ui` and `.common.ui.theme` |
-| `:shared:common-resources` | `.common.resources` (generated `Res`) |
+| `:shared:common-resources` | `.common.resources` (generated `MR`) |
 | `:shared:core-domain` | `.core.domain` |
 | `:shared:core-navigation` | `.core.navigation` |
-| `:shared:core-network` | `.core.network` (+ generated GraphQL in `.graphql`) |
+| `:shared:core-network` | `.core.network` and `.core.network.ktor` |
 | `:shared:core-mvikotlin` | `.core.mvikotlin` and `.core.mvikotlin.di` |
 | `:shared:core-presentation` | `.core.presentation.viewmodel` |
 | `:shared:core-storage` | `.core.storage` |
@@ -87,14 +85,13 @@ Package root: `dev.nonoxy.d2buildhelper`. Module segment determines the sub-pack
 | State mapper | `Ui{Feature}StateMapper` | `UiGuidesStateMapper` |
 | Label mapper | `Ui{Feature}LabelMapper` | `UiGuidesLabelMapper` |
 | Repository contract | `{Topic}Repository` | `GuidesRepository`, `ResourcesRepository` |
-| DataSource interface | `{Topic}Api` | `GuidesApi`, `ImageResourcesApi` |
-| DataSource impl | `{Topic}DataSource` | `GuidesDataSource`, `ImageResourcesDataSource` |
+| REST client interface | `{Topic}ApiClient` | `GuidesApiClient`, `ConstantsApiClient` |
+| REST client impl | `{Topic}ApiClientImpl` | `GuidesApiClientImpl`, `ConstantsApiClientImpl` |
 | Mapper file | `{Topic}Mappers.kt` | `GuideMappers.kt` |
 | Koin module fun | `{moduleName}Module` | `commonModule`, `coreNetworkModule`, `featureGuidesImplModule` |
 
 ## Existing Features
 
-- `:shared:feature-guides:*` — list of high-rated builds for a hero (Stratz GraphQL + Supabase icons + local hero JSON).
-- `features/detailGuide/` — placeholder screen still inside `:shared:main`, not yet implemented.
+- `:shared:feature-guides:*` — list of high-rated builds for a hero. Data from the d2bh-backend REST proxy: `GET /v1/guides` for builds, `GET /v1/constants` for hero/item/ability metadata and icon URLs.
 
-Navigation routes are declared in `:shared:core-navigation/.../AppScreens.kt` as a sealed class of route strings. `LocalNavHost` exposes the `NavHostController` to children.
+Navigation uses the `Screen` marker interface + `@Serializable` route objects (`GuidesRoute`) in `:shared:core-navigation`; per-feature `ScreenApi` extensions register composables on `NavGraphBuilder`. See `mobile-architecture.mdc`.

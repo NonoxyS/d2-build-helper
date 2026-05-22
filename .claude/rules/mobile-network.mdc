@@ -1,54 +1,71 @@
 ---
-description: Network layer — Apollo, Steam CDN icons, Ktor engines, BuildConfig keys
+description: Network layer — Ktor REST stack, KtorClient, engine matrix, BuildConfig keys
 globs: **/*.{kt,kts}
 alwaysApply: false
 ---
 
 # Network
 
-## Apollo (Stratz GraphQL)
+## Ktor REST stack (`:shared:core-network`)
 
-- GraphQL queries: `core-network/src/commonMain/graphql/*.graphql`.
-- Schema: `core-network/src/commonMain/graphql/schema.graphqls` (Stratz dump, ~252 KB).
-- Apollo config in `core-network/build.gradle.kts`:
-  ```kotlin
-  apollo {
-      service("api") {
-          packageName.set("dev.nonoxy.d2buildhelper.graphql")
-      }
-  }
-  ```
-- Generated client code lands in `dev.nonoxy.d2buildhelper.graphql.*`.
-- `ApolloClient` is constructed once in `InjectProvider` with the Stratz endpoint and bearer token from `BuildConfig`.
-- Auth: `Authorization: Bearer ${BuildConfig.STRATZ_API_KEY}` (set from `local.properties` → `STRATZ_API_KEY`).
-- Beta version (`4.0.0-beta.6`): API can move between minor versions. Pin the version in `libs.versions.toml`. Coordinate upgrades carefully.
+All network communication goes through the `KtorClient` interface in package `dev.nonoxy.d2buildhelper.core.network.ktor`.
 
-## Icons (Steam CDN)
+- `KtorClient` — interface; exposes `executeQuery(...)`, `get(...)`, `post(...)`, `submitForm(...)`, `submitFormWithBinaryData(...)`.
+- `KtorClientImpl` — `public class` implementing `KtorClient`; wraps an `HttpClient` and handles deserialization + error logging.
+- `NetworkEnvironment` — enum with two values:
+  - `Dev` — HTTP, `localhost:8080`
+  - `Prod` — HTTPS, `d2bh-api.nonoxy.dev`
+  The active environment is resolved at build time from `BuildConfig.D2BH_ENVIRONMENT` (see below).
 
-- Hero / item / ability icons are served by the public Steam CDN — no auth, no API key, no listing call.
-- `IconUrls` (`core-resources/.../data/IconUrls.kt`) builds URLs from `shortName` / `name`:
-  - hero — `…/dota_react/heroes/icons/{shortName}.png`
-  - item — `…/dota_react/items/{shortName}.png`
-  - ability — `…/dota_react/abilities/{name}.png`
-- Position and Radiant/Dire icons are app chrome — bundled as moko-resources images in `:shared:common-resources/.../moko-resources/images/`, not fetched.
-- Do not reintroduce a hosted-storage SDK for icons. If persistent on-device storage is needed, evaluate DataStore / SQLDelight in `:shared:core-storage`.
+### `coreNetworkKtorModule`
+
+Declared in `core/network/ktor/di/CoreNetworkKtorModule.kt`. Wires:
+
+- `single<Json>` — `Json { ignoreUnknownKeys = true }`.
+- `single<HttpClient>` — configured with:
+  - `Logging` (LogLevel.ALL → Napier.d, tag `"HTTP"`).
+  - `ContentNegotiation` (kotlinx.serialization JSON).
+  - `HttpResponseValidator` — maps `IOException` → `NetworkUnavailableException` (`:shared:core-domain`).
+  - `defaultRequest` — sets `url.protocol`, `url.host`, `url.port` from `NetworkEnvironment`; adds `X-Api-Key` header from `BuildConfig.D2BH_API_KEY`.
+- `factory<KtorClient>` — `KtorClientImpl`.
+
+`coreNetworkModule` (the public Koin module) only `includes(coreNetworkKtorModule)`.
+
+### REST clients convention
+
+Feature/resource network clients follow the pattern:
+
+- `*ApiClient` interface + `*ApiClientImpl` class (in `data/network/` of each feature or `:shared:core-resources`).
+- They receive a `KtorClient` via constructor injection and call `ktorClient.executeQuery(...)`.
+- Raw HTTP calls use `ktorClient.get("/v1/<endpoint>")`.
+
+## Icons
+
+Hero/item/ability icon URLs are returned in backend responses (`iconUrl` field) — the client does not construct Steam CDN URLs. Position and Radiant/Dire icons are app chrome bundled as moko-resources images in `:shared:common-resources/.../moko-resources/images/`.
+
+Do not reintroduce client-side URL building for hero/item/ability icons.
 
 ## Ktor Engines
 
-- `androidMain`: `ktor-client-cio`.
-- `jvmMain`: `ktor-client-cio` (`coroutines-swing` for Compose Desktop).
+- `androidMain`: `ktor-client-okhttp`.
 - `iosMain`: `ktor-client-darwin`.
 
-Keep this matrix consistent — adding a new platform target requires picking the right engine. The `HttpClient` lives indirectly through the Apollo SDK; the project does not own a `HttpClient` singleton today.
+Keep this matrix consistent — adding a new platform target requires picking the right engine.
 
 ## BuildConfig and local.properties
 
 `local.properties` (gitignored) must contain:
 
 ```
-STRATZ_API_KEY=...
+D2BH_API_KEY=...
 ```
 
-`composeApp/build.gradle.kts` validates non-blank values via `require(...)` at configuration time. Build fails fast if a key is missing.
+Optional:
+
+```
+D2BH_ENVIRONMENT=prod   # or dev — defaults to prod if absent
+```
+
+`:shared:core-network/build.gradle.kts` validates that `D2BH_API_KEY` is non-blank at configuration time (`require(...)`). Build fails fast if missing.
 
 Do **not** check API keys into git. Do **not** print them. Do **not** read `local.properties` outside the build script.

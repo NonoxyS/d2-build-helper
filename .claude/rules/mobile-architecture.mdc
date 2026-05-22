@@ -42,7 +42,7 @@ Loading lives in `Store.State.isLoading: Boolean`. Errors in `Store.State.isErro
 
 Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<feature>/impl/di/<Feature>ImplModule.kt` and are aggregated by `appModule`. The `core/mvikotlin/di/CoreMVIKotlinModule.kt` module exposes `StoreFactory`.
 
-- `single<T> { ... }` for clients (Apollo), datasources, repositories.
+- `single<T> { ... }` for clients (`HttpClient`, `*ApiClient`), datasources, repositories.
 - `factory { <Feature>StoreFactory(get(), ...).create() }` to expose a feature `Store` (the StoreFactory itself is `internal` and lives in the same module).
 - `viewModelOf(::SomeViewModel)` for view-models (via `koin-compose-viewmodel`).
 - `singleOf(::Impl) bind Api::class` to expose mappers and other interface-backed services.
@@ -60,18 +60,23 @@ Resolve dependencies:
 
 ## Compose Navigation
 
-`navigation/AppScreens.kt` defines a sealed class with `route: String` per screen. Navigation uses `compose-navigation`'s `NavHost` + `NavController`.
+Navigation uses type-safe routes based on the `Screen` marker interface in `:shared:core-navigation`.
 
-```kotlin
-sealed class AppScreens(val route: String) {
-    data object Guides : AppScreens("guides")
-    data object DetailGuide : AppScreens("detail_guide/{guideId}")
-}
-```
+- `Screen` — empty marker interface. All route objects implement it.
+- Route objects are `@Serializable data object` (or `data class` for routes with arguments), e.g.:
+  ```kotlin
+  @Serializable
+  data object GuidesRoute : Screen
+  ```
+- Per-feature `ScreenApi` extension functions live in `<feature>/ui/api/Feature*ScreenApi.kt` and register composables on `NavGraphBuilder`:
+  ```kotlin
+  fun NavGraphBuilder.composableGuidesScreen() {
+      composable<GuidesRoute> { GuidesScreen() }
+  }
+  ```
+- `NavigationUtils.kt` (`:shared:core-navigation`) provides `NavController` helpers (`navigateOnResumed`, `popBackStackOnResumed`, `CheckNavigationResult`, etc.).
 
-`LocalNavHost` is a `staticCompositionLocalOf<NavHostController>` so descendants can navigate without prop drilling. Avoid passing `NavController` through composables when `LocalNavHost.current` is sufficient.
-
-When migrating to type-safe routes (`@Serializable` data objects), do it project-wide in one PR — partial migration leads to mixed-API breakage.
+`NavController` is threaded through the composable call-site rather than via a `CompositionLocal`. Prefer `NavController` parameters for explicit navigation; reserve `NavigationUtils` helpers for deep-link and result-passing scenarios.
 
 ## Build conventions
 

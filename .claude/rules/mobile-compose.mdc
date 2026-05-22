@@ -98,7 +98,7 @@ Every reusable composable in `features/.../ui/views/` should have a `@Preview` i
 
 ## CompositionLocals
 
-`LocalImageLoader` and `LocalNavHost` are the only CompositionLocals in the project. Do not introduce new ones without good reason — they hide dependencies and complicate testing.
+`LocalImageLoader` is the only CompositionLocal in the project. Do not introduce new ones without good reason — they hide dependencies and complicate testing.
 
 ## Local-mirror text inputs
 

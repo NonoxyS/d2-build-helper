@@ -1,5 +1,5 @@
 ---
-description: Resources — moko-resources strings, fonts, JSON constants
+description: Resources — moko-resources strings, fonts, images
 globs: **/*.{kt,kts,xml,json}
 alwaysApply: false
 ---
@@ -13,14 +13,12 @@ Resources live in `:shared:common-resources/src/commonMain/moko-resources/`. The
 ```
 common-resources/src/commonMain/moko-resources/
   base/strings.xml          # default locale
-  files/*.json              # JSON constants bundled with the app
   fonts/*.ttf               # custom typefaces
   images/*.png              # bundled chrome icons (positions, Radiant/Dire)
 ```
 
 Basenames must be identifier-safe — moko mirrors them verbatim in the generated accessor:
 
-- `constant_heroes.json` → `MR.files.constant_heroes_json`
 - `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`
 
 ## Strings
@@ -73,12 +71,4 @@ Image(painter = painterResource(MR.images.position_1), contentDescription = null
 
 Image files **must** carry a moko scale suffix `@{n}x` — e.g. `position_1@1x.png`. Without it moko emits the `MR.images` accessor but no Android `drawable`, and the build fails with `Unresolved reference 'drawable'`. The accessor name strips the suffix (`position_1@1x.png` → `MR.images.position_1`).
 
-Only bundle static app chrome here. Game-entity icons (heroes, items, abilities) are Steam CDN URLs built by `IconUrls` — see `mobile-network.mdc`.
-
-## JSON Constants
-
-`moko-resources/files/constant_{heroes,items,abilities}.json` ship statically with the app. `MR.files.constant_X_json.readText()` is **not** in commonMain because Android requires a `Context`.
-
-Read JSON content through the `FileContentReader` expect/actual helper in `:shared:core-resources/.../data/local/constants/`. Inject it via Koin, then call `fileContentReader.read(MR.files.constant_heroes_json)`. The `bindFileContentReader` helper in `coreResourcesModule` wires the Android `Context` from Koin automatically.
-
-If a JSON file grows large or needs frequent updates, fetch it from Stratz instead of bundling — the game-constants migration to Stratz GraphQL `Constants` is the planned path (see `mobile-roadmap.mdc`).
+Only bundle static app chrome here. Game-entity icons (heroes, items, abilities) come from the backend response (`iconUrl` field) — do not bundle them or construct Steam CDN URLs on the client. See `mobile-network.mdc`.
