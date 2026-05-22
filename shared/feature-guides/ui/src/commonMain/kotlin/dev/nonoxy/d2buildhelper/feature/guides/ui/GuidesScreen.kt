@@ -15,7 +15,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.ui.views.HeroFilterDialog
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
+internal fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
     var showHeroDialog by rememberSaveable { mutableStateOf(false) }
 
