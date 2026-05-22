@@ -20,6 +20,8 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.new
 import org.koin.dsl.module
 
+private const val API_KEY_HEADER = "X-Api-Key"
+
 val coreNetworkKtorModule = module {
 
     single<Json> {
@@ -37,6 +39,7 @@ val coreNetworkKtorModule = module {
                         Napier.d(tag = "HTTP", message = message)
                     }
                 }
+                sanitizeHeader { header -> header.equals(API_KEY_HEADER, ignoreCase = true) }
             }
             install(ContentNegotiation) {
                 json(json)
@@ -53,7 +56,7 @@ val coreNetworkKtorModule = module {
                 url.protocol = environment.protocol
                 url.host = environment.apiHost
                 environment.apiPort?.let { url.port = it }
-                header("X-Api-Key", BuildConfig.D2BH_API_KEY)
+                header(API_KEY_HEADER, BuildConfig.D2BH_API_KEY)
             }
         }
     }
