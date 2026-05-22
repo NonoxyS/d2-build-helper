@@ -74,4 +74,21 @@ class GuidesApiClientImplTest {
 
         assertTrue(result.isFailure)
     }
+
+    @Test
+    fun `getHeroGuides forwards the heroId query parameter and parses the payload`() = runTest {
+        val engine = MockEngine { respond(content = GUIDES_JSON, status = HttpStatusCode.OK) }
+        val httpClient = HttpClient(engine) {
+            defaultRequest { url("http://localhost") }
+        }
+        val apiClient = GuidesApiClientImpl(KtorClientImpl(httpClient, json))
+
+        val result = apiClient.getHeroGuides(heroId = 1)
+
+        assertTrue(result.isSuccess)
+        assertEquals(1, result.getOrThrow().guides.size)
+        val requestUrl = engine.requestHistory.single().url
+        assertEquals("1", requestUrl.parameters["heroId"])
+        assertEquals("50", requestUrl.parameters["pageSize"])
+    }
 }

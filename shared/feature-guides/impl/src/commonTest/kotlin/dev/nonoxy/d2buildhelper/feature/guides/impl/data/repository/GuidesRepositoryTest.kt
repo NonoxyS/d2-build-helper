@@ -59,7 +59,9 @@ class GuidesRepositoryTest {
         assertEquals(MatchPlayerPosition.POSITION_1, guide.playerStats.position)
         val purchases = guide.playerStats.sortedEndItemPurchases
         assertEquals(2, purchases.size)
+        assertEquals(43.toShort(), purchases[0].itemId)
         assertEquals(100, purchases[0].time)
+        assertEquals(42.toShort(), purchases[1].itemId)
         assertEquals(200, purchases[1].time)
     }
 
@@ -100,5 +102,29 @@ class GuidesRepositoryTest {
         assertEquals(25.toShort(), stats.impact)
         assertNull(stats.endNeutralItemId)
         assertTrue(stats.sortedEndItemPurchases.isEmpty())
+    }
+
+    @Test
+    fun `getHeroGuides reads the hero-specific page and maps it to domain`() = runTest {
+        val heroDto = RemoteGuideResponse(
+            matchId = 300L,
+            steamAccountId = 7L,
+            durationSeconds = 2400,
+            hero = RemoteGuideHeroResponse(id = 8, shortName = "juggernaut", displayName = "Juggernaut"),
+            player = RemoteGuidePlayerResponse(position = "POSITION_1", isRadiant = false),
+        )
+        val api = FakeGuidesApiClient(
+            guides = Result.success(page()),
+            heroGuides = Result.success(page(heroDto)),
+        )
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+
+        val result = repo.getHeroGuides(heroId = 8).getOrThrow()
+
+        assertEquals(1, result.size)
+        val guide = result.single()
+        assertEquals(8.toShort(), guide.hero.heroId)
+        assertEquals("Juggernaut", guide.hero.displayName)
+        assertEquals(false, guide.playerStats.isRadiant)
     }
 }
