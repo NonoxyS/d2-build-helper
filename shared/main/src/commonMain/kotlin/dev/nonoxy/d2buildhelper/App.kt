@@ -29,7 +29,7 @@ fun App() = D2BuildHelperTheme {
 }
 
 @Composable
-fun D2BuildHelperApp(
+private fun D2BuildHelperApp(
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
