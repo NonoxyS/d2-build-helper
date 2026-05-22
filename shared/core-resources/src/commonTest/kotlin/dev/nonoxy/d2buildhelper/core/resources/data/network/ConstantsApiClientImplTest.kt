@@ -52,6 +52,7 @@ class ConstantsApiClientImplTest {
         assertEquals(1, constants.heroes.size)
         assertEquals("antimage", constants.heroes.single().shortName)
         assertEquals(1, constants.items.size)
+        assertEquals("blink", constants.items.single().shortName)
         assertEquals(1, constants.abilities.size)
         assertEquals("https://cdn.example/abilities/mana_break.png", constants.abilities.single().iconUrl)
     }

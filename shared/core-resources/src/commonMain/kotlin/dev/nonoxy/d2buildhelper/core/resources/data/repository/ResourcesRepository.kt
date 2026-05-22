@@ -9,6 +9,7 @@ import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteAbility
 import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteConstantsResponse
 import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteHeroConstantResponse
 import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteItemConstantResponse
+import kotlin.concurrent.Volatile
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -27,9 +28,9 @@ internal class ResourcesRepositoryImpl(
     private val constantsMutex = Mutex()
     private var cachedConstants: RemoteConstantsResponse? = null
 
-    private var heroImagesCache: Map<Hero, String>? = null
-    private var itemImagesCache: Map<Item, String>? = null
-    private var abilityImagesCache: Map<Ability, String>? = null
+    @Volatile private var heroImagesCache: Map<Hero, String>? = null
+    @Volatile private var itemImagesCache: Map<Item, String>? = null
+    @Volatile private var abilityImagesCache: Map<Ability, String>? = null
 
     override suspend fun getHeroImages(): Result<Map<Hero, String>> {
         heroImagesCache?.let { return Result.success(it) }
