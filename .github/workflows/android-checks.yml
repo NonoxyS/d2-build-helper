@@ -2,7 +2,7 @@ name: Android Checks
 
 on:
   pull_request:
-    branches: [ master, develop, develop-cmp ]
+    branches: [ develop ]
 
 jobs:
   detekt:
