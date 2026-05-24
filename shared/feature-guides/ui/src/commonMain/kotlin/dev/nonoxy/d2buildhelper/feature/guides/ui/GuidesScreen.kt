@@ -7,10 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import dev.icerock.moko.resources.compose.stringResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.error.D2ErrorView
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.loading.D2LoadingView
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.GuidesViewModel
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesLabel
-import dev.nonoxy.d2buildhelper.feature.guides.ui.views.GuidesErrorView
-import dev.nonoxy.d2buildhelper.feature.guides.ui.views.GuidesLoadingView
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.HeroFilterDialog
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -28,8 +30,12 @@ internal fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
     }
 
     when {
-        state.isLoading -> GuidesLoadingView()
-        state.isError -> GuidesErrorView(onRetry = vm::onRetry)
+        state.isLoading -> D2LoadingView()
+        state.isError -> D2ErrorView(
+            message = stringResource(MR.strings.error_loading),
+            retryLabel = stringResource(MR.strings.retry),
+            onRetry = vm::onRetry,
+        )
         else -> GuidesView(
             state = state,
             onHeroSearchDialogClick = vm::onHeroSearchDialogClick,
