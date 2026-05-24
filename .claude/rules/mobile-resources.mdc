@@ -13,13 +13,15 @@ Resources live in `:shared:common-resources/src/commonMain/moko-resources/`. The
 ```
 common-resources/src/commonMain/moko-resources/
   base/strings.xml          # default locale
-  fonts/*.ttf               # custom typefaces
+  base/colors.xml           # design system tokens (dark-only)
+  fonts/*.ttf               # custom typefaces (NotoSans Regular/Medium/Bold)
   images/*.png              # bundled chrome icons (positions, Radiant/Dire)
 ```
 
 Basenames must be identifier-safe — moko mirrors them verbatim in the generated accessor:
 
 - `NotoSans-Regular.ttf` → `MR.fonts.notosans_regular`
+- `NotoSans-Medium.ttf` → `MR.fonts.notosans_medium`
 
 ## Strings
 
@@ -48,15 +50,38 @@ No hardcoded user-facing strings in composables. Logs and debug text are allowed
 
 ## Fonts
 
-Custom typefaces live in `moko-resources/fonts/`. `theme/Type.kt` (in `:shared:common-ui`) builds the `FontFamily` via `dev.icerock.moko.resources.compose.asFont`:
+Custom typefaces live in `moko-resources/fonts/`. `compose/theme/Fonts.kt` (in `:shared:common-ui`) builds the `FontFamily` via `dev.icerock.moko.resources.compose.asFont`:
 
 ```kotlin
-val regular = MR.fonts.notosans_regular.asFont(weight = FontWeight.Normal)
-val bold = MR.fonts.notosans_bold.asFont(weight = FontWeight.Bold)
-val family = FontFamily(listOfNotNull(regular, bold))
+val fontNotoSans: FontFamily
+    @Composable get() = FontFamily(
+        MR.fonts.notosans_regular.asFont(weight = FontWeight.Normal).requireNotNull(),
+        MR.fonts.notosans_medium.asFont(weight = FontWeight.Medium).requireNotNull(),
+        MR.fonts.notosans_bold.asFont(weight = FontWeight.Bold).requireNotNull(),
+    )
 ```
 
-`asFont` is nullable on platforms that fail to load the typeface — fall back to `FontFamily.Default`.
+`asFont` is nullable on platforms that fail to load the typeface — surface it as an error rather than silently falling back, so a missing weight is caught at the dev loop, not at runtime.
+
+## Colors
+
+Design-system color tokens live in `moko-resources/base/colors.xml` as a single dark-only palette:
+
+```xml
+<resources>
+    <color name="background">#0a0a0a</color>
+    <color name="surface">#141414</color>
+    <color name="surfaceVariant">#13343a</color>
+    <color name="tintColor">#10a4c1</color>
+    <color name="textPrimary">#ffffff</color>
+    <color name="textSecondary">#ccffffff</color> <!-- 80% alpha -->
+    <color name="outline">#14ffffff</color>      <!-- 8% alpha -->
+</resources>
+```
+
+`compose/theme/Colors.kt` reads them via `colorResource(MR.colors.*)`. Composables access them through the `D2BuildHelperTheme.colors.*` accessors from `dev.nonoxy.d2buildhelper.common.ui.compose.theme`; never hard-code a hex literal inside a composable.
+
+No `values-night/` variant — the app is dark-only.
 
 ## Images
 

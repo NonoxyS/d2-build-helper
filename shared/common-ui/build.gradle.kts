@@ -15,6 +15,7 @@ commonMainDependencies {
     api(libs.coil)
     api(libs.coil.network.ktor)
     api(projects.shared.commonResources)
+    implementation(projects.shared.common)
     implementation(libs.compose.material3)
 }
 

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dev.nonoxy.d2buildhelper.App
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.setupImageLoader
 import dev.nonoxy.d2buildhelper.core.di.initKoin
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -17,6 +18,7 @@ class AndroidApp : Application() {
         super.onCreate()
         Napier.base(DebugAntilog(defaultTag = "D2BuildHelper"))
         initKoin { androidContext(this@AndroidApp) }
+        setupImageLoader()
     }
 }
 

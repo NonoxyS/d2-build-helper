@@ -2,24 +2,42 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ArgumentListWrapping:HeroFilterDialogView.kt$( items = filteredHeroImageUrls.toList(), key = { (hero, _) -&gt; hero.heroId })</ID>
     <ID>ComposableEventParameterNaming:HeroFilterDialogView.kt$onSearchValueChanged: (String) -&gt; Unit</ID>
     <ID>ComposableFunctionName:App.kt$@Composable fun App()</ID>
-    <ID>ComposableFunctionName:Type.kt$@Composable fun D2BuildHelperTypography()</ID>
-    <ID>CompositionLocalAllowlist:D2BuildHelperColors.kt$LocalD2BuildHelperColor</ID>
-    <ID>CompositionLocalAllowlist:LocalImageLoader.kt$LocalImageLoader</ID>
-    <ID>CompositionLocalAllowlist:Theme.kt$LocalThemeIsDark</ID>
-    <ID>CompositionLocalAllowlist:Type.kt$LocalD2BuildHelperTypography</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space(height: Dp, modifier: Modifier = Modifier)</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space12()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space16()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space2()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space20()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space24()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space32()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space4()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space40()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space48()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space6()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun ColumnScope.Space8()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space(width: Dp, modifier: Modifier = Modifier)</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space12()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space16()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space2()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space20()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space24()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space32()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space4()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space40()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space48()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space6()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun RowScope.Space8()</ID>
+    <ID>ComposableFunctionName:Space.kt$@Composable fun Space(modifier: Modifier = Modifier, height: Dp = 0.dp, width: Dp = 0.dp)</ID>
     <ID>Filename:main.kt$.main.kt</ID>
     <ID>FinalNewline:TimeConverter.kt$dev.nonoxy.d2buildhelper.common.utils.TimeConverter.kt</ID>
-    <ID>ModifierHeightWithText:GuidesTopBarView.kt$height(IntrinsicSize.Min)</ID>
-    <ID>ModifierMissing:GuidesTopBarView.kt$GuidesTopBar</ID>
+    <ID>MaximumLineLength:GuideItemView.kt$ </ID>
+    <ID>ModifierHeightWithText:D2TopBar.kt$height(height)</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$""</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"${if (seconds / 60 &gt;= 10) seconds / 60 else "0${seconds / 60}"}:" + "${if (seconds % 60 &gt;= 10) seconds % 60 else "0${seconds % 60}"}"</ID>
     <ID>MultiLineIfElse:TimeConverter.kt$TimeConverter$"00:00"</ID>
     <ID>UnstableCollections:GuideItemView.kt$Map&lt;Item, String&gt;</ID>
     <ID>UnstableCollections:GuideListView.kt$List&lt;Guide&gt;</ID>
     <ID>UnstableCollections:HeroFilterDialogView.kt$Map&lt;Hero, String&gt;</ID>
-    <ID>Wrapping:HeroFilterDialogView.kt$(</ID>
   </CurrentIssues>
 </SmellBaseline>

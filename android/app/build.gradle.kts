@@ -21,6 +21,7 @@ android {
 
 dependencies {
     implementation(projects.shared.main)
+    implementation(projects.shared.commonUi)
     implementation(libs.androidx.activityCompose)
     implementation(libs.koin.android)
     implementation(libs.napier)
