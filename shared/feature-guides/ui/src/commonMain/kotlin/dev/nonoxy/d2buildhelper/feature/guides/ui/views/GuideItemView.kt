@@ -28,7 +28,6 @@ import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
 import dev.nonoxy.d2buildhelper.core.domain.Hero
@@ -101,7 +100,6 @@ private fun HeroNameRow(
         AsyncImage(
             model = heroImageUrl,
             contentDescription = null,
-            imageLoader = LocalImageLoader.current,
             modifier = Modifier.size(32.dp)
         )
 
@@ -219,7 +217,6 @@ private fun ItemRow(
         AsyncImage(
             model = guide.playerStats.endNeutralItemId?.let { itemImageUrls.findByItemId(it) },
             contentDescription = null,
-            imageLoader = LocalImageLoader.current,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(28.dp)
@@ -254,7 +251,6 @@ private fun ItemWithBuyTime(
         AsyncImage(
             model = itemImageUrl,
             contentDescription = null,
-            imageLoader = LocalImageLoader.current,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .width(36.dp)

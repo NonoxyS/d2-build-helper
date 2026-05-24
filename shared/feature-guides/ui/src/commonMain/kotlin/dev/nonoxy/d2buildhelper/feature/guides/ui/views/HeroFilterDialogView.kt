@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
-import dev.nonoxy.d2buildhelper.common.ui.LocalImageLoader
 import dev.nonoxy.d2buildhelper.core.domain.Hero
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.theme.D2BuildHelperTheme
@@ -140,7 +139,6 @@ private fun HeroFilterItem(
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
-            imageLoader = LocalImageLoader.current,
             modifier = Modifier.size(24.dp)
         )
 

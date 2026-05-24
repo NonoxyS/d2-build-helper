@@ -1,5 +1,6 @@
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.nonoxy.d2buildhelper.App
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.setupImageLoader
 import dev.nonoxy.d2buildhelper.core.di.initKoin
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
@@ -9,7 +10,8 @@ fun MainViewController(): UIViewController = ComposeUIViewController(
     configure = {
         Napier.base(DebugAntilog(defaultTag = "D2BuildHelper"))
         initKoin()
-    }
+        setupImageLoader()
+    },
 ) {
     App()
 }
