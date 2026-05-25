@@ -1,13 +1,17 @@
 package dev.nonoxy.d2buildhelper.core.network.deserializer
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.KeepGeneratedSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+@KeepGeneratedSerializer
+@Serializable(with = TestEnumSerializer::class)
 internal enum class TestEnum {
     KNOWN_A,
 
@@ -16,12 +20,14 @@ internal enum class TestEnum {
     UNKNOWN,
 }
 
-internal object TestEnumSerializer : KSerializer<TestEnum> by fallbackEnumSerializer(TestEnum.UNKNOWN)
+@OptIn(ExperimentalSerializationApi::class)
+internal object TestEnumSerializer : KSerializer<TestEnum> by fallbackEnumSerializer(
+    generatedSerializer = TestEnum.generatedSerializer(),
+    fallback = TestEnum.UNKNOWN,
+)
 
 @Serializable
-internal data class Holder(
-    @Serializable(with = TestEnumSerializer::class) val value: TestEnum,
-)
+internal data class Holder(val value: TestEnum)
 
 class FallbackEnumSerializerTest {
 

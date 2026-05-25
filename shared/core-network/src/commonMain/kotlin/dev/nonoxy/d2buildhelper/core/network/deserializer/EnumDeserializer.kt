@@ -1,63 +1,68 @@
-package ru.mirea.toir.core.network.deserializer
+package dev.nonoxy.d2buildhelper.core.network.deserializer
 
 import io.github.aakira.napier.Napier
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 /**
- * A generic serializer for enum classes using Kotlin Serialization.
+ * Wraps an existing enum serializer for [T] and substitutes [fallback] whenever the wire value
+ * does not match any declared enum entry. Element names (including `@SerialName` overrides)
+ * are taken from [generated]'s descriptor — no manual mapping required.
  *
- * This serializer handles the serialization and deserialization of enum values as strings,
- * using either the `serialName` (if available) or the regular `name` of the enum.
+ * Use for forward-compatible DTO enums where the backend may introduce new values.
  *
- * @param T The enum type to serialize.
- * @param fallbackEnum The fallback enum, if deserialization fails
+ * Recommended setup — `@KeepGeneratedSerializer` keeps the plugin-generated serializer
+ * accessible as `T.generatedSerializer()` even when `@Serializable(with = …)` is present.
+ * That lets you point every use-site at the enum without sprinkling `@Serializable(with = …)`
+ * on every field:
+ *
+ * ```
+ * @OptIn(ExperimentalSerializationApi::class)
+ * @KeepGeneratedSerializer
+ * @Serializable(with = RemoteFooSerializer::class)
+ * enum class RemoteFoo {
+ *     @SerialName("known_value") KNOWN,
+ *     UNKNOWN,
+ * }
+ *
+ * @OptIn(ExperimentalSerializationApi::class)
+ * object RemoteFooSerializer : KSerializer<RemoteFoo> by fallbackEnumSerializer(
+ *     generatedSerializer = RemoteFoo.generatedSerializer(),
+ *     fallback = RemoteFoo.UNKNOWN
+ * )
+ *
+ * @Serializable
+ * data class FooHolder(val foo: RemoteFoo)   // no per-field @Serializable(with = …)
+ * ```
+ *
+ * Do NOT pass `serializer<T>()` here when `@Serializable(with = X)` points back to the same
+ * object — that produces a self-referential delegate and a StackOverflowError on first
+ * encode/decode. Always thread the generated serializer through explicitly.
  */
-
-@OptIn(InternalSerializationApi::class)
-inline fun <reified T : Enum<T>> enumSerializerWithFallback(
-    fallbackEnum: T,
-    serialNameMapping: Map<T, String>
+inline fun <reified T : Enum<T>> fallbackEnumSerializer(
+    generatedSerializer: KSerializer<T>,
+    fallback: T,
 ): KSerializer<T> = object : KSerializer<T> {
 
-    private val enumValues = enumValues<T>()
+    override val descriptor = generatedSerializer.descriptor
 
-    private val nameToEnum: Map<String, T> by lazy {
-        buildMap {
-            enumValues.forEach { enumValue ->
-                val serialName = serialNameMapping[enumValue]
-
-                if (serialName == null) {
-                    put(enumValue.name.lowercase(), enumValue)
-                } else {
-                    put(serialName, enumValue)
-                }
-            }
+    override fun deserialize(decoder: Decoder): T {
+        val name = decoder.decodeString()
+        return nameToValue[name] ?: fallback.also {
+            val exception = IllegalArgumentException("Unknown enum value found: $name")
+            Napier.e(message = "Error during deserializing enum", throwable = exception)
         }
     }
 
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
-        serialName = "EnumSerializer<${T::class.simpleName}>",
-        kind = PrimitiveKind.STRING
-    )
-
     override fun serialize(encoder: Encoder, value: T) {
-        val serialName = serialNameMapping[value] ?: value.name
-        encoder.encodeString(serialName)
+        generatedSerializer.serialize(encoder, value)
     }
 
-    override fun deserialize(decoder: Decoder): T {
-        val decodeString = decoder.decodeString()
-        return nameToEnum[decodeString]
-            ?: nameToEnum[decodeString.lowercase()]
-            ?: fallbackEnum.also {
-                val exception = IllegalArgumentException("Unknown enum value found: $decodeString")
-                Napier.e(message = "Error during deserializing enum", throwable = exception)
-            }
+    private val enumValues = enumValues<T>()
+    private val nameToValue: Map<String, T> = buildMap(enumValues.size) {
+        for (index in 0 until descriptor.elementsCount) {
+            put(descriptor.getElementName(index), enumValues[index])
+        }
     }
 }
