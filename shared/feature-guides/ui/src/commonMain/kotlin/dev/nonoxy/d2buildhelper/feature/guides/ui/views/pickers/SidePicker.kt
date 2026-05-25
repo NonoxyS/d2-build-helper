@@ -18,7 +18,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicke
 @Suppress("UnusedParameter")
 internal fun SidePicker(
     picker: UiFilterPicker.Side,
-    onSideSelected: (Boolean) -> Unit,
+    onSideClick: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(24.dp),
@@ -28,12 +28,12 @@ internal fun SidePicker(
         Image(
             painter = painterResource(MR.images.radiant_square),
             contentDescription = "Radiant",
-            modifier = Modifier.size(64.dp).clickable { onSideSelected(true) },
+            modifier = Modifier.size(64.dp).clickable { onSideClick(true) },
         )
         Image(
             painter = painterResource(MR.images.dire_square),
             contentDescription = "Dire",
-            modifier = Modifier.size(64.dp).clickable { onSideSelected(false) },
+            modifier = Modifier.size(64.dp).clickable { onSideClick(false) },
         )
     }
 }

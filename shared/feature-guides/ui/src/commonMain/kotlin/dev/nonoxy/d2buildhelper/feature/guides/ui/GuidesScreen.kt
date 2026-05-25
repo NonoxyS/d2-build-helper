@@ -39,15 +39,15 @@ internal fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
                 is UiFilterPicker.Hero -> HeroPicker(
                     picker = picker,
                     onSearchChange = vm::onPickerSearchChange,
-                    onHeroSelected = vm::onHeroSelected,
+                    onHeroClick = vm::onHeroSelected,
                 )
                 is UiFilterPicker.Position -> PositionPicker(
                     picker = picker,
-                    onPositionSelected = vm::onPositionSelected,
+                    onPositionClick = vm::onPositionSelected,
                 )
                 is UiFilterPicker.Side -> SidePicker(
                     picker = picker,
-                    onSideSelected = vm::onSideSelected,
+                    onSideClick = vm::onSideSelected,
                 )
             }
         }

@@ -122,8 +122,10 @@ class GuidesExecutorTest {
     fun `LoadInitial failure sets error and clears loading`() = runTest {
         val resources = FakeResourcesRepository(constants(174))
         val guidesRepo = object : GuidesRepository {
-            override suspend fun getGuides(): Result<GuidesPage> = Result.failure(RuntimeException("boom"))
-            override suspend fun getHeroGuides(heroId: HeroId): Result<GuidesPage> = Result.success(guidesPage(174, emptyList()))
+            override suspend fun getGuides(): Result<GuidesPage> =
+                Result.failure(RuntimeException("boom"))
+            override suspend fun getHeroGuides(heroId: HeroId): Result<GuidesPage> =
+                Result.success(guidesPage(174, emptyList()))
         }
         val store = GuidesStoreFactory(
             storeFactory = DefaultStoreFactory(),

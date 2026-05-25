@@ -17,7 +17,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicke
 @Composable
 internal fun PositionPicker(
     picker: UiFilterPicker.Position,
-    onPositionSelected: (MatchPlayerPosition) -> Unit,
+    onPositionClick: (MatchPlayerPosition) -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(24.dp),
@@ -33,7 +33,7 @@ internal fun PositionPicker(
                     contentDescription = option.name,
                     modifier = Modifier
                         .size(48.dp)
-                        .clickable { onPositionSelected(domainPosition) },
+                        .clickable { onPositionClick(domainPosition) },
                 )
             }
         }

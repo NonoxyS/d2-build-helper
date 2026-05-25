@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -46,7 +46,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHero
 internal fun HeroPicker(
     picker: UiFilterPicker.Hero,
     onSearchChange: (String) -> Unit,
-    onHeroSelected: (HeroId) -> Unit,
+    onHeroClick: (HeroId) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -54,7 +54,7 @@ internal fun HeroPicker(
 
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    Column(modifier = Modifier.padding(horizontal = 8.dp).height(560.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 8.dp).heightIn(max = 560.dp)) {
         OutlinedTextField(
             value = input,
             onValueChange = {
@@ -96,7 +96,7 @@ internal fun HeroPicker(
                 HeroCell(
                     hero = hero,
                     isSelected = picker.selectedHeroId == hero.id,
-                    onClick = { onHeroSelected(hero.id) },
+                    onClick = { onHeroClick(hero.id) },
                 )
             }
         }
