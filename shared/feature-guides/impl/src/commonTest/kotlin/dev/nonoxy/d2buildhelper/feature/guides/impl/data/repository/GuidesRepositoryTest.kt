@@ -123,7 +123,7 @@ class GuidesRepositoryTest {
 
         assertEquals(1, result.size)
         val guide = result.single()
-        assertEquals(8.toShort(), guide.hero.heroId)
+        assertEquals(8.toShort(), guide.hero.id)
         assertEquals("Juggernaut", guide.hero.displayName)
         assertEquals(false, guide.playerStats.isRadiant)
     }

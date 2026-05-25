@@ -1,9 +1,9 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.data
 
 import dev.nonoxy.d2buildhelper.core.resources.data.repository.ResourcesRepository
-import dev.nonoxy.d2buildhelper.core.domain.Ability
-import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.core.domain.Item
+import dev.nonoxy.d2buildhelper.core.domain.models.Ability
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Item
 
 internal class FakeResourcesRepository(
     var heroImages: Result<Map<Hero, String>> = Result.success(emptyMap()),

@@ -1,14 +1,14 @@
 package dev.nonoxy.d2buildhelper.core.resources.data.repository
 
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
-import dev.nonoxy.d2buildhelper.core.domain.Ability
-import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.core.domain.Item
+import dev.nonoxy.d2buildhelper.core.domain.models.Ability
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.resources.data.network.ConstantsApiClient
-import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteAbilityConstantResponse
+import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteAbilityConstant
 import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteConstantsResponse
-import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteHeroConstantResponse
-import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteItemConstantResponse
+import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteHeroConstant
+import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteItemConstant
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -68,11 +68,11 @@ internal class ResourcesRepositoryImpl(
     }
 }
 
-private fun RemoteHeroConstantResponse.toDomain(): Hero =
-    Hero(heroId = id.toShort(), shortName = shortName, displayName = displayName)
+private fun RemoteHeroConstant.toDomain(): Hero =
+    Hero(id = id.toShort(), shortName = shortName, displayName = displayName)
 
-private fun RemoteItemConstantResponse.toDomain(): Item =
+private fun RemoteItemConstant.toDomain(): Item =
     Item(id = id.toShort(), shortName = shortName, displayName = displayName)
 
-private fun RemoteAbilityConstantResponse.toDomain(): Ability =
+private fun RemoteAbilityConstant.toDomain(): Ability =
     Ability(id = id.toShort(), name = name)

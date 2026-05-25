@@ -3,7 +3,7 @@ package dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
 import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
 import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
-import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
@@ -45,7 +45,7 @@ internal class GuidesRepositoryImpl(
 
 private fun RemoteGuideResponse.toDomain(): Guide = Guide(
     hero = Hero(
-        heroId = hero.id.toShort(),
+        id = hero.id.toShort(),
         shortName = hero.shortName.orEmpty(),
         displayName = hero.displayName.orEmpty(),
     ),

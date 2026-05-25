@@ -6,8 +6,8 @@ import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeResourcesRepository
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
-import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.core.domain.Item
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.PlayerStats
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +21,7 @@ import kotlin.test.assertTrue
 class GuidesExecutorTest {
 
     private fun hero(id: Short, name: String = "Hero$id") =
-        Hero(heroId = id, shortName = name, displayName = name)
+        Hero(id = id, shortName = name, displayName = name)
 
     private fun item(id: Short) = Item(id = id, shortName = "item_$id", displayName = "Item $id")
 
@@ -126,7 +126,7 @@ class GuidesExecutorTest {
         store.accept(Intent.OnHeroSelect(7))
 
         assertEquals(7.toShort(), observedHeroId)
-        assertEquals(7.toShort(), store.state.guides.single().hero.heroId)
+        assertEquals(7.toShort(), store.state.guides.single().hero.id)
 
         store.dispose()
     }

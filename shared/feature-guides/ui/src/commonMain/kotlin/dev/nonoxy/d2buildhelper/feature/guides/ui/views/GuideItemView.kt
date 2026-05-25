@@ -34,9 +34,9 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space48
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
-import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.ImageResources
-import dev.nonoxy.d2buildhelper.core.domain.Item
+import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
@@ -282,7 +282,7 @@ private fun GuideItemView_Preview() {
         GuideItemView(
             guide = Guide(
                 hero = Hero(
-                    heroId = 1,
+                    id = 1,
                     shortName = "antimage",
                     displayName = "Anti-Mage",
                 ),
@@ -306,7 +306,7 @@ private fun GuideItemView_Preview() {
             imageResources = ImageResources(
                 heroImages = mapOf(
                     Hero(
-                        heroId = 1,
+                        id = 1,
                         shortName = "antimage",
                         displayName = "Anti-Mage",
                     ) to "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/antimage.png",

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 internal data class RemoteConstantsResponse(
     @SerialName("gameVersionId") val gameVersionId: Int,
     @SerialName("patch") val patch: String,
-    @SerialName("heroes") val heroes: List<RemoteHeroConstantResponse>,
-    @SerialName("items") val items: List<RemoteItemConstantResponse>,
-    @SerialName("abilities") val abilities: List<RemoteAbilityConstantResponse>,
+    @SerialName("heroes") val heroes: List<RemoteHeroConstant>,
+    @SerialName("items") val items: List<RemoteItemConstant>,
+    @SerialName("abilities") val abilities: List<RemoteAbilityConstant>,
 )

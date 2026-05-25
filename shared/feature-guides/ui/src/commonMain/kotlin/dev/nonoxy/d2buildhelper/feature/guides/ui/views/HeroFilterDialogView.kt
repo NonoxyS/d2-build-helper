@@ -32,7 +32,7 @@ import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.dialog.D2Dialog
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.core.domain.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 
 @Composable
 internal fun HeroFilterDialog(
@@ -91,7 +91,7 @@ internal fun HeroFilterDialog(
         ) {
             items(
                 items = filteredHeroImageUrls.toList(),
-                key = { (hero, _) -> hero.heroId },
+                key = { (hero, _) -> hero.id },
             ) { (hero, url) ->
                 HeroFilterItem(
                     hero = hero,
@@ -116,7 +116,7 @@ private fun HeroFilterItem(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { onItemClick(hero.heroId) },
+            .clickable { onItemClick(hero.id) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(

@@ -1,7 +1,7 @@
-package dev.nonoxy.d2buildhelper.core.domain
+package dev.nonoxy.d2buildhelper.core.domain.models
 
 data class Hero(
-    val heroId: Short,
+    val id: Short,
     val shortName: String,
     val displayName: String
 )
