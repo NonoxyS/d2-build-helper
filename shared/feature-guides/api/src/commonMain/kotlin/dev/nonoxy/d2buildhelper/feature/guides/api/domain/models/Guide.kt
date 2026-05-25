@@ -12,7 +12,7 @@ data class Guide(
 )
 
 data class PlayerStats(
-    val position: MatchPlayerPosition,
+    val position: MatchPlayerPosition?,
     val isRadiant: Boolean,
     val kills: Byte,
     val deaths: Byte,
@@ -27,13 +27,10 @@ data class ItemPurchase(
     val time: Int?,
 )
 
-enum class MatchPlayerPosition(val title: String) {
-    POSITION_1("POSITION_1"),
-    POSITION_2("POSITION_2"),
-    POSITION_3("POSITION_3"),
-    POSITION_4("POSITION_4"),
-    POSITION_5("POSITION_5"),
-    UNKNOWN("UNKNOWN"),
-    FILTERED("FILTERED"),
-    ALL("ALL"),
+enum class MatchPlayerPosition {
+    POSITION_1,
+    POSITION_2,
+    POSITION_3,
+    POSITION_4,
+    POSITION_5,
 }
