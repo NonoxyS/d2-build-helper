@@ -1,6 +1,7 @@
 import extensions.androidLibraryConfig
 import extensions.androidMainDependencies
 import extensions.commonMainDependencies
+import extensions.commonTestDependencies
 import extensions.iosMainDependencies
 import java.util.Properties
 
@@ -31,6 +32,10 @@ iosMainDependencies {
     api(libs.ktor.engine.darwin)
 }
 
+commonTestDependencies {
+    implementation(kotlin("test"))
+}
+
 buildConfig {
     packageName = "dev.nonoxy.d2buildhelper.core.network"
     useKotlinOutput { internalVisibility = false }
@@ -47,3 +52,9 @@ buildConfig {
     buildConfigField("String", "D2BH_API_KEY", "\"$d2bhApiKey\"")
     buildConfigField("String", "D2BH_ENVIRONMENT", "\"$d2bhEnvironment\"")
 }
+
+// AGP 9 lint host-test tasks read generated BuildConfig outputs without declaring the dependency.
+tasks.matching { it.name == "lintAnalyzeAndroidHostTest" || it.name == "generateAndroidHostTestLintModel" }
+    .configureEach {
+        dependsOn("generateAndroidHostTestBuildConfig", "generateTestBuildConfig")
+    }

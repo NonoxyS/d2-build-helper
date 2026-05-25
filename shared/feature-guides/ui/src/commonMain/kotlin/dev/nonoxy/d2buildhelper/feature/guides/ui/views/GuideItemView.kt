@@ -23,37 +23,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space16
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space48
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.common.utils.TimeConverter
-import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.core.domain.ImageResources
-import dev.nonoxy.d2buildhelper.core.domain.Item
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.ItemPurchase
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.PlayerStats
+import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
+import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchase
 
 @Composable
-internal fun GuideItemView(
-    guide: Guide,
-    imageResources: ImageResources,
-) {
+internal fun GuideItemView(guide: UiGuide) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = D2BuildHelperTheme.colors.surface,
-                shape = D2BuildHelperTheme.shapes.cornerRadius4,
-            )
+            .background(color = D2BuildHelperTheme.colors.surface, shape = D2BuildHelperTheme.shapes.cornerRadius4)
             .border(
                 width = 1.dp,
                 color = D2BuildHelperTheme.colors.outline,
@@ -62,34 +48,20 @@ internal fun GuideItemView(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        HeroNameRow(
-            hero = guide.hero,
-            heroImageUrl = imageResources.heroImages[guide.hero] ?: "",
-            position = guide.playerStats.position,
-        )
-        MatchStatsRow(
-            guide = guide,
-            isRadiant = guide.playerStats.isRadiant,
-        )
-        ItemRow(
-            guide = guide,
-            itemImageUrls = imageResources.itemImages,
-        )
+        HeroNameRow(guide = guide)
+        MatchStatsRow(guide = guide)
+        ItemRow(guide = guide)
     }
 }
 
 @Composable
-private fun HeroNameRow(
-    hero: Hero,
-    heroImageUrl: String,
-    position: MatchPlayerPosition,
-) {
+private fun HeroNameRow(guide: UiGuide) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val positionIcon = position.iconResource()
+        val positionIcon = guide.position?.iconResource
         if (positionIcon != null) {
             Image(
                 painter = painterResource(positionIcon),
@@ -99,15 +71,13 @@ private fun HeroNameRow(
         } else {
             Spacer(modifier = Modifier.size(18.dp))
         }
-
-        AsyncImage(
-            model = heroImageUrl,
-            contentDescription = null,
+        D2AsyncImage(
+            model = guide.hero.iconUrl,
+            contentDescription = guide.hero.displayName,
             modifier = Modifier.size(32.dp),
         )
-
         Text(
-            text = hero.displayName,
+            text = guide.hero.displayName,
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.bodyLG,
         )
@@ -115,84 +85,68 @@ private fun HeroNameRow(
 }
 
 @Composable
-private fun MatchStatsRow(
-    guide: Guide,
-    isRadiant: Boolean,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+private fun MatchStatsRow(guide: UiGuide) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = TimeConverter.convertSecondsToMinutesAndSeconds(guide.durationSeconds),
+            text = guide.durationFormatted,
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.captionMD,
         )
-
         Space16()
 
         Image(
             painter = painterResource(
-                if (isRadiant) MR.images.radiant_square else MR.images.dire_square,
+                if (guide.isRadiant) MR.images.radiant_square else MR.images.dire_square,
             ),
             contentDescription = null,
             modifier = Modifier.size(16.dp).clip(D2BuildHelperTheme.shapes.cornerRadius4),
         )
-
         Space16()
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = guide.playerStats.kills.toString(),
+                text = guide.kills.toString(),
                 textAlign = TextAlign.Center,
                 color = D2BuildHelperTheme.colors.textSecondary,
                 style = D2BuildHelperTheme.typography.captionMD,
                 modifier = Modifier.widthIn(min = 15.dp),
             )
-
             Text(
                 text = "/",
                 color = D2BuildHelperTheme.colors.textSecondary.copy(alpha = .36f),
                 style = D2BuildHelperTheme.typography.captionMD,
             )
-
             Text(
-                text = guide.playerStats.deaths.toString(),
+                text = guide.deaths.toString(),
                 textAlign = TextAlign.Center,
                 color = D2BuildHelperTheme.colors.textSecondary,
                 style = D2BuildHelperTheme.typography.captionMD,
                 modifier = Modifier.widthIn(min = 15.dp),
             )
-
             Text(
                 text = "/",
                 color = D2BuildHelperTheme.colors.textSecondary.copy(alpha = .36f),
                 style = D2BuildHelperTheme.typography.captionMD,
             )
-
             Text(
-                text = guide.playerStats.assists.toString(),
+                text = guide.assists.toString(),
                 textAlign = TextAlign.Center,
                 color = D2BuildHelperTheme.colors.textSecondary,
                 style = D2BuildHelperTheme.typography.captionMD,
                 modifier = Modifier.widthIn(min = 15.dp),
             )
         }
-
         Space48()
 
         Text(
-            text = "+${guide.playerStats.impact}",
+            text = guide.impactLabel,
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.captionMD,
         )
-
         Space4()
 
         LinearProgressIndicator(
-            progress = { guide.playerStats.impact.div(50f) },
+            progress = { guide.impactProgress },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.5f)
                 .height(8.dp)
@@ -202,59 +156,30 @@ private fun MatchStatsRow(
 }
 
 @Composable
-private fun ItemRow(
-    guide: Guide,
-    itemImageUrls: Map<Item, String>,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        for (i in 0..5) {
-            val item = guide.playerStats.sortedEndItemPurchases.getOrNull(i)
-            ItemWithBuyTime(
-                itemPurchase = item,
-                itemImageUrl = item?.itemId?.let { itemImageUrls.findByItemId(it) } ?: "",
+private fun ItemRow(guide: UiGuide) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        guide.items.forEach { purchase ->
+            ItemWithBuyTime(purchase = purchase)
+        }
+        guide.neutralItem?.let { neutral ->
+            D2AsyncImage(
+                model = neutral.iconUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
+                    .clip(CircleShape),
             )
         }
-        AsyncImage(
-            model = guide.playerStats.endNeutralItemId?.let { itemImageUrls.findByItemId(it) },
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(28.dp)
-                .background(
-                    color = D2BuildHelperTheme.colors.outline,
-                    shape = CircleShape,
-                )
-                .clip(CircleShape),
-        )
     }
 }
 
-private fun Map<Item, String>.findByItemId(id: Short): String? =
-    entries.firstOrNull { it.key.id == id }?.value
-
-private fun MatchPlayerPosition.iconResource(): ImageResource? = when (this) {
-    MatchPlayerPosition.POSITION_1 -> MR.images.position_1
-    MatchPlayerPosition.POSITION_2 -> MR.images.position_2
-    MatchPlayerPosition.POSITION_3 -> MR.images.position_3
-    MatchPlayerPosition.POSITION_4 -> MR.images.position_4
-    MatchPlayerPosition.POSITION_5 -> MR.images.position_5
-    MatchPlayerPosition.UNKNOWN,
-    MatchPlayerPosition.FILTERED,
-    MatchPlayerPosition.ALL,
-    -> null
-}
-
 @Composable
-private fun ItemWithBuyTime(
-    itemPurchase: ItemPurchase?,
-    itemImageUrl: String,
-) {
+private fun ItemWithBuyTime(purchase: UiItemPurchase) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        AsyncImage(
-            model = itemImageUrl,
+        D2AsyncImage(
+            model = purchase.iconUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
@@ -267,53 +192,11 @@ private fun ItemWithBuyTime(
                 .clip(D2BuildHelperTheme.shapes.cornerRadius4),
         )
         Space4()
+
         Text(
-            text = itemPurchase?.let { TimeConverter.convertSecondsToMinutesAndSeconds(it.time) } ?: "",
+            text = purchase.timeFormatted,
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.captionMD,
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun GuideItemView_Preview() {
-    D2BuildHelperTheme {
-        GuideItemView(
-            guide = Guide(
-                hero = Hero(
-                    heroId = 1,
-                    shortName = "antimage",
-                    displayName = "Anti-Mage",
-                ),
-                steamAccountId = 76561197960287930,
-                matchId = 1234567890,
-                durationSeconds = 3600,
-                playerStats = PlayerStats(
-                    position = MatchPlayerPosition.POSITION_1,
-                    isRadiant = true,
-                    kills = 10,
-                    deaths = 2,
-                    assists = 8,
-                    impact = 38,
-                    endNeutralItemId = 10,
-                    sortedEndItemPurchases = listOf(
-                        ItemPurchase(itemId = 1, time = 0),
-                        ItemPurchase(itemId = 2, time = 600),
-                    ),
-                ),
-            ),
-            imageResources = ImageResources(
-                heroImages = mapOf(
-                    Hero(
-                        heroId = 1,
-                        shortName = "antimage",
-                        displayName = "Anti-Mage",
-                    ) to "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/antimage.png",
-                ),
-                itemImages = emptyMap(),
-                abilityImages = emptyMap(),
-            ),
         )
     }
 }

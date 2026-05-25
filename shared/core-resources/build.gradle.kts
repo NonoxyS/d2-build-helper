@@ -16,6 +16,8 @@ commonMainDependencies {
     api(projects.shared.coreDomain)
     implementation(projects.shared.common)
     implementation(projects.shared.coreNetwork)
+    implementation(projects.shared.coreStorage)
+    implementation(libs.kotlinx.datetime)
 }
 
 commonTestDependencies {

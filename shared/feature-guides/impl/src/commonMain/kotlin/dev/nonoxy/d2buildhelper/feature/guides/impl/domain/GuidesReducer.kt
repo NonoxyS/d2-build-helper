@@ -9,8 +9,14 @@ internal class GuidesReducer : Reducer<State, Message> {
         is Message.SetLoading -> copy(isLoading = msg.isLoading)
         is Message.SetError -> copy(isError = msg.isError)
         is Message.SetGuides -> copy(guides = msg.guides)
-        is Message.SetImageResources -> copy(imageResources = msg.resources)
-        is Message.SetHeroSearchValue -> copy(heroSearchValue = msg.value)
-        is Message.SetHeroSearchFiltered -> copy(heroSearchFiltered = msg.filtered)
+        is Message.SetConstants -> copy(
+            heroes = msg.heroes,
+            items = msg.items,
+            abilities = msg.abilities,
+            gameVersion = msg.gameVersion,
+        )
+        is Message.SetFilters -> copy(filters = msg.filters)
+        is Message.SetActivePicker -> copy(activePicker = msg.kind)
+        is Message.SetPickerSearch -> copy(pickerSearch = msg.value)
     }
 }

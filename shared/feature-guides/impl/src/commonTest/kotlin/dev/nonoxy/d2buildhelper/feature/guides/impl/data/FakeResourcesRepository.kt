@@ -1,18 +1,22 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.data
 
-import dev.nonoxy.d2buildhelper.core.resources.data.repository.ResourcesRepository
-import dev.nonoxy.d2buildhelper.core.domain.Ability
-import dev.nonoxy.d2buildhelper.core.domain.Hero
-import dev.nonoxy.d2buildhelper.core.domain.Item
+import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
+import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
+import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesRepository
 
 internal class FakeResourcesRepository(
-    var heroImages: Result<Map<Hero, String>> = Result.success(emptyMap()),
-    var itemImages: Result<Map<Item, String>> = Result.success(emptyMap()),
-    var abilityImages: Result<Map<Ability, String>> = Result.success(emptyMap()),
+    private val constants: DotaConstants,
+    private val getResult: Result<DotaConstants> = Result.success(constants),
+    private val refreshResult: Result<DotaConstants> = Result.success(constants),
 ) : ResourcesRepository {
-    override suspend fun getHeroImages(): Result<Map<Hero, String>> = heroImages
 
-    override suspend fun getItemImages(): Result<Map<Item, String>> = itemImages
+    var lastExpectedVersion: GameVersion? = null
+        private set
 
-    override suspend fun getAbilityImages(): Result<Map<Ability, String>> = abilityImages
+    override suspend fun getDotaConstants(): Result<DotaConstants> = getResult
+
+    override suspend fun refreshDotaConstants(expectedVersion: GameVersion?): Result<DotaConstants> {
+        lastExpectedVersion = expectedVersion
+        return refreshResult
+    }
 }

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class RemoteItemConstantResponse(
+internal data class RemoteItemConstant(
     @SerialName("id") val id: Int,
     @SerialName("shortName") val shortName: String,
     @SerialName("displayName") val displayName: String,

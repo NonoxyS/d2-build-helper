@@ -7,22 +7,23 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 
 private const val GUIDES_JSON = """
 {
   "pagination": { "page": 0, "pageSize": 50, "hasMore": false },
+  "gameVersionId": 174,
   "guides": [
     {
       "matchId": 7891234567,
       "steamAccountId": 123456789,
       "durationSeconds": 1834,
-      "hero": { "id": 1, "shortName": "antimage", "displayName": "Anti-Mage" },
+      "heroId": 1,
       "player": {
         "position": "POSITION_1",
         "isRadiant": true,
@@ -60,10 +61,11 @@ class GuidesApiClientImplTest {
 
         assertTrue(result.isSuccess)
         val page = result.getOrThrow()
+        assertEquals(174, page.gameVersionId)
         assertEquals(1, page.guides.size)
         val guide = page.guides.single()
         assertEquals(7891234567L, guide.matchId)
-        assertEquals(1, guide.hero.id)
+        assertEquals(1, guide.heroId)
         assertEquals(listOf(1, 50), guide.player.finalItemIds)
         assertEquals(2, guide.player.itemPurchases.size)
     }

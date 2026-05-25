@@ -8,6 +8,6 @@ internal data class RemoteGuideResponse(
     @SerialName("matchId") val matchId: Long,
     @SerialName("steamAccountId") val steamAccountId: Long,
     @SerialName("durationSeconds") val durationSeconds: Int? = null,
-    @SerialName("hero") val hero: RemoteGuideHeroResponse,
+    @SerialName("heroId") val heroId: Int,
     @SerialName("player") val player: RemoteGuidePlayerResponse,
 )

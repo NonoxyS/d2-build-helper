@@ -1,27 +1,32 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository
 
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
-import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideHeroResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesPageMapperImpl
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidePlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidesPageResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteItemPurchaseResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemotePaginationResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GuidesRepositoryTest {
 
-    private fun page(vararg guides: RemoteGuideResponse) = RemoteGuidesPageResponse(
+    private fun page(vararg guides: RemoteGuideResponse, gameVersionId: Int = 174) = RemoteGuidesPageResponse(
         pagination = RemotePaginationResponse(page = 0, pageSize = 50, hasMore = false),
+        gameVersionId = gameVersionId,
         guides = guides.toList(),
     )
 
@@ -31,9 +36,9 @@ class GuidesRepositoryTest {
             matchId = 100L,
             steamAccountId = 1L,
             durationSeconds = 1800,
-            hero = RemoteGuideHeroResponse(id = 1, shortName = "antimage", displayName = "Anti-Mage"),
+            heroId = 1,
             player = RemoteGuidePlayerResponse(
-                position = "POSITION_1",
+                position = RemoteMatchPlayerPosition.POSITION_1,
                 isRadiant = true,
                 kills = 10,
                 deaths = 1,
@@ -48,20 +53,21 @@ class GuidesRepositoryTest {
                 ),
             ),
         )
-        val api = FakeGuidesApiClient(guides = Result.success(page(dto)))
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val api = FakeGuidesApiClient(guides = Result.success(page(dto, gameVersionId = 174)))
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
-        val result = repo.getGuides().getOrThrow()
+        val pageResult = repo.getGuides().getOrThrow()
 
-        assertEquals(1, result.size)
-        val guide = result.single()
-        assertEquals("Anti-Mage", guide.hero.displayName)
+        assertEquals(GameVersion(174), pageResult.gameVersion)
+        assertEquals(1, pageResult.guides.size)
+        val guide = pageResult.guides.single()
+        assertEquals(HeroId(1), guide.heroId)
         assertEquals(MatchPlayerPosition.POSITION_1, guide.playerStats.position)
         val purchases = guide.playerStats.sortedEndItemPurchases
         assertEquals(2, purchases.size)
-        assertEquals(43.toShort(), purchases[0].itemId)
+        assertEquals(ItemId(43), purchases[0].itemId)
         assertEquals(100, purchases[0].time)
-        assertEquals(42.toShort(), purchases[1].itemId)
+        assertEquals(ItemId(42), purchases[1].itemId)
         assertEquals(200, purchases[1].time)
     }
 
@@ -69,7 +75,7 @@ class GuidesRepositoryTest {
     fun `getGuides surfaces upstream failure unchanged`() = runTest {
         val boom = IllegalStateException("network")
         val api = FakeGuidesApiClient(guides = Result.failure(boom))
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
         val result = repo.getGuides()
 
@@ -83,21 +89,23 @@ class GuidesRepositoryTest {
             matchId = 200L,
             steamAccountId = 99L,
             durationSeconds = null,
-            hero = RemoteGuideHeroResponse(id = 5, shortName = null, displayName = null),
+            heroId = 5,
             player = RemoteGuidePlayerResponse(),
         )
         val repo: GuidesRepository = GuidesRepositoryImpl(
-            FakeGuidesApiClient(guides = Result.success(page(dto))),
+            FakeGuidesApiClient(guides = Result.success(page(dto, gameVersionId = 200))),
+            GuidesPageMapperImpl(),
             TestCoroutineDispatchers(),
         )
 
-        val guide = repo.getGuides().getOrThrow().single()
+        val pageResult = repo.getGuides().getOrThrow()
+        val guide = pageResult.guides.single()
         val stats = guide.playerStats
 
-        assertEquals("", guide.hero.shortName)
-        assertEquals("", guide.hero.displayName)
+        assertEquals(GameVersion(200), pageResult.gameVersion)
+        assertEquals(HeroId(5), guide.heroId)
         assertEquals(0, guide.durationSeconds)
-        assertEquals(MatchPlayerPosition.UNKNOWN, stats.position)
+        assertNull(stats.position)
         assertEquals(true, stats.isRadiant)
         assertEquals(25.toShort(), stats.impact)
         assertNull(stats.endNeutralItemId)
@@ -110,21 +118,20 @@ class GuidesRepositoryTest {
             matchId = 300L,
             steamAccountId = 7L,
             durationSeconds = 2400,
-            hero = RemoteGuideHeroResponse(id = 8, shortName = "juggernaut", displayName = "Juggernaut"),
-            player = RemoteGuidePlayerResponse(position = "POSITION_1", isRadiant = false),
+            heroId = 8,
+            player = RemoteGuidePlayerResponse(position = RemoteMatchPlayerPosition.POSITION_1, isRadiant = false),
         )
         val api = FakeGuidesApiClient(
             guides = Result.success(page()),
-            heroGuides = Result.success(page(heroDto)),
+            heroGuides = Result.success(page(heroDto, gameVersionId = 174)),
         )
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
-        val result = repo.getHeroGuides(heroId = 8).getOrThrow()
+        val pageResult = repo.getHeroGuides(heroId = HeroId(8)).getOrThrow()
 
-        assertEquals(1, result.size)
-        val guide = result.single()
-        assertEquals(8.toShort(), guide.hero.heroId)
-        assertEquals("Juggernaut", guide.hero.displayName)
+        assertEquals(1, pageResult.guides.size)
+        val guide = pageResult.guides.single()
+        assertEquals(HeroId(8), guide.heroId)
         assertEquals(false, guide.playerStats.isRadiant)
     }
 }

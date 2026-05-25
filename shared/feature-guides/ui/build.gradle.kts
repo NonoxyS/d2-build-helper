@@ -12,4 +12,5 @@ androidLibraryConfig {
 
 commonMainDependencies {
     implementation(libs.compose.material.icons.extended)
+    implementation(libs.kotlinx.collections.immutable)
 }

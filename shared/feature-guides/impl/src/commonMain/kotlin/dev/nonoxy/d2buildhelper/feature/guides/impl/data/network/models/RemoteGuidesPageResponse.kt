@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class RemoteGuidesPageResponse(
     @SerialName("pagination") val pagination: RemotePaginationResponse,
+    @SerialName("gameVersionId") val gameVersionId: Int,
     @SerialName("guides") val guides: List<RemoteGuideResponse>,
 )

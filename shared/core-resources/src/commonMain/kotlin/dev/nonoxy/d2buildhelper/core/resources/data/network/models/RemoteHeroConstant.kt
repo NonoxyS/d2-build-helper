@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class RemoteHeroConstantResponse(
+internal data class RemoteHeroConstant(
     @SerialName("id") val id: Int,
     @SerialName("shortName") val shortName: String,
     @SerialName("displayName") val displayName: String,

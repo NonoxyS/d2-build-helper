@@ -4,8 +4,9 @@ import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.GuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidesPageResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemotePaginationResponse
 
-internal fun emptyGuidesPage(): RemoteGuidesPageResponse = RemoteGuidesPageResponse(
+internal fun emptyGuidesPage(gameVersionId: Int = 0): RemoteGuidesPageResponse = RemoteGuidesPageResponse(
     pagination = RemotePaginationResponse(page = 0, pageSize = 50, hasMore = false),
+    gameVersionId = gameVersionId,
     guides = emptyList(),
 )
 

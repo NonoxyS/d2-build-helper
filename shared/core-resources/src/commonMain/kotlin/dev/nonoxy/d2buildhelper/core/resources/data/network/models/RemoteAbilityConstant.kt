@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class RemoteAbilityConstantResponse(
+internal data class RemoteAbilityConstant(
     @SerialName("id") val id: Int,
     @SerialName("name") val name: String,
     @SerialName("iconUrl") val iconUrl: String,
