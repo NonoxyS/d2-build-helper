@@ -30,6 +30,7 @@ commonMainDependencies {
     implementation(projects.shared.commonUi)
     implementation(projects.shared.coreNetwork)
     implementation(projects.shared.coreResources)
+    implementation(projects.shared.coreStorage)
     implementation(projects.shared.featureGuides.api)
     implementation(projects.shared.featureGuides.impl)
     implementation(projects.shared.featureGuides.presentation)
