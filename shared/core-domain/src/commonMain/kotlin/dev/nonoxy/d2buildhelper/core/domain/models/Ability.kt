@@ -1,6 +1,7 @@
 package dev.nonoxy.d2buildhelper.core.domain.models
 
 data class Ability(
-    val id: Short,
+    val id: AbilityId,
     val name: String,
+    val iconUrl: ImageUrl,
 )

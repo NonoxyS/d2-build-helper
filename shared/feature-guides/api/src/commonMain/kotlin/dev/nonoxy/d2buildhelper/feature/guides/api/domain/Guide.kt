@@ -1,29 +1,30 @@
 package dev.nonoxy.d2buildhelper.feature.guides.api.domain
 
-import dev.nonoxy.d2buildhelper.core.domain.models.Hero
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 
-class Guide(
-    val hero: Hero,
-    val steamAccountId: Long,
+data class Guide(
     val matchId: Long,
+    val steamAccountId: Long,
     val durationSeconds: Int,
-    val playerStats: PlayerStats
+    val heroId: HeroId,
+    val playerStats: PlayerStats,
 )
 
-class PlayerStats(
+data class PlayerStats(
     val position: MatchPlayerPosition,
     val isRadiant: Boolean,
     val kills: Byte,
     val deaths: Byte,
     val assists: Byte,
     val impact: Short,
-    val endNeutralItemId: Short?,
+    val endNeutralItemId: ItemId?,
     val sortedEndItemPurchases: List<ItemPurchase>,
 )
 
-class ItemPurchase(
-    val itemId: Short,
-    val time: Int?
+data class ItemPurchase(
+    val itemId: ItemId,
+    val time: Int?,
 )
 
 enum class MatchPlayerPosition(val title: String) {
@@ -34,5 +35,5 @@ enum class MatchPlayerPosition(val title: String) {
     POSITION_5("POSITION_5"),
     UNKNOWN("UNKNOWN"),
     FILTERED("FILTERED"),
-    ALL("ALL")
+    ALL("ALL"),
 }

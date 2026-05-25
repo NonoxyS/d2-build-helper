@@ -1,0 +1,14 @@
+package dev.nonoxy.d2buildhelper.feature.guides.presentation.models
+
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
+
+data class UiHero(
+    val id: HeroId,
+    val displayName: String,
+    val iconUrl: ImageUrl,
+) {
+    companion object {
+        val Unknown = UiHero(HeroId(0), "—", ImageUrl(""))
+    }
+}
