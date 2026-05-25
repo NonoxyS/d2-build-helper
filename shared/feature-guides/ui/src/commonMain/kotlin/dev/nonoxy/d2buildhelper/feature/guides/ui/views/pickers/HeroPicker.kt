@@ -35,6 +35,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.stringResource
+import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
@@ -61,7 +63,12 @@ internal fun HeroPicker(
                 input = it
                 onSearchChange(it)
             },
-            placeholder = { Text("Search hero", style = D2BuildHelperTheme.typography.textMD) },
+            placeholder = {
+                Text(
+                    text = stringResource(MR.strings.search_hero_placeholder),
+                    style = D2BuildHelperTheme.typography.textMD,
+                )
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
@@ -72,7 +79,10 @@ internal fun HeroPicker(
                         input = ""
                         onSearchChange("")
                     }) {
-                        Icon(imageVector = Icons.Rounded.Clear, contentDescription = "Clear")
+                        Icon(
+                            imageVector = Icons.Rounded.Clear,
+                            contentDescription = stringResource(MR.strings.content_desc_clear),
+                        )
                     }
                 }
             },
@@ -80,7 +90,7 @@ internal fun HeroPicker(
         )
 
         Text(
-            text = "${picker.heroes.size} heroes",
+            text = stringResource(MR.strings.search_hero_count_format, picker.heroes.size),
             style = D2BuildHelperTheme.typography.captionMD,
             color = D2BuildHelperTheme.colors.textSecondary,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -117,6 +127,7 @@ private fun HeroCell(hero: UiHero, isSelected: Boolean, onClick: () -> Unit) {
             modifier = Modifier.size(56.dp),
         )
         Space4()
+
         Text(
             text = hero.displayName,
             style = D2BuildHelperTheme.typography.captionMD,

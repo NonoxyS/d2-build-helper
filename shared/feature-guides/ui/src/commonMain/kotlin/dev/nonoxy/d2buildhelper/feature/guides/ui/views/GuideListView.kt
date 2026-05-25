@@ -23,7 +23,10 @@ internal fun GuideListView(guides: ImmutableList<UiGuide>) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(bottom = bottomInset + 16.dp),
     ) {
-        items(items = guides, key = { it.matchId to it.steamAccountId }) { guide ->
+        items(
+            items = guides,
+            key = { guide -> guide.matchId to guide.steamAccountId }
+        ) { guide ->
             GuideItemView(guide = guide)
         }
     }

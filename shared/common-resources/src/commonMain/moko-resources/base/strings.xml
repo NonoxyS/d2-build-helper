@@ -4,4 +4,20 @@
     <string name="app_name">D2 Build Helper</string>
     <string name="error_loading">Failed to load</string>
     <string name="retry">Retry</string>
+
+    <string name="filter_chip_hero">Hero</string>
+    <string name="filter_chip_position">Position</string>
+    <string name="filter_chip_side">Side</string>
+    <string name="filter_chip_applied_format">%1$s: %2$s</string>
+
+    <string name="position_short_format">Pos %1$d</string>
+
+    <string name="side_radiant">Radiant</string>
+    <string name="side_dire">Dire</string>
+
+    <string name="search_hero_placeholder">Search hero</string>
+    <string name="search_hero_count_format">%1$d heroes</string>
+    <string name="content_desc_clear">Clear</string>
+    <string name="content_desc_radiant">Radiant</string>
+    <string name="content_desc_dire">Dire</string>
 </resources>

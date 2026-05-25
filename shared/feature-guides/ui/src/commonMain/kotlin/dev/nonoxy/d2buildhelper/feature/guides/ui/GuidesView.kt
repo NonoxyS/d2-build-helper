@@ -23,7 +23,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesFilterKind
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterChip
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.GuideListView
@@ -59,7 +59,7 @@ private fun FilterChipRow(
 ) {
     AssistChip(
         onClick = { onClick(chip.kind) },
-        label = { Text(text = chip.label, style = D2BuildHelperTheme.typography.captionMD) },
+        label = { Text(text = chipLabel(chip), style = D2BuildHelperTheme.typography.captionMD) },
         trailingIcon = if (chip.isApplied) {
             {
                 IconButton(onClick = { onReset(chip.kind) }, modifier = Modifier.size(20.dp)) {
@@ -73,4 +73,27 @@ private fun FilterChipRow(
             labelColor = D2BuildHelperTheme.colors.textPrimary,
         ),
     )
+}
+
+@Composable
+private fun chipLabel(chip: UiFilterChip): String {
+    val title = stringResource(
+        when (chip.kind) {
+            GuidesFilterKind.Hero -> MR.strings.filter_chip_hero
+            GuidesFilterKind.Position -> MR.strings.filter_chip_position
+            GuidesFilterKind.Side -> MR.strings.filter_chip_side
+        },
+    )
+    val appliedValue: String? = when (chip) {
+        is UiFilterChip.Hero -> chip.appliedHeroName
+        is UiFilterChip.Position -> chip.appliedPosition?.let {
+            stringResource(MR.strings.position_short_format, it.shortNumber)
+        }
+        is UiFilterChip.Side -> chip.appliedIsRadiant?.let {
+            stringResource(if (it) MR.strings.side_radiant else MR.strings.side_dire)
+        }
+    }
+    return appliedValue
+        ?.let { stringResource(MR.strings.filter_chip_applied_format, title, it) }
+        ?: title
 }

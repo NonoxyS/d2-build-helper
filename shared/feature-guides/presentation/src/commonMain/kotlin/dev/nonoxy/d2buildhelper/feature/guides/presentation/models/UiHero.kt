@@ -7,8 +7,4 @@ data class UiHero(
     val id: HeroId,
     val displayName: String,
     val iconUrl: ImageUrl,
-) {
-    companion object {
-        val Unknown = UiHero(HeroId(0), "—", ImageUrl(""))
-    }
-}
+)

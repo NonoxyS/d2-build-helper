@@ -11,11 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 
 @Composable
-@Suppress("UnusedParameter")
 internal fun SidePicker(
     picker: UiFilterPicker.Side,
     onSideClick: (Boolean) -> Unit,
@@ -27,12 +27,12 @@ internal fun SidePicker(
     ) {
         Image(
             painter = painterResource(MR.images.radiant_square),
-            contentDescription = "Radiant",
+            contentDescription = stringResource(MR.strings.content_desc_radiant),
             modifier = Modifier.size(64.dp).clickable { onSideClick(true) },
         )
         Image(
             painter = painterResource(MR.images.dire_square),
-            contentDescription = "Dire",
+            contentDescription = stringResource(MR.strings.content_desc_dire),
             modifier = Modifier.size(64.dp).clickable { onSideClick(false) },
         )
     }

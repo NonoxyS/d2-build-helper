@@ -6,7 +6,7 @@ data class UiGuide(
     val matchId: Long,
     val steamAccountId: Long,
     val hero: UiHero,
-    val position: UiMatchPlayerPosition,
+    val position: UiMatchPlayerPosition?,
     val isRadiant: Boolean,
     val durationFormatted: String,
     val kills: Int,

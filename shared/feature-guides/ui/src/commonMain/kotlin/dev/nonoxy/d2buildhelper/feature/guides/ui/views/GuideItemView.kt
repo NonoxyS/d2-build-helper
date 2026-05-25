@@ -61,7 +61,7 @@ private fun HeroNameRow(guide: UiGuide) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val positionIcon = guide.position.iconResource
+        val positionIcon = guide.position?.iconResource
         if (positionIcon != null) {
             Image(
                 painter = painterResource(positionIcon),
@@ -93,6 +93,7 @@ private fun MatchStatsRow(guide: UiGuide) {
             style = D2BuildHelperTheme.typography.captionMD,
         )
         Space16()
+
         Image(
             painter = painterResource(
                 if (guide.isRadiant) MR.images.radiant_square else MR.images.dire_square,
@@ -101,6 +102,7 @@ private fun MatchStatsRow(guide: UiGuide) {
             modifier = Modifier.size(16.dp).clip(D2BuildHelperTheme.shapes.cornerRadius4),
         )
         Space16()
+
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = guide.kills.toString(),
@@ -135,12 +137,14 @@ private fun MatchStatsRow(guide: UiGuide) {
             )
         }
         Space48()
+
         Text(
             text = guide.impactLabel,
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.captionMD,
         )
         Space4()
+
         LinearProgressIndicator(
             progress = { guide.impactProgress },
             modifier = Modifier
@@ -188,6 +192,7 @@ private fun ItemWithBuyTime(purchase: UiItemPurchase) {
                 .clip(D2BuildHelperTheme.shapes.cornerRadius4),
         )
         Space4()
+
         Text(
             text = purchase.timeFormatted,
             color = D2BuildHelperTheme.colors.textSecondary,
