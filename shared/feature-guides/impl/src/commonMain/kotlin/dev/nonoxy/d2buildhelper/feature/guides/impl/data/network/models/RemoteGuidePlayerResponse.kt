@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class RemoteGuidePlayerResponse(
-    @SerialName("position") val position: String? = null,
+    @SerialName("position") val position: RemoteMatchPlayerPosition? = null,
     @SerialName("isRadiant") val isRadiant: Boolean? = null,
     @SerialName("kills") val kills: Int? = null,
     @SerialName("deaths") val deaths: Int? = null,

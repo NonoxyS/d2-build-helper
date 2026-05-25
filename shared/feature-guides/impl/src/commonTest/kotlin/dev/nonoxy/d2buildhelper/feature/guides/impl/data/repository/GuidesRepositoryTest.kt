@@ -3,13 +3,15 @@ package dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesPageMapperImpl
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidePlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidesPageResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteItemPurchaseResponse
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemotePaginationResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import kotlin.test.Test
@@ -36,7 +38,7 @@ class GuidesRepositoryTest {
             durationSeconds = 1800,
             heroId = 1,
             player = RemoteGuidePlayerResponse(
-                position = "POSITION_1",
+                position = RemoteMatchPlayerPosition.POSITION_1,
                 isRadiant = true,
                 kills = 10,
                 deaths = 1,
@@ -52,7 +54,7 @@ class GuidesRepositoryTest {
             ),
         )
         val api = FakeGuidesApiClient(guides = Result.success(page(dto, gameVersionId = 174)))
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
         val pageResult = repo.getGuides().getOrThrow()
 
@@ -73,7 +75,7 @@ class GuidesRepositoryTest {
     fun `getGuides surfaces upstream failure unchanged`() = runTest {
         val boom = IllegalStateException("network")
         val api = FakeGuidesApiClient(guides = Result.failure(boom))
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
         val result = repo.getGuides()
 
@@ -92,6 +94,7 @@ class GuidesRepositoryTest {
         )
         val repo: GuidesRepository = GuidesRepositoryImpl(
             FakeGuidesApiClient(guides = Result.success(page(dto, gameVersionId = 200))),
+            GuidesPageMapperImpl(),
             TestCoroutineDispatchers(),
         )
 
@@ -102,7 +105,7 @@ class GuidesRepositoryTest {
         assertEquals(GameVersion(200), pageResult.gameVersion)
         assertEquals(HeroId(5), guide.heroId)
         assertEquals(0, guide.durationSeconds)
-        assertEquals(MatchPlayerPosition.UNKNOWN, stats.position)
+        assertNull(stats.position)
         assertEquals(true, stats.isRadiant)
         assertEquals(25.toShort(), stats.impact)
         assertNull(stats.endNeutralItemId)
@@ -116,13 +119,13 @@ class GuidesRepositoryTest {
             steamAccountId = 7L,
             durationSeconds = 2400,
             heroId = 8,
-            player = RemoteGuidePlayerResponse(position = "POSITION_1", isRadiant = false),
+            player = RemoteGuidePlayerResponse(position = RemoteMatchPlayerPosition.POSITION_1, isRadiant = false),
         )
         val api = FakeGuidesApiClient(
             guides = Result.success(page()),
             heroGuides = Result.success(page(heroDto, gameVersionId = 174)),
         )
-        val repo: GuidesRepository = GuidesRepositoryImpl(api, TestCoroutineDispatchers())
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
         val pageResult = repo.getHeroGuides(heroId = HeroId(8)).getOrThrow()
 

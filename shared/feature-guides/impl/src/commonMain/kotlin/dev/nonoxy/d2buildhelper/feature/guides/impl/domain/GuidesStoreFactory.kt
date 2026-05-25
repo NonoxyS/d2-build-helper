@@ -12,9 +12,9 @@ import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesRepository
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.Guide
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesFilterKind
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesFilters
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Label

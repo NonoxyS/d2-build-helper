@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.feature.guides.api.domain
+package dev.nonoxy.d2buildhelper.feature.guides.api.domain.models
 
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 

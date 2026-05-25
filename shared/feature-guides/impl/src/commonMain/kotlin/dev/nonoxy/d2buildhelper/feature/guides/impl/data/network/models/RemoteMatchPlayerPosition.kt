@@ -1,11 +1,14 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models
 
 import dev.nonoxy.d2buildhelper.core.network.deserializer.fallbackEnumSerializer
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.MatchPlayerPosition
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.KeepGeneratedSerializer
 import kotlinx.serialization.Serializable
 
-@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+@KeepGeneratedSerializer
+@Serializable(with = RemoteMatchPlayerPositionSerializer::class)
 internal enum class RemoteMatchPlayerPosition {
     POSITION_1,
     POSITION_2,
@@ -15,14 +18,8 @@ internal enum class RemoteMatchPlayerPosition {
     UNKNOWN,
 }
 
-internal object RemoteMatchPlayerPositionSerializer :
-    KSerializer<RemoteMatchPlayerPosition> by fallbackEnumSerializer(RemoteMatchPlayerPosition.UNKNOWN)
-
-internal fun RemoteMatchPlayerPosition.toDomainOrNull(): MatchPlayerPosition? = when (this) {
-    RemoteMatchPlayerPosition.POSITION_1 -> MatchPlayerPosition.POSITION_1
-    RemoteMatchPlayerPosition.POSITION_2 -> MatchPlayerPosition.POSITION_2
-    RemoteMatchPlayerPosition.POSITION_3 -> MatchPlayerPosition.POSITION_3
-    RemoteMatchPlayerPosition.POSITION_4 -> MatchPlayerPosition.POSITION_4
-    RemoteMatchPlayerPosition.POSITION_5 -> MatchPlayerPosition.POSITION_5
-    RemoteMatchPlayerPosition.UNKNOWN -> null
-}
+@OptIn(ExperimentalSerializationApi::class)
+internal object RemoteMatchPlayerPositionSerializer : KSerializer<RemoteMatchPlayerPosition> by fallbackEnumSerializer(
+    generatedSerializer = RemoteMatchPlayerPosition.generatedSerializer(),
+    fallback = RemoteMatchPlayerPosition.UNKNOWN,
+)

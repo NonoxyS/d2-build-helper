@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.feature.guides.impl.data.mappers
+package dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers
 
 import dev.nonoxy.d2buildhelper.common.mappers.Mapper
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
@@ -16,7 +16,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteMa
 
 private const val DEFAULT_IMPACT: Short = 25
 
-interface GuidesPageMapper : Mapper<RemoteGuidesPageResponse, GuidesPage>
+internal interface GuidesPageMapper : Mapper<RemoteGuidesPageResponse, GuidesPage>
 
 internal class GuidesPageMapperImpl : GuidesPageMapper {
 

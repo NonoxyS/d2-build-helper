@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository
 
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesPage
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
 
 internal interface GuidesRepository {
 

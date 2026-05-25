@@ -4,10 +4,10 @@ import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
 import dev.nonoxy.d2buildhelper.core.mvikotlin.BaseExecutor
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
 import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesRepository
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.FilterValue
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesFilterKind
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesFilters
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.GuidesPage
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.FilterValue
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Label
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.State
