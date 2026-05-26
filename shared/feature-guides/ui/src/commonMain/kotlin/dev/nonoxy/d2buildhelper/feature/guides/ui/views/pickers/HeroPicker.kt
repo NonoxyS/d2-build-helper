@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +38,7 @@ import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.textfield.D2OutlinedTextField
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
@@ -57,7 +57,7 @@ internal fun HeroPicker(
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     Column(modifier = Modifier.padding(horizontal = 8.dp).heightIn(max = 560.dp)) {
-        OutlinedTextField(
+        D2OutlinedTextField(
             value = input,
             onValueChange = {
                 input = it
