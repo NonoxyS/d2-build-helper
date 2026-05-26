@@ -11,8 +11,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -22,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.chip.D2AssistChip
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
@@ -65,7 +64,7 @@ private fun FilterChipRow(
     onClick: (GuidesFilterKind) -> Unit,
     onReset: (GuidesFilterKind) -> Unit,
 ) {
-    AssistChip(
+    D2AssistChip(
         onClick = { onClick(chip.kind) },
         label = { Text(text = chipLabel(chip), style = D2BuildHelperTheme.typography.captionMD) },
         trailingIcon = if (chip.isApplied) {
@@ -77,9 +76,6 @@ private fun FilterChipRow(
         } else {
             null
         },
-        colors = AssistChipDefaults.assistChipColors(
-            labelColor = D2BuildHelperTheme.colors.textPrimary,
-        ),
     )
 }
 
