@@ -1,5 +1,6 @@
 package dev.nonoxy.d2buildhelper.feature.guides.ui
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,11 +28,12 @@ internal fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
 
     when {
-        state.isLoading && state.guides.isEmpty() -> D2LoadingView()
+        state.isLoading && state.guides.isEmpty() -> D2LoadingView(modifier = Modifier.fillMaxSize())
         state.isError && state.guides.isEmpty() -> D2ErrorView(
             message = stringResource(MR.strings.error_loading),
             retryLabel = stringResource(MR.strings.retry),
             onRetry = vm::onRetry,
+            modifier = Modifier.fillMaxSize(),
         )
         else -> GuidesView(
             state = state,
