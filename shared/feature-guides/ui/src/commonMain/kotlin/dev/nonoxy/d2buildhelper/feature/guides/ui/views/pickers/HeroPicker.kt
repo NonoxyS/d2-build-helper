@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,7 +55,7 @@ internal fun HeroPicker(
     val keyboard = LocalSoftwareKeyboardController.current
     var input by remember(picker.search) { mutableStateOf(picker.search) }
 
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    LaunchedEffect(picker) { focusRequester.requestFocus() }
 
     Column(modifier = Modifier.padding(horizontal = 8.dp).heightIn(max = 560.dp)) {
         D2OutlinedTextField(
@@ -118,7 +119,11 @@ private fun HeroCell(hero: UiHero, isSelected: Boolean, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .clickable(
+                onClickLabel = hero.displayName,
+                role = Role.Button,
+                onClick = onClick,
+            )
             .padding(4.dp),
     ) {
         AsyncImage(
