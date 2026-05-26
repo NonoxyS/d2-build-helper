@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.textfield.D2OutlinedTextField
@@ -72,14 +72,14 @@ internal fun HeroPicker(
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
-            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = null) },
+            leadingIcon = { D2Icon(imageVector = Icons.Rounded.Search, contentDescription = null) },
             trailingIcon = {
                 if (input.isNotBlank()) {
                     D2IconButton(onClick = {
                         input = ""
                         onSearchChange("")
                     }) {
-                        Icon(
+                        D2Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = stringResource(MR.strings.content_desc_clear),
                         )

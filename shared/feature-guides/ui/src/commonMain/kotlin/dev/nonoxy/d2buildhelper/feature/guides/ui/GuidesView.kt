@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.chip.D2AssistChip
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
@@ -70,7 +70,7 @@ private fun FilterChipRow(
         trailingIcon = if (chip.isApplied) {
             {
                 D2IconButton(onClick = { onReset(chip.kind) }, modifier = Modifier.size(20.dp)) {
-                    Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
+                    D2Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
                 }
             }
         } else {
