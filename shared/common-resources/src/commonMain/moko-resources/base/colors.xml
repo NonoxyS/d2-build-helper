@@ -6,5 +6,5 @@
     <color name="tintColor">#10a4c1</color>
     <color name="textPrimary">#ffffff</color>
     <color name="textSecondary">#ccffffff</color>
-    <color name="outline">#14ffffff</color>
+    <color name="outline">#ffffff14</color>
 </resources>

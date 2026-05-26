@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,9 +18,14 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun GuideListView(guides: ImmutableList<UiGuide>) {
     val bottomInset = WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = bottomInset + 16.dp),
+        contentPadding = PaddingValues(
+            top = 8.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = bottomInset + 16.dp
+        ),
     ) {
         items(
             items = guides,

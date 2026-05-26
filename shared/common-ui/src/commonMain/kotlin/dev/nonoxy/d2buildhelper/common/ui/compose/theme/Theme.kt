@@ -2,6 +2,7 @@ package dev.nonoxy.d2buildhelper.common.ui.compose.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -9,7 +10,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 @Suppress("ModifierMissing")
 @Composable
 fun D2BuildHelperTheme(content: @Composable () -> Unit) {
-    MaterialTheme {
+    MaterialTheme(colorScheme = darkColorScheme()) {
         CompositionLocalProvider(
             LocalD2BuildHelperColorScheme provides getDarkColorScheme(),
             LocalD2BuildHelperTypography provides defaultTypography(),

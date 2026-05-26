@@ -34,7 +34,11 @@ internal fun GuidesView(
     onFilterChipClick: (GuidesFilterKind) -> Unit,
     onFilterReset: (GuidesFilterKind) -> Unit,
 ) {
-    Column(modifier = Modifier.systemBarsPadding().fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .systemBarsPadding()
+            .fillMaxSize()
+    ) {
         D2TopBar(title = stringResource(MR.strings.all_heroes))
 
         LazyRow(
@@ -89,6 +93,7 @@ private fun chipLabel(chip: UiFilterChip): String {
         is UiFilterChip.Position -> chip.appliedPosition?.let {
             stringResource(MR.strings.position_short_format, it.shortNumber)
         }
+
         is UiFilterChip.Side -> chip.appliedIsRadiant?.let {
             stringResource(if (it) MR.strings.side_radiant else MR.strings.side_dire)
         }

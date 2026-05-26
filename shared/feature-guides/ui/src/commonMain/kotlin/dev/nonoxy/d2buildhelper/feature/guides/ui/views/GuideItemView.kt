@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
@@ -158,20 +159,18 @@ private fun MatchStatsRow(guide: UiGuide) {
 @Composable
 private fun ItemRow(guide: UiGuide) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        guide.items.forEach { purchase ->
+        guide.items.fastForEach { purchase ->
             ItemWithBuyTime(purchase = purchase)
         }
-        guide.neutralItem?.let { neutral ->
-            D2AsyncImage(
-                model = neutral.iconUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(28.dp)
-                    .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
-                    .clip(CircleShape),
-            )
-        }
+        D2AsyncImage(
+            model = guide.neutralItem?.iconUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .size(28.dp)
+                .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
+                .clip(CircleShape),
+        )
     }
 }
 
@@ -181,7 +180,7 @@ private fun ItemWithBuyTime(purchase: UiItemPurchase) {
         D2AsyncImage(
             model = purchase.iconUrl,
             contentDescription = null,
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .width(36.dp)
                 .height(28.dp)
