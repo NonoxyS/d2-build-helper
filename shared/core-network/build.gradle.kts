@@ -1,7 +1,9 @@
 import extensions.androidLibraryConfig
 import extensions.androidMainDependencies
+import extensions.apis
 import extensions.commonMainDependencies
 import extensions.commonTestDependencies
+import extensions.implementations
 import extensions.iosMainDependencies
 import java.util.Properties
 
@@ -16,24 +18,26 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(libs.ktor.core)
-    implementation(libs.ktor.logging)
-    implementation(libs.ktor.contentNegotiation)
-    implementation(libs.ktor.serializationJson)
-    implementation(projects.shared.common)
-    implementation(projects.shared.coreDomain)
+    apis(libs.ktor.core)
+    implementations(
+        libs.ktor.logging,
+        libs.ktor.contentNegotiation,
+        libs.ktor.serializationJson,
+        projects.shared.common,
+        projects.shared.coreDomain,
+    )
 }
 
 androidMainDependencies {
-    api(libs.ktor.engine.okhttp)
+    apis(libs.ktor.engine.okhttp)
 }
 
 iosMainDependencies {
-    api(libs.ktor.engine.darwin)
+    apis(libs.ktor.engine.darwin)
 }
 
 commonTestDependencies {
-    implementation(kotlin("test"))
+    implementations(kotlin("test"))
 }
 
 buildConfig {
@@ -47,10 +51,8 @@ buildConfig {
     val d2bhApiKey = localProperties.getProperty("D2BH_API_KEY")
         ?: error("Register a d2bh-backend API key and place it in local.properties as `D2BH_API_KEY`")
     require(d2bhApiKey.isNotBlank()) { "D2BH_API_KEY in local.properties is blank" }
-    val d2bhEnvironment = localProperties.getProperty("D2BH_ENVIRONMENT") ?: "prod"
 
     buildConfigField("String", "D2BH_API_KEY", "\"$d2bhApiKey\"")
-    buildConfigField("String", "D2BH_ENVIRONMENT", "\"$d2bhEnvironment\"")
 }
 
 // AGP 9 lint host-test tasks read generated BuildConfig outputs without declaring the dependency.

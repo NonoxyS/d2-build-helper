@@ -1,4 +1,5 @@
 import extensions.androidLibraryConfig
+import extensions.apis
 import extensions.commonMainDependencies
 
 plugins {
@@ -12,5 +13,5 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(libs.compose.navigation)
+    apis(libs.compose.multiplatform.navigation)
 }

@@ -31,9 +31,5 @@ gradlePlugin {
             id = "compose-multiplatform-setup"
             implementationClass = "plugins.ComposeMultiplatformSetupPlugin"
         }
-        register("AndroidApplicationSetup") {
-            id = "android-application-setup"
-            implementationClass = "plugins.AndroidApplicationSetupPlugin"
-        }
     }
 }

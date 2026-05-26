@@ -1,5 +1,6 @@
 import extensions.androidLibraryConfig
 import extensions.commonMainDependencies
+import extensions.implementations
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpFeatureSetup)
@@ -10,7 +11,9 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    implementation(projects.shared.commonResources)
-    implementation(libs.kotlinx.collections.immutable)
-    implementation(libs.moko.resources.compose)
+    implementations(
+        projects.shared.commonResources,
+        libs.kotlinx.collections.immutable,
+        libs.moko.resources.compose,
+    )
 }

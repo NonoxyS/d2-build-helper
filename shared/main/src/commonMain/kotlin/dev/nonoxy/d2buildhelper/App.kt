@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.core.navigation.GuidesRoute
+import dev.nonoxy.d2buildhelper.feature.guides.ui.api.GuidesRoute
 import dev.nonoxy.d2buildhelper.feature.guides.ui.api.composableGuidesScreen
 
 @Composable

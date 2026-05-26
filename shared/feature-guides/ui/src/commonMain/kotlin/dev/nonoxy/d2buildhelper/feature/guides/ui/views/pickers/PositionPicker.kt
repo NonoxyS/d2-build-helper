@@ -22,9 +22,10 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiMatchPlayer
 internal fun PositionPicker(
     picker: UiFilterPicker.Position,
     onPositionClick: (UiMatchPlayerPosition) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.padding(24.dp),
+        modifier = modifier.padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

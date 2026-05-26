@@ -2,6 +2,7 @@ package extensions
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.gradle.LibraryExtension
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -15,6 +16,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 val Project.libs: LibrariesForLibs
     get() = the<LibrariesForLibs>()
+
+internal fun Project.androidConfig(configure: LibraryExtension.() -> Unit) {
+    extensions.configure<LibraryExtension>(configure)
+}
 
 internal fun Project.androidAppConfig(configure: ApplicationExtension.() -> Unit) {
     extensions.configure<ApplicationExtension>(configure)

@@ -1,10 +1,10 @@
 import dev.icerock.gradle.MRVisibility
 import extensions.androidLibraryConfig
+import extensions.apis
 import extensions.commonMainDependencies
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
-    alias(libs.plugins.conventionPlugin.composeMultiplatformSetup)
     alias(libs.plugins.moko.resources)
 }
 
@@ -13,8 +13,7 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(libs.moko.resources)
-    api(libs.moko.resources.compose)
+    apis(libs.moko.resources)
 }
 
 multiplatformResources {

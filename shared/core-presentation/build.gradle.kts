@@ -1,5 +1,7 @@
 import extensions.androidLibraryConfig
+import extensions.apis
 import extensions.commonMainDependencies
+import extensions.implementations
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
@@ -10,8 +12,10 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(projects.shared.coreMvikotlin)
-    api(libs.moko.mvvm.flow)
-    api(libs.androidx.lifecycle.viewmodel)
-    implementation(projects.shared.common)
+    apis(
+        projects.shared.coreMvikotlin,
+        libs.moko.mvvm.flow,
+        libs.androidx.lifecycle.viewmodel,
+    )
+    implementations(projects.shared.common)
 }
