@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.compose.ui.util.fastForEach
 import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.progress.D2LinearProgressIndicator
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space16
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space48
@@ -146,7 +146,7 @@ private fun MatchStatsRow(guide: UiGuide) {
         )
         Space4()
 
-        LinearProgressIndicator(
+        D2LinearProgressIndicator(
             progress = { guide.impactProgress },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.5f)
