@@ -91,7 +91,7 @@ internal fun HeroPicker(
         )
 
         Text(
-            text = stringResource(MR.strings.search_hero_count_format, picker.heroes.size),
+            text = stringResource(MR.plurals.search_hero_count_plural, picker.heroes.size, picker.heroes.size),
             style = D2BuildHelperTheme.typography.captionMD,
             color = D2BuildHelperTheme.colors.textSecondary,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
