@@ -20,9 +20,10 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicke
 internal fun SidePicker(
     picker: UiFilterPicker.Side,
     onSideClick: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.padding(24.dp),
+        modifier = modifier.padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

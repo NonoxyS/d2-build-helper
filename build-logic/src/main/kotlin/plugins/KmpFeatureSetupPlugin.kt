@@ -27,7 +27,7 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
             apply(libs.plugins.conventionPlugin.kmpLibrary.get().pluginId)
 
             if (project.isApiModule || project.isPresentationModule) {
-                // Need for inferring stability of public models
+                // Need for inferring stability
                 apply(libs.plugins.compose.compiler.get().pluginId)
             }
         }
@@ -37,31 +37,34 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
 
         // Need for inferring stability of public models
         val composeRuntimeApiPresentationModuleDependencies = listOf(
-            libs.compose.runtime,
+            libs.compose.multiplatform.runtime
         ).takeIf { project.isApiModule || project.isPresentationModule }
 
         val implModuleDependencies = when (project.isApiModule) {
             true -> null
             false -> listOfNotNull(
                 project(":shared:common"),
-                project.getApiModule(),
+                project.getApiModule()
             )
         }
 
         val presentationModuleDependencies = listOf(
             project(":shared:core-presentation"),
-            libs.koin.compose.viewmodel,
+            libs.koin.core.viewmodel,
         ).takeIf { project.isPresentationModule }
 
         val uiModuleDependencies = listOf(
             project(":shared:core-navigation"),
             project(":shared:common-resources"),
             project(":shared:common-ui"),
-            libs.koin.compose.viewmodel,
+            libs.koin.composeMultiplatform.viewmodel,
             libs.moko.resources.compose,
-            *composeBundle,
+            *composeBundle
         ).plus(
-            project.getPresentationModule()?.asList().orEmpty(),
+            project
+                .getPresentationModule()
+                ?.asList()
+                .orEmpty()
         ).takeIf { project.isUiModule }
 
         val commonDependencies = listOf(
@@ -79,7 +82,7 @@ class KmpFeatureSetupPlugin : Plugin<Project> {
                 *implModuleDependencies?.toTypedArray().orEmpty(),
                 *uiModuleDependencies?.toTypedArray().orEmpty(),
                 *composeRuntimeApiPresentationModuleDependencies?.toTypedArray().orEmpty(),
-                *nonUiModuleDependencies?.toTypedArray().orEmpty(),
+                *nonUiModuleDependencies?.toTypedArray().orEmpty()
             )
 
             apis(*presentationModuleDependencies?.toTypedArray().orEmpty())

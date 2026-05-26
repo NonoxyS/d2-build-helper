@@ -1,8 +1,10 @@
 package dev.nonoxy.d2buildhelper.feature.guides.ui
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,44 +26,49 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun GuidesScreen(vm: GuidesViewModel = koinViewModel()) {
-    val state by vm.state.collectAsState()
+internal fun GuidesScreen(viewModel: GuidesViewModel = koinViewModel()) {
+
+    val state by viewModel.state.collectAsState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     when {
         state.isLoading && state.guides.isEmpty() -> D2LoadingView(modifier = Modifier.fillMaxSize())
         state.isError && state.guides.isEmpty() -> D2ErrorView(
             message = stringResource(MR.strings.error_loading),
             retryLabel = stringResource(MR.strings.retry),
-            onRetry = vm::onRetry,
+            onRetry = viewModel::onRetry,
             modifier = Modifier.fillMaxSize(),
         )
+
         else -> GuidesView(
             state = state,
-            onFilterChipClick = vm::onFilterChipClick,
-            onFilterReset = vm::onFilterReset,
+            onFilterChipClick = viewModel::onFilterChipClick,
+            onFilterReset = viewModel::onFilterReset,
         )
     }
 
     state.activePicker?.let { picker ->
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         D2ModalBottomSheet(
-            onDismissRequest = vm::onPickerDismiss,
+            onDismissRequest = viewModel::onPickerDismiss,
             sheetState = sheetState,
+            contentWindowInsets = { WindowInsets.statusBars },
             modifier = Modifier.fillMaxWidth().heightIn(min = 300.dp),
         ) {
             when (picker) {
                 is UiFilterPicker.Hero -> HeroPicker(
                     picker = picker,
-                    onSearchChange = vm::onPickerSearchChange,
-                    onHeroClick = vm::onHeroSelected,
+                    onSearchChange = viewModel::onPickerSearchChange,
+                    onHeroClick = viewModel::onHeroSelected,
                 )
+
                 is UiFilterPicker.Position -> PositionPicker(
                     picker = picker,
-                    onPositionClick = vm::onPositionSelected,
+                    onPositionClick = viewModel::onPositionSelected,
                 )
+
                 is UiFilterPicker.Side -> SidePicker(
                     picker = picker,
-                    onSideClick = vm::onSideSelected,
+                    onSideClick = viewModel::onSideSelected,
                 )
             }
         }

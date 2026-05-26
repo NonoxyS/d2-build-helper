@@ -36,9 +36,12 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchase
 
 @Composable
-internal fun GuideItemView(guide: UiGuide) {
+internal fun GuideItemView(
+    guide: UiGuide,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(color = D2BuildHelperTheme.colors.surface, shape = D2BuildHelperTheme.shapes.cornerRadius4)
             .border(
@@ -56,9 +59,12 @@ internal fun GuideItemView(guide: UiGuide) {
 }
 
 @Composable
-private fun HeroNameRow(guide: UiGuide) {
+private fun HeroNameRow(
+    guide: UiGuide,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -86,8 +92,11 @@ private fun HeroNameRow(guide: UiGuide) {
 }
 
 @Composable
-private fun MatchStatsRow(guide: UiGuide) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+private fun MatchStatsRow(
+    guide: UiGuide,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = guide.durationFormatted,
             color = D2BuildHelperTheme.colors.textSecondary,
@@ -157,8 +166,11 @@ private fun MatchStatsRow(guide: UiGuide) {
 }
 
 @Composable
-private fun ItemRow(guide: UiGuide) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun ItemRow(
+    guide: UiGuide,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         guide.items.fastForEach { purchase ->
             ItemWithBuyTime(purchase = purchase)
         }
@@ -175,8 +187,14 @@ private fun ItemRow(guide: UiGuide) {
 }
 
 @Composable
-private fun ItemWithBuyTime(purchase: UiItemPurchase) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun ItemWithBuyTime(
+    purchase: UiItemPurchase,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         AsyncImage(
             model = purchase.iconUrl?.raw,
             contentDescription = null,

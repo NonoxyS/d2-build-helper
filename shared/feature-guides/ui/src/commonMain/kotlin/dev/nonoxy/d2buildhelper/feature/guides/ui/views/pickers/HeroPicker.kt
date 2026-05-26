@@ -4,8 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -41,6 +41,7 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.textfield.D2OutlinedTextField
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.compose.utils.navigationBarHeight
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHero
@@ -50,6 +51,7 @@ internal fun HeroPicker(
     picker: UiFilterPicker.Hero,
     onSearchChange: (String) -> Unit,
     onHeroClick: (HeroId) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -57,12 +59,12 @@ internal fun HeroPicker(
 
     LaunchedEffect(picker) { focusRequester.requestFocus() }
 
-    Column(modifier = Modifier.padding(horizontal = 8.dp).heightIn(max = 560.dp)) {
+    Column(modifier = modifier.fillMaxHeight()) {
         D2OutlinedTextField(
             value = input,
-            onValueChange = {
-                input = it
-                onSearchChange(it)
+            onValueChange = { newValue ->
+                input = newValue
+                onSearchChange(newValue)
             },
             placeholder = {
                 Text(
@@ -87,27 +89,39 @@ internal fun HeroPicker(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
         )
 
         Text(
             text = stringResource(MR.plurals.search_hero_count_plural, picker.heroes.size, picker.heroes.size),
             style = D2BuildHelperTheme.typography.captionMD,
             color = D2BuildHelperTheme.colors.textSecondary,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 72.dp),
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                end = 8.dp,
+                top = 8.dp,
+                bottom = navigationBarHeight + 8.dp,
+            ),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(items = picker.heroes, key = { it.id.raw }) { hero ->
+            items(
+                items = picker.heroes,
+                key = { hero -> hero.id.raw }
+            ) { hero ->
                 HeroCell(
                     hero = hero,
                     isSelected = picker.selectedHeroId == hero.id,
                     onClick = { onHeroClick(hero.id) },
+                    modifier = Modifier.animateItem()
                 )
             }
         }
@@ -115,10 +129,15 @@ internal fun HeroPicker(
 }
 
 @Composable
-private fun HeroCell(hero: UiHero, isSelected: Boolean, onClick: () -> Unit) {
+private fun HeroCell(
+    hero: UiHero,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .clickable(
                 onClickLabel = hero.displayName,
                 role = Role.Button,

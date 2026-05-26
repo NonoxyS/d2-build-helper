@@ -1,6 +1,8 @@
 import extensions.androidLibraryConfig
+import extensions.apis
 import extensions.commonMainDependencies
 import extensions.commonTestDependencies
+import extensions.implementations
 import org.gradle.kotlin.dsl.kotlin
 
 plugins {
@@ -13,15 +15,19 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(projects.shared.coreDomain)
-    implementation(projects.shared.common)
-    implementation(projects.shared.coreNetwork)
-    implementation(projects.shared.coreStorage)
-    implementation(libs.kotlinx.datetime)
+    apis(projects.shared.coreDomain)
+    implementations(
+        projects.shared.common,
+        projects.shared.coreNetwork,
+        projects.shared.coreStorage,
+        libs.kotlinx.datetime,
+    )
 }
 
 commonTestDependencies {
-    implementation(kotlin("test"))
-    implementation(libs.kotlinx.coroutines.test)
-    implementation(libs.ktor.client.mock)
+    implementations(
+        kotlin("test"),
+        libs.kotlinx.coroutines.test,
+        libs.ktor.client.mock,
+    )
 }

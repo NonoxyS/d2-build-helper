@@ -5,6 +5,7 @@ import dev.nonoxy.d2buildhelper.core.network.BuildConfig
 import dev.nonoxy.d2buildhelper.core.network.ktor.KtorClient
 import dev.nonoxy.d2buildhelper.core.network.ktor.KtorClientImpl
 import dev.nonoxy.d2buildhelper.core.network.ktor.NetworkEnvironment
+import dev.nonoxy.d2buildhelper.core.network.ktor.certificates.configureCertificates
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpResponseValidator
@@ -29,7 +30,7 @@ val coreNetworkKtorModule = module {
     }
 
     single<HttpClient> {
-        val environment = resolveEnvironment()
+        val environment: NetworkEnvironment = get()
         val json: Json = get()
         HttpClient {
             install(Logging) {
@@ -57,15 +58,11 @@ val coreNetworkKtorModule = module {
                 url.host = environment.apiHost
                 header(API_KEY_HEADER, BuildConfig.D2BH_API_KEY)
             }
+            if (environment == NetworkEnvironment.Dev) {
+                configureCertificates()
+            }
         }
     }
 
     factory<KtorClient> { new(::KtorClientImpl) }
 }
-
-private fun resolveEnvironment(): NetworkEnvironment =
-    when (BuildConfig.D2BH_ENVIRONMENT.lowercase()) {
-        "dev" -> NetworkEnvironment.Dev
-        "prod" -> NetworkEnvironment.Prod
-        else -> error("Unknown BuildConfig.D2BH_ENVIRONMENT: ${BuildConfig.D2BH_ENVIRONMENT}")
-    }

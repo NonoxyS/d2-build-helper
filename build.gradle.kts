@@ -21,7 +21,6 @@ plugins {
     alias(libs.plugins.conventionPlugin.kmpFeatureSetup) apply false
     alias(libs.plugins.conventionPlugin.composeMultiplatformSetup) apply false
     alias(libs.plugins.conventionPlugin.jsonSerialization) apply false
-    alias(libs.plugins.conventionPlugin.androidApplicationSetup) apply false
 
     alias(libs.plugins.detekt)
 }

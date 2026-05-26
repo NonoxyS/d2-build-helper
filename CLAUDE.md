@@ -5,8 +5,8 @@ Dota 2 build helper — Compose Multiplatform app (Android, iOS) that surfaces h
 ## Build Commands
 
 ```shell
-./gradlew :android:app:assembleDebug                       # Android debug APK
-./gradlew :android:app:lintDebug                            # Android Lint
+./gradlew :android:app:assembleDevDebug                       # Android debug APK
+./gradlew :android:app:lintDevDebug                            # Android Lint
 ./gradlew :shared:feature-guides:impl:testAndroidHostTest  # commonTest tests run on Android host JVM
 ./gradlew :shared:main:iosSimulatorArm64Test
 ./gradlew detekt                                            # Static analysis (Kotlin, all modules)

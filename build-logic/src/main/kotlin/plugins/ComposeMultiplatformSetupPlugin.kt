@@ -1,5 +1,6 @@
 package plugins
 
+import extensions.androidConfig
 import extensions.commonMainDependencies
 import extensions.composeCompilerConfig
 import extensions.debugImplementation
@@ -16,14 +17,22 @@ class ComposeMultiplatformSetupPlugin : Plugin<Project> {
         with(target) {
             applyPlugins()
 
+            if (pluginManager.hasPlugin(libs.plugins.androidLibrary.get().pluginId)) {
+                androidConfig {
+                    buildFeatures {
+                        compose = true
+                    }
+                }
+            }
+
             composeCompilerConfig {
                 reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
             }
 
             commonMainDependencies {
                 implementations(
-                    libs.compose.runtime,
-                    libs.compose.ui.tooling.preview,
+                    libs.compose.multiplatform.runtime,
+                    libs.compose.multiplatform.uiToolingPreview
                 )
             }
 
@@ -31,9 +40,9 @@ class ComposeMultiplatformSetupPlugin : Plugin<Project> {
                 // Workaround now instead of debugImplementation before
                 // https://developer.android.com/kotlin/multiplatform/plugin#compose-preview-dependencies
                 if (project.configurations.names.contains("androidRuntimeClasspath")) {
-                    "androidRuntimeClasspath"(libs.compose.ui.tooling)
+                    "androidRuntimeClasspath"(libs.compose.multiplatform.uiTooling)
                 } else {
-                    debugImplementation(libs.compose.ui.tooling)
+                    debugImplementation(libs.compose.multiplatform.uiTooling)
                 }
             }
         }
@@ -43,22 +52,23 @@ class ComposeMultiplatformSetupPlugin : Plugin<Project> {
         with(pluginManager) {
             apply(libs.plugins.compose.compiler.get().pluginId)
             apply(libs.plugins.compose.multiplatform.get().pluginId)
+            apply(libs.plugins.conventionPlugin.jsonSerialization.get().pluginId)
         }
     }
 }
 
 val <T : KotlinDependencyHandler> T.composeBundle
     get() = listOf(
-        project.libs.compose.runtime,
-        project.libs.compose.foundation,
-        project.libs.compose.ui,
-        project.libs.compose.material3,
+        project.libs.compose.multiplatform.runtime,
+        project.libs.compose.multiplatform.foundation,
+        project.libs.compose.multiplatform.ui,
+        project.libs.compose.multiplatform.material3,
     ).toTypedArray()
 
 val <T : Project> T.composeBundle
     get() = listOf(
-        project.libs.compose.runtime,
-        project.libs.compose.foundation,
-        project.libs.compose.ui,
-        project.libs.compose.material3,
+        project.libs.compose.multiplatform.runtime,
+        project.libs.compose.multiplatform.foundation,
+        project.libs.compose.multiplatform.ui,
+        project.libs.compose.multiplatform.material3,
     ).toTypedArray()

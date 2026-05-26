@@ -1,5 +1,6 @@
 import extensions.androidLibraryConfig
 import extensions.commonMainDependencies
+import extensions.implementations
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpFeatureSetup)
@@ -11,6 +12,9 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    implementation(libs.compose.material.icons.extended)
-    implementation(libs.kotlinx.collections.immutable)
+    implementations(
+        libs.compose.multiplatform.material.iconsExtended,
+        libs.coil.compose,
+        libs.kotlinx.collections.immutable
+    )
 }

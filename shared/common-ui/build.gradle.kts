@@ -1,6 +1,7 @@
 import extensions.androidLibraryConfig
 import extensions.androidMainDependencies
 import extensions.commonMainDependencies
+import extensions.implementations
 
 plugins {
     alias(libs.plugins.conventionPlugin.kmpLibrary)
@@ -12,14 +13,16 @@ androidLibraryConfig {
 }
 
 commonMainDependencies {
-    api(libs.coil)
-    api(libs.coil.network.ktor)
-    api(projects.shared.commonResources)
-    api(projects.shared.coreDomain)
-    implementation(projects.shared.common)
-    implementation(libs.compose.material3)
+    implementations(
+        projects.shared.common,
+        projects.shared.commonResources,
+
+        libs.compose.multiplatform.material3,
+        libs.moko.resources.compose,
+        libs.coil.compose,
+    )
 }
 
 androidMainDependencies {
-    implementation(libs.androidx.activityCompose)
+    implementations(libs.androidx.activity.compose)
 }
