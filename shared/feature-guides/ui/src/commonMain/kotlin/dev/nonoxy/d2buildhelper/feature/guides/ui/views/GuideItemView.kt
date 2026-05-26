@@ -25,9 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space16
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space48
@@ -72,8 +72,8 @@ private fun HeroNameRow(guide: UiGuide) {
         } else {
             Spacer(modifier = Modifier.size(18.dp))
         }
-        D2AsyncImage(
-            model = guide.hero.iconUrl,
+        AsyncImage(
+            model = guide.hero.iconUrl.raw,
             contentDescription = guide.hero.displayName,
             modifier = Modifier.size(32.dp),
         )
@@ -162,10 +162,10 @@ private fun ItemRow(guide: UiGuide) {
         guide.items.fastForEach { purchase ->
             ItemWithBuyTime(purchase = purchase)
         }
-        D2AsyncImage(
-            model = guide.neutralItem?.iconUrl,
+        AsyncImage(
+            model = guide.neutralItem?.iconUrl?.raw,
             contentDescription = null,
-            contentScale = ContentScale.Fit,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(28.dp)
                 .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
@@ -177,10 +177,10 @@ private fun ItemRow(guide: UiGuide) {
 @Composable
 private fun ItemWithBuyTime(purchase: UiItemPurchase) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        D2AsyncImage(
-            model = purchase.iconUrl,
+        AsyncImage(
+            model = purchase.iconUrl?.raw,
             contentDescription = null,
-            contentScale = ContentScale.Fit,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .width(36.dp)
                 .height(28.dp)

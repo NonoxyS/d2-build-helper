@@ -35,9 +35,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
@@ -121,8 +121,8 @@ private fun HeroCell(hero: UiHero, isSelected: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(4.dp),
     ) {
-        D2AsyncImage(
-            model = hero.iconUrl,
+        AsyncImage(
+            model = hero.iconUrl.raw,
             contentDescription = hero.displayName,
             modifier = Modifier.size(56.dp),
         )
