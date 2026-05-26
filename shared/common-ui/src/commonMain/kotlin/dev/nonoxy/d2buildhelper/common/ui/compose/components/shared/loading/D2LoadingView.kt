@@ -2,7 +2,6 @@ package dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.loading
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,9 +17,7 @@ fun D2LoadingView(
     contentAlignment: Alignment = Alignment.Center,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(backgroundColor),
+        modifier = modifier.background(backgroundColor),
         contentAlignment = contentAlignment,
     ) {
         CircularProgressIndicator(color = color)

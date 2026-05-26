@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -25,15 +26,27 @@ internal fun SidePicker(
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val radiantLabel = stringResource(MR.strings.content_desc_radiant)
         Image(
             painter = painterResource(MR.images.radiant_square),
-            contentDescription = stringResource(MR.strings.content_desc_radiant),
-            modifier = Modifier.size(64.dp).clickable { onSideClick(true) },
+            contentDescription = radiantLabel,
+            modifier = Modifier
+                .size(64.dp)
+                .clickable(
+                    onClickLabel = radiantLabel,
+                    role = Role.Button,
+                ) { onSideClick(true) },
         )
+        val direLabel = stringResource(MR.strings.content_desc_dire)
         Image(
             painter = painterResource(MR.images.dire_square),
-            contentDescription = stringResource(MR.strings.content_desc_dire),
-            modifier = Modifier.size(64.dp).clickable { onSideClick(false) },
+            contentDescription = direLabel,
+            modifier = Modifier
+                .size(64.dp)
+                .clickable(
+                    onClickLabel = direLabel,
+                    role = Role.Button,
+                ) { onSideClick(false) },
         )
     }
 }

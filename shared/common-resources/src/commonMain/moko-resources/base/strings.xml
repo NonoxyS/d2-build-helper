@@ -16,7 +16,6 @@
     <string name="side_dire">Dire</string>
 
     <string name="search_hero_placeholder">Search hero</string>
-    <string name="search_hero_count_format">%1$d heroes</string>
     <string name="content_desc_clear">Clear</string>
     <string name="content_desc_radiant">Radiant</string>
     <string name="content_desc_dire">Dire</string>

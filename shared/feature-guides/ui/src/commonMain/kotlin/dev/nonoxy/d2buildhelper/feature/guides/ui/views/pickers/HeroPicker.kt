@@ -16,9 +16,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,14 +28,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.textfield.D2OutlinedTextField
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
@@ -54,10 +55,10 @@ internal fun HeroPicker(
     val keyboard = LocalSoftwareKeyboardController.current
     var input by remember(picker.search) { mutableStateOf(picker.search) }
 
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    LaunchedEffect(picker) { focusRequester.requestFocus() }
 
     Column(modifier = Modifier.padding(horizontal = 8.dp).heightIn(max = 560.dp)) {
-        OutlinedTextField(
+        D2OutlinedTextField(
             value = input,
             onValueChange = {
                 input = it
@@ -72,14 +73,14 @@ internal fun HeroPicker(
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
-            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = null) },
+            leadingIcon = { D2Icon(imageVector = Icons.Rounded.Search, contentDescription = null) },
             trailingIcon = {
                 if (input.isNotBlank()) {
-                    IconButton(onClick = {
+                    D2IconButton(onClick = {
                         input = ""
                         onSearchChange("")
                     }) {
-                        Icon(
+                        D2Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = stringResource(MR.strings.content_desc_clear),
                         )
@@ -90,7 +91,7 @@ internal fun HeroPicker(
         )
 
         Text(
-            text = stringResource(MR.strings.search_hero_count_format, picker.heroes.size),
+            text = stringResource(MR.plurals.search_hero_count_plural, picker.heroes.size, picker.heroes.size),
             style = D2BuildHelperTheme.typography.captionMD,
             color = D2BuildHelperTheme.colors.textSecondary,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -118,11 +119,15 @@ private fun HeroCell(hero: UiHero, isSelected: Boolean, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .clickable(
+                onClickLabel = hero.displayName,
+                role = Role.Button,
+                onClick = onClick,
+            )
             .padding(4.dp),
     ) {
-        D2AsyncImage(
-            model = hero.iconUrl,
+        AsyncImage(
+            model = hero.iconUrl.raw,
             contentDescription = hero.displayName,
             modifier = Modifier.size(56.dp),
         )

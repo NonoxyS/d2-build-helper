@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,9 +23,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.painterResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.image.D2AsyncImage
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.progress.D2LinearProgressIndicator
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space16
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space48
@@ -71,8 +72,8 @@ private fun HeroNameRow(guide: UiGuide) {
         } else {
             Spacer(modifier = Modifier.size(18.dp))
         }
-        D2AsyncImage(
-            model = guide.hero.iconUrl,
+        AsyncImage(
+            model = guide.hero.iconUrl.raw,
             contentDescription = guide.hero.displayName,
             modifier = Modifier.size(32.dp),
         )
@@ -145,7 +146,7 @@ private fun MatchStatsRow(guide: UiGuide) {
         )
         Space4()
 
-        LinearProgressIndicator(
+        D2LinearProgressIndicator(
             progress = { guide.impactProgress },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.5f)
@@ -158,28 +159,26 @@ private fun MatchStatsRow(guide: UiGuide) {
 @Composable
 private fun ItemRow(guide: UiGuide) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        guide.items.forEach { purchase ->
+        guide.items.fastForEach { purchase ->
             ItemWithBuyTime(purchase = purchase)
         }
-        guide.neutralItem?.let { neutral ->
-            D2AsyncImage(
-                model = neutral.iconUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(28.dp)
-                    .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
-                    .clip(CircleShape),
-            )
-        }
+        AsyncImage(
+            model = guide.neutralItem?.iconUrl?.raw,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(28.dp)
+                .background(color = D2BuildHelperTheme.colors.outline, shape = CircleShape)
+                .clip(CircleShape),
+        )
     }
 }
 
 @Composable
 private fun ItemWithBuyTime(purchase: UiItemPurchase) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        D2AsyncImage(
-            model = purchase.iconUrl,
+        AsyncImage(
+            model = purchase.iconUrl?.raw,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier

@@ -5,22 +5,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.chip.D2AssistChip
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
@@ -34,20 +34,27 @@ internal fun GuidesView(
     onFilterChipClick: (GuidesFilterKind) -> Unit,
     onFilterReset: (GuidesFilterKind) -> Unit,
 ) {
-    Column(modifier = Modifier.systemBarsPadding().fillMaxSize()) {
-        D2TopBar(title = stringResource(MR.strings.all_heroes))
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth(),
+    Scaffold(
+        containerColor = D2BuildHelperTheme.colors.background,
+        topBar = { D2TopBar(title = stringResource(MR.strings.all_heroes)) },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
-            items(state.filterChips, key = { it.kind::class.simpleName!! }) { chip ->
-                FilterChipRow(chip = chip, onClick = onFilterChipClick, onReset = onFilterReset)
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(state.filterChips, key = { it.kind }) { chip ->
+                    FilterChipRow(chip = chip, onClick = onFilterChipClick, onReset = onFilterReset)
+                }
             }
-        }
 
-        GuideListView(guides = state.guides)
+            GuideListView(guides = state.guides)
+        }
     }
 }
 
@@ -57,21 +64,18 @@ private fun FilterChipRow(
     onClick: (GuidesFilterKind) -> Unit,
     onReset: (GuidesFilterKind) -> Unit,
 ) {
-    AssistChip(
+    D2AssistChip(
         onClick = { onClick(chip.kind) },
         label = { Text(text = chipLabel(chip), style = D2BuildHelperTheme.typography.captionMD) },
         trailingIcon = if (chip.isApplied) {
             {
-                IconButton(onClick = { onReset(chip.kind) }, modifier = Modifier.size(20.dp)) {
-                    Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
+                D2IconButton(onClick = { onReset(chip.kind) }, modifier = Modifier.size(20.dp)) {
+                    D2Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
                 }
             }
         } else {
             null
         },
-        colors = AssistChipDefaults.assistChipColors(
-            labelColor = D2BuildHelperTheme.colors.textPrimary,
-        ),
     )
 }
 
@@ -89,6 +93,7 @@ private fun chipLabel(chip: UiFilterChip): String {
         is UiFilterChip.Position -> chip.appliedPosition?.let {
             stringResource(MR.strings.position_short_format, it.shortNumber)
         }
+
         is UiFilterChip.Side -> chip.appliedIsRadiant?.let {
             stringResource(if (it) MR.strings.side_radiant else MR.strings.side_dire)
         }

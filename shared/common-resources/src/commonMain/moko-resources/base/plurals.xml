@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="search_hero_count_plural">
+        <item quantity="one">%1$d hero</item>
+        <item quantity="other">%1$d heroes</item>
+    </plurals>
+</resources>

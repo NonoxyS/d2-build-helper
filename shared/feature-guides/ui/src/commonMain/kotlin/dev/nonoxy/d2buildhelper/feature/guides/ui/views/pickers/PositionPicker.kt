@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import dev.icerock.moko.resources.compose.painterResource
@@ -28,12 +29,16 @@ internal fun PositionPicker(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         picker.options.fastForEach { option ->
+            val positionLabel = stringResource(MR.strings.position_short_format, option.shortNumber)
             Image(
                 painter = painterResource(option.iconResource),
-                contentDescription = stringResource(MR.strings.position_short_format, option.shortNumber),
+                contentDescription = positionLabel,
                 modifier = Modifier
                     .size(48.dp)
-                    .clickable { onPositionClick(option) },
+                    .clickable(
+                        onClickLabel = positionLabel,
+                        role = Role.Button,
+                    ) { onPositionClick(option) },
             )
         }
     }

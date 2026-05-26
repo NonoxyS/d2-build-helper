@@ -55,7 +55,6 @@ val coreNetworkKtorModule = module {
             defaultRequest {
                 url.protocol = environment.protocol
                 url.host = environment.apiHost
-                environment.apiPort?.let { url.port = it }
                 header(API_KEY_HEADER, BuildConfig.D2BH_API_KEY)
             }
         }
@@ -67,5 +66,6 @@ val coreNetworkKtorModule = module {
 private fun resolveEnvironment(): NetworkEnvironment =
     when (BuildConfig.D2BH_ENVIRONMENT.lowercase()) {
         "dev" -> NetworkEnvironment.Dev
-        else -> NetworkEnvironment.Prod
+        "prod" -> NetworkEnvironment.Prod
+        else -> error("Unknown BuildConfig.D2BH_ENVIRONMENT: ${BuildConfig.D2BH_ENVIRONMENT}")
     }
