@@ -60,7 +60,7 @@ jobs:
           EOF
 
       - name: Run Android Lint
-        run: ./gradlew :android:app:lintDebug
+        run: ./gradlew :android:app:lintDevDebug
 
       - name: Upload Lint report
         if: always()
