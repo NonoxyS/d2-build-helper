@@ -9,8 +9,10 @@ import dev.nonoxy.d2buildhelper.feature.guides.ui.api.GuidesRoute
 import dev.nonoxy.d2buildhelper.feature.guides.ui.api.composableGuidesScreen
 
 @Composable
-fun App() = D2BuildHelperTheme {
-    D2BuildHelperApp()
+fun App() {
+    D2BuildHelperTheme {
+        D2BuildHelperApp()
+    }
 }
 
 @Composable

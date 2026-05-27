@@ -1,4 +1,4 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("ComposableFunctionName", "TooManyFunctions")
 
 package dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space
 
