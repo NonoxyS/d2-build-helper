@@ -1,7 +1,8 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain
 
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
-import dev.nonoxy.d2buildhelper.common.extensions.combineResults
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultSuccess
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.mvikotlin.BaseExecutor
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
@@ -39,6 +40,7 @@ internal class GuidesExecutor(
                 dispatch(Message.SetActivePicker(null))
                 dispatch(Message.SetPickerSearch(""))
             }
+
             is Intent.OnPickerSearchChange -> dispatch(Message.SetPickerSearch(intent.value))
             is Intent.OnFilterApply -> applyFilter(intent.value)
             is Intent.OnFilterReset -> resetFilter(intent.kind)
@@ -46,6 +48,7 @@ internal class GuidesExecutor(
                 dispatch(Message.SetFilters(GuidesFilters()))
                 loadForCurrentFilters()
             }
+
             Intent.OnRetry -> loadForCurrentFilters()
         }
     }
@@ -74,12 +77,11 @@ internal class GuidesExecutor(
 
     private suspend fun loadForCurrentFilters() {
         val heroId = state().filters.heroId
-        val fetcher: suspend () -> Result<GuidesPage> = if (heroId != null) {
-            { guidesRepository.getHeroGuides(heroId) }
+        if (heroId != null) {
+            renderGuidesPage { guidesRepository.getHeroGuides(heroId) }
         } else {
-            { guidesRepository.getGuides() }
+            renderGuidesPage { guidesRepository.getGuides() }
         }
-        renderGuidesPage(fetcher)
     }
 
     private suspend fun renderGuidesPage(fetcher: suspend () -> Result<GuidesPage>) {
@@ -106,13 +108,16 @@ internal class GuidesExecutor(
         val constantsDef = async { resourcesRepository.getDotaConstants() }
         val guidesDef = async { fetcher() }
 
-        val combined = combineResults(constantsDef.await(), guidesDef.await())
-        val (cachedConstants, guidesPage) = combined.getOrElse { error ->
-            return@coroutineScope Result.failure(error)
-        }
+        val cachedConstants = constantsDef
+            .await()
+            .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
+
+        val guidesPage = guidesDef
+            .await()
+            .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
 
         val finalConstants = syncConstantsToGuidesVersion(cachedConstants, guidesPage.gameVersion)
-        Result.success(GuidesAndConstants(constants = finalConstants, guidesPage = guidesPage))
+        GuidesAndConstants(constants = finalConstants, guidesPage = guidesPage).wrapResultSuccess()
     }
 
     private suspend fun syncConstantsToGuidesVersion(
