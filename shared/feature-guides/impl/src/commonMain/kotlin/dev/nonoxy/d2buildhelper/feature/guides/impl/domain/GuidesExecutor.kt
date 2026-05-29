@@ -1,6 +1,9 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain
 
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
+import dev.nonoxy.d2buildhelper.common.extensions.wrapResultSuccess
+import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.mvikotlin.BaseExecutor
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
 import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesRepository
@@ -24,12 +27,9 @@ internal class GuidesExecutor(
     private val dispatchers: CoroutineDispatchers,
 ) : BaseExecutor<Intent, Action, State, Message, Label>(mainContext = dispatchers.main) {
 
-    private var lastFailedRetry: (suspend () -> Unit)? = null
-
     override suspend fun suspendExecuteAction(action: Action) {
         when (action) {
-            Action.LoadInitial -> loadInitial { guidesRepository.getGuides() }
-            is Action.FilterByHero -> loadInitial { guidesRepository.getHeroGuides(action.heroId) }
+            Action.LoadInitial -> loadForCurrentFilters()
         }
     }
 
@@ -40,65 +40,17 @@ internal class GuidesExecutor(
                 dispatch(Message.SetActivePicker(null))
                 dispatch(Message.SetPickerSearch(""))
             }
+
             is Intent.OnPickerSearchChange -> dispatch(Message.SetPickerSearch(intent.value))
             is Intent.OnFilterApply -> applyFilter(intent.value)
             is Intent.OnFilterReset -> resetFilter(intent.kind)
             Intent.OnFiltersResetAll -> {
                 dispatch(Message.SetFilters(GuidesFilters()))
-                suspendExecuteAction(Action.LoadInitial)
+                loadForCurrentFilters()
             }
-            Intent.OnRetry -> (lastFailedRetry ?: { suspendExecuteAction(Action.LoadInitial) }).invoke()
+
+            Intent.OnRetry -> loadForCurrentFilters()
         }
-    }
-
-    private suspend fun loadInitial(fetchGuides: suspend () -> Result<GuidesPage>): Unit = coroutineScope {
-        dispatch(Message.SetLoading(true))
-        dispatch(Message.SetError(false))
-
-        val constantsDef = async { resourcesRepository.getDotaConstants() }
-        val guidesDef = async { fetchGuides() }
-
-        val constantsResult = constantsDef.await()
-        val guidesResult = guidesDef.await()
-
-        val firstFailure = listOf(constantsResult, guidesResult).firstOrNull { it.isFailure }
-        if (firstFailure != null) {
-            Napier.e(throwable = firstFailure.exceptionOrNull(), message = "GuidesExecutor.loadInitial failed")
-            lastFailedRetry = { loadInitial(fetchGuides) }
-            dispatch(Message.SetError(true))
-            dispatch(Message.SetLoading(false))
-            return@coroutineScope
-        }
-
-        val cachedConstants = constantsResult.getOrThrow()
-        val guidesPage = guidesResult.getOrThrow()
-
-        val finalConstants: DotaConstants = if (cachedConstants.gameVersion == guidesPage.gameVersion) {
-            cachedConstants
-        } else {
-            val refreshResult = resourcesRepository.refreshDotaConstants(expectedVersion = guidesPage.gameVersion)
-            if (refreshResult.isFailure) {
-                Napier.e(
-                    throwable = refreshResult.exceptionOrNull(),
-                    message = "GuidesExecutor.loadInitial: version-mismatch refresh failed; serving cached",
-                )
-                cachedConstants
-            } else {
-                refreshResult.getOrThrow()
-            }
-        }
-
-        dispatch(
-            Message.SetConstants(
-                heroes = finalConstants.heroes,
-                items = finalConstants.items,
-                abilities = finalConstants.abilities,
-                gameVersion = finalConstants.gameVersion,
-            ),
-        )
-        dispatch(Message.SetGuides(guidesPage.guides))
-        dispatch(Message.SetLoading(false))
-        lastFailedRetry = null
     }
 
     private suspend fun applyFilter(value: FilterValue) {
@@ -110,13 +62,7 @@ internal class GuidesExecutor(
         dispatch(Message.SetFilters(newFilters))
         dispatch(Message.SetActivePicker(null))
         dispatch(Message.SetPickerSearch(""))
-
-        val heroId = newFilters.heroId
-        if (heroId != null) {
-            suspendExecuteAction(Action.FilterByHero(heroId))
-        } else {
-            suspendExecuteAction(Action.LoadInitial)
-        }
+        loadForCurrentFilters()
     }
 
     private suspend fun resetFilter(kind: GuidesFilterKind) {
@@ -126,6 +72,70 @@ internal class GuidesExecutor(
             GuidesFilterKind.Side -> state().filters.copy(isRadiant = null)
         }
         dispatch(Message.SetFilters(cleared))
-        suspendExecuteAction(Action.LoadInitial)
+        loadForCurrentFilters()
     }
+
+    private suspend fun loadForCurrentFilters() {
+        val heroId = state().filters.heroId
+        if (heroId != null) {
+            renderGuidesPage { guidesRepository.getHeroGuides(heroId) }
+        } else {
+            renderGuidesPage { guidesRepository.getGuides() }
+        }
+    }
+
+    private suspend fun renderGuidesPage(fetcher: suspend () -> Result<GuidesPage>) {
+        dispatch(Message.SetLoading(true))
+        dispatch(Message.SetError(false))
+
+        fetchGuidesWithSyncedConstants(fetcher).fold(
+            onSuccess = { loaded ->
+                dispatch(Message.SetConstants(loaded.constants))
+                dispatch(Message.SetGuides(loaded.guidesPage.guides))
+                dispatch(Message.SetLoading(false))
+            },
+            onFailure = { error ->
+                Napier.e(throwable = error, message = "GuidesExecutor: failed to load guides page")
+                dispatch(Message.SetError(true))
+                dispatch(Message.SetLoading(false))
+            },
+        )
+    }
+
+    private suspend fun fetchGuidesWithSyncedConstants(
+        fetcher: suspend () -> Result<GuidesPage>,
+    ): Result<GuidesAndConstants> = coroutineScope {
+        val constantsDef = async { resourcesRepository.getDotaConstants() }
+        val guidesDef = async { fetcher() }
+
+        val cachedConstants = constantsDef
+            .await()
+            .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
+
+        val guidesPage = guidesDef
+            .await()
+            .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
+
+        val finalConstants = syncConstantsToGuidesVersion(cachedConstants, guidesPage.gameVersion)
+        GuidesAndConstants(constants = finalConstants, guidesPage = guidesPage).wrapResultSuccess()
+    }
+
+    private suspend fun syncConstantsToGuidesVersion(
+        cached: DotaConstants,
+        guidesVersion: GameVersion,
+    ): DotaConstants {
+        if (cached.gameVersion == guidesVersion) return cached
+        return resourcesRepository.refreshDotaConstants(expectedVersion = guidesVersion).getOrElse { error ->
+            Napier.e(
+                throwable = error,
+                message = "GuidesExecutor: version-mismatch refresh failed; serving cached",
+            )
+            cached
+        }
+    }
+
+    private data class GuidesAndConstants(
+        val constants: DotaConstants,
+        val guidesPage: GuidesPage,
+    )
 }

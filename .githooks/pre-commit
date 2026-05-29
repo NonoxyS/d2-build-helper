@@ -6,7 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[92m'
 NC='\033[0m' # No Color
 
-STAGED_SWIFT_FILES=$(git diff --diff-filter=d --name-only --cached | grep ".swift$")
+STAGED_SWIFT_FILES=$(git diff --diff-filter=d --name-only --cached | grep ".swift$" || true)
 
 # IOS pre-commit
 SWIFTFORMAT_FILES="$STAGED_SWIFT_FILES"
@@ -62,7 +62,7 @@ fi
 # Android pre-commit
 EXPLICIT_FILES=$(git diff --name-only --cached)
 
-STAGED_KT_FILES=$(echo "$EXPLICIT_FILES" | grep ".kt$")
+STAGED_KT_FILES=$(echo "$EXPLICIT_FILES" | grep ".kt$" || true)
 
 if [[ ! -z "$STAGED_KT_FILES" ]]; then
   ./gradlew detekt

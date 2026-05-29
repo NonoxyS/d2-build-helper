@@ -57,3 +57,10 @@ include(":shared:feature-guides:api")
 include(":shared:feature-guides:impl")
 include(":shared:feature-guides:presentation")
 include(":shared:feature-guides:ui")
+
+if (System.getenv("IS_CI") == null) {
+    providers.exec {
+        commandLine("git", "config", "core.hooksPath", ".githooks")
+        workingDir = rootDir
+    }.result.get()
+}

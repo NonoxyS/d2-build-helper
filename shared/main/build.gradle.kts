@@ -92,16 +92,3 @@ private fun KotlinMultiplatformExtension.addCommonModules() {
         implementations(*commonProjects.toTypedArray())
     }
 }
-
-val changeGitHooksDir by tasks.registering(Exec::class) {
-    group = "git"
-    description = "Changing githooks dir to .githooks"
-
-    commandLine("git", "config", "core.hooksPath", ".githooks")
-
-    onlyIf {
-        System.getenv("IS_CI") == null
-    }
-}
-
-// tasks.getByPath(":shared:main:preBuild").dependsOn(changeGitHooksDir)

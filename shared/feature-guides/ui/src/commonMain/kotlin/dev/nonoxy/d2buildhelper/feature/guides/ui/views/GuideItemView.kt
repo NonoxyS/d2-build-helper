@@ -43,7 +43,10 @@ internal fun GuideItemView(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = D2BuildHelperTheme.colors.surface, shape = D2BuildHelperTheme.shapes.cornerRadius4)
+            .background(
+                color = D2BuildHelperTheme.colors.surface,
+                shape = D2BuildHelperTheme.shapes.cornerRadius4
+            )
             .border(
                 width = 1.dp,
                 color = D2BuildHelperTheme.colors.outline,
@@ -106,10 +109,13 @@ private fun MatchStatsRow(
 
         Image(
             painter = painterResource(
-                if (guide.isRadiant) MR.images.radiant_square else MR.images.dire_square,
+                imageResource = if (guide.isRadiant) MR.images.radiant_square
+                else MR.images.dire_square,
             ),
             contentDescription = null,
-            modifier = Modifier.size(16.dp).clip(D2BuildHelperTheme.shapes.cornerRadius4),
+            modifier = Modifier
+                .size(16.dp)
+                .clip(D2BuildHelperTheme.shapes.cornerRadius4),
         )
         Space16()
 
@@ -170,7 +176,10 @@ private fun ItemRow(
     guide: UiGuide,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         guide.items.fastForEach { purchase ->
             ItemWithBuyTime(purchase = purchase)
         }
