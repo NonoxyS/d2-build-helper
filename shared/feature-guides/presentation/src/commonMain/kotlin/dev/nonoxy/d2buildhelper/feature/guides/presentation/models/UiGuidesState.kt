@@ -5,8 +5,10 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class UiGuidesState(
     val guides: ImmutableList<UiGuide> = persistentListOf(),
-    val filterChips: ImmutableList<UiFilterChip> = persistentListOf(),
-    val activePicker: UiFilterPicker? = null,
+    val heroFilter: UiHeroFilter? = null,
+    val selectedPosition: UiMatchPlayerPosition? = null,
+    val selectedSide: Boolean? = null,
+    val heroPicker: UiFilterPicker.Hero? = null,
     val isLoading: Boolean = true,
     val isError: Boolean = false,
 )
