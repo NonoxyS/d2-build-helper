@@ -19,6 +19,8 @@ object AppVersion {
 
     /** Returns version code equal to the number of Git commits */
     fun getVersionCode(project: Project): Provider<Int> {
-        return project.providers.of(GitCommitCountValueSource::class.java) {}
+        return project.providers.of(GitCommitCountValueSource::class.java) {
+            parameters.workingDir.set(project.layout.settingsDirectory)
+        }
     }
 }
