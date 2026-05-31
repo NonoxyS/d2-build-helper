@@ -189,4 +189,100 @@ class GuidesExecutorTest {
 
         store.dispose()
     }
+
+    @Test
+    fun `applying the already-selected Side clears it back to null`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides() = Result.success(guidesPage(174, listOf(1)))
+            override suspend fun getHeroGuides(heroId: HeroId) =
+                Result.success(guidesPage(174, listOf(heroId.raw)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = true)))
+        assertEquals(true, store.state.filters.isRadiant)
+
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = true)))
+        assertNull(store.state.filters.isRadiant)
+
+        store.dispose()
+    }
+
+    @Test
+    fun `applying a different Side value switches instead of clearing`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides() = Result.success(guidesPage(174, listOf(1)))
+            override suspend fun getHeroGuides(heroId: HeroId) =
+                Result.success(guidesPage(174, listOf(heroId.raw)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = true)))
+        assertEquals(true, store.state.filters.isRadiant)
+
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = false)))
+        assertEquals(false, store.state.filters.isRadiant)
+
+        store.dispose()
+    }
+
+    @Test
+    fun `applying the already-selected Position clears it back to null`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides() = Result.success(guidesPage(174, listOf(1)))
+            override suspend fun getHeroGuides(heroId: HeroId) =
+                Result.success(guidesPage(174, listOf(heroId.raw)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Position(MatchPlayerPosition.POSITION_2)))
+        assertEquals(MatchPlayerPosition.POSITION_2, store.state.filters.position)
+
+        store.accept(Intent.OnFilterApply(FilterValue.Position(MatchPlayerPosition.POSITION_2)))
+        assertNull(store.state.filters.position)
+
+        store.dispose()
+    }
+
+    @Test
+    fun `applying the already-selected Hero clears it back to null`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides() = Result.success(guidesPage(174, listOf(1)))
+            override suspend fun getHeroGuides(heroId: HeroId) =
+                Result.success(guidesPage(174, listOf(heroId.raw)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(1))))
+        assertEquals(HeroId(1), store.state.filters.heroId)
+
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(1))))
+        assertNull(store.state.filters.heroId)
+
+        store.dispose()
+    }
 }
