@@ -11,16 +11,15 @@ import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKin
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterChip
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHero
+import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHeroFilter
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiNeutralItem
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 private const val IMPACT_PROGRESS_DIVIDER = 50f
@@ -38,8 +37,12 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
 
         return UiGuidesState(
             guides = visibleGuides,
-            filterChips = buildChips(item),
-            activePicker = item.activePicker?.let { kind -> buildPicker(kind, item) },
+            heroFilter = item.filters.heroId?.let { id -> item.heroes[id]?.toUiHeroFilter() },
+            selectedPosition = item.filters.position?.toUi(),
+            selectedSide = item.filters.isRadiant,
+            heroPicker = item.activePicker
+                ?.takeIf { it == GuidesFilterKind.Hero }
+                ?.let { buildHeroPicker(item) },
             isLoading = item.isLoading,
             isError = item.isError,
         )
@@ -86,36 +89,25 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
             (isRadiant == null || guide.playerStats.isRadiant == isRadiant)
     }
 
-    private fun buildChips(state: GuidesStore.State): ImmutableList<UiFilterChip> = persistentListOf(
-        UiFilterChip.Hero(appliedHeroName = state.filters.heroId?.let { state.heroes[it]?.displayName }),
-        UiFilterChip.Position(appliedPosition = state.filters.position?.toUi()),
-        UiFilterChip.Side(appliedIsRadiant = state.filters.isRadiant),
-    )
-
-    private fun buildPicker(kind: GuidesFilterKind, state: GuidesStore.State): UiFilterPicker = when (kind) {
-        GuidesFilterKind.Hero -> {
-            val query = state.pickerSearch.trim()
-            val filtered = state.heroes.values
-                .filter { query.isEmpty() || it.displayName.contains(query, ignoreCase = true) }
-                .sortedBy { it.displayName }
-                .map { hero -> hero.toUi() }
-                .toImmutableList()
-            UiFilterPicker.Hero(search = state.pickerSearch, heroes = filtered, selectedHeroId = state.filters.heroId)
-        }
-
-        GuidesFilterKind.Position -> UiFilterPicker.Position(
-            options = persistentListOf(
-                UiMatchPlayerPosition.POSITION_1,
-                UiMatchPlayerPosition.POSITION_2,
-                UiMatchPlayerPosition.POSITION_3,
-                UiMatchPlayerPosition.POSITION_4,
-                UiMatchPlayerPosition.POSITION_5,
-            ),
-            selected = state.filters.position?.toUi(),
+    private fun buildHeroPicker(state: GuidesStore.State): UiFilterPicker.Hero {
+        val query = state.pickerSearch.trim()
+        val filtered = state.heroes.values
+            .filter { query.isEmpty() || it.displayName.contains(query, ignoreCase = true) }
+            .sortedBy { it.displayName }
+            .map { hero -> hero.toUi() }
+            .toImmutableList()
+        return UiFilterPicker.Hero(
+            search = state.pickerSearch,
+            heroes = filtered,
+            selectedHeroId = state.filters.heroId,
         )
-
-        GuidesFilterKind.Side -> UiFilterPicker.Side(selected = state.filters.isRadiant)
     }
+
+    private fun Hero.toUiHeroFilter(): UiHeroFilter = UiHeroFilter(
+        heroId = id,
+        displayName = displayName,
+        iconUrl = iconUrl,
+    )
 
     private fun Hero.toUi(): UiHero {
         return UiHero(
