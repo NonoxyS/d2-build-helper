@@ -17,11 +17,9 @@ import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.error.D2ErrorView
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.loading.D2LoadingView
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.sheet.D2ModalBottomSheet
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.GuidesViewModel
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.pickers.HeroPicker
-import dev.nonoxy.d2buildhelper.feature.guides.ui.views.pickers.PositionPicker
-import dev.nonoxy.d2buildhelper.feature.guides.ui.views.pickers.SidePicker
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,35 +40,26 @@ internal fun GuidesScreen(viewModel: GuidesViewModel = koinViewModel()) {
 
         else -> GuidesView(
             state = state,
-            onFilterChipClick = viewModel::onFilterChipClick,
-            onFilterReset = viewModel::onFilterReset,
+            onHeroClick = { viewModel.onFilterChipClick(GuidesFilterKind.Hero) },
+            onHeroReset = { viewModel.onFilterReset(GuidesFilterKind.Hero) },
+            onPositionToggle = viewModel::onPositionToggle,
+            onSideToggle = viewModel::onSideToggle,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 
-    state.activePicker?.let { picker ->
+    state.heroPicker?.let { picker ->
         D2ModalBottomSheet(
             onDismissRequest = viewModel::onPickerDismiss,
             sheetState = sheetState,
             contentWindowInsets = { WindowInsets.statusBars },
             modifier = Modifier.fillMaxWidth().heightIn(min = 300.dp),
         ) {
-            when (picker) {
-                is UiFilterPicker.Hero -> HeroPicker(
-                    picker = picker,
-                    onSearchChange = viewModel::onPickerSearchChange,
-                    onHeroClick = viewModel::onHeroSelected,
-                )
-
-                is UiFilterPicker.Position -> PositionPicker(
-                    picker = picker,
-                    onPositionClick = viewModel::onPositionSelected,
-                )
-
-                is UiFilterPicker.Side -> SidePicker(
-                    picker = picker,
-                    onSideClick = viewModel::onSideSelected,
-                )
-            }
+            HeroPicker(
+                picker = picker,
+                onSearchChange = viewModel::onPickerSearchChange,
+                onHeroClick = viewModel::onHeroSelected,
+            )
         }
     }
 }
