@@ -9,11 +9,4 @@ sealed interface UiFilterPicker {
         val heroes: ImmutableList<UiHero>,
         val selectedHeroId: HeroId?,
     ) : UiFilterPicker
-
-    data class Position(
-        val options: ImmutableList<UiMatchPlayerPosition>,
-        val selected: UiMatchPlayerPosition?,
-    ) : UiFilterPicker
-
-    data class Side(val selected: Boolean?) : UiFilterPicker
 }

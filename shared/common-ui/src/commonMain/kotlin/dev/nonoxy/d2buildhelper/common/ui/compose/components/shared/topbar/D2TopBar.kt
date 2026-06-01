@@ -19,8 +19,8 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 
 @Composable
 fun D2TopBar(
-    title: String,
     modifier: Modifier = Modifier,
+    title: String? = null,
     titleStyle: TextStyle = D2BuildHelperTheme.typography.bodyLG,
     titleColor: Color = D2BuildHelperTheme.colors.textPrimary,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
@@ -40,7 +40,9 @@ fun D2TopBar(
         horizontalArrangement = horizontalArrangement,
     ) {
         leading?.invoke()
-        Text(text = title, style = titleStyle, color = titleColor)
+        if (title != null) {
+            Text(text = title, style = titleStyle, color = titleColor)
+        }
         trailing?.invoke()
     }
 }

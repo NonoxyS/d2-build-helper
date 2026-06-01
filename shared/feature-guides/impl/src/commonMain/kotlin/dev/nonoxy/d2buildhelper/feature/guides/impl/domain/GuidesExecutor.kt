@@ -54,16 +54,19 @@ internal class GuidesExecutor(
     }
 
     private suspend fun applyFilter(value: FilterValue) {
+        val current = state().filters
         val newFilters = when (value) {
-            is FilterValue.Hero -> state().filters.copy(heroId = value.heroId)
-            is FilterValue.Position -> state().filters.copy(position = value.position)
-            is FilterValue.Side -> state().filters.copy(isRadiant = value.isRadiant)
+            is FilterValue.Hero -> current.copy(heroId = current.heroId.toggle(value.heroId))
+            is FilterValue.Position -> current.copy(position = current.position.toggle(value.position))
+            is FilterValue.Side -> current.copy(isRadiant = current.isRadiant.toggle(value.isRadiant))
         }
         dispatch(Message.SetFilters(newFilters))
         dispatch(Message.SetActivePicker(null))
         dispatch(Message.SetPickerSearch(""))
         loadForCurrentFilters()
     }
+
+    private fun <T> T?.toggle(selected: T): T? = if (this == selected) null else selected
 
     private suspend fun resetFilter(kind: GuidesFilterKind) {
         val cleared = when (kind) {

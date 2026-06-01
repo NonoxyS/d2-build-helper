@@ -33,11 +33,11 @@ class GuidesViewModel internal constructor(
     fun onPickerDismiss() = store.accept(Intent.OnPickerDismiss)
     fun onPickerSearchChange(value: String) = store.accept(Intent.OnPickerSearchChange(value))
     fun onHeroSelected(heroId: HeroId) = store.accept(Intent.OnFilterApply(FilterValue.Hero(heroId)))
-    fun onPositionSelected(position: UiMatchPlayerPosition) = store.accept(
+    fun onPositionToggle(position: UiMatchPlayerPosition) = store.accept(
         Intent.OnFilterApply(value = FilterValue.Position(position.toDomain())),
     )
 
-    fun onSideSelected(isRadiant: Boolean) = store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant)))
+    fun onSideToggle(isRadiant: Boolean) = store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant)))
     fun onFilterReset(kind: GuidesFilterKind) = store.accept(Intent.OnFilterReset(kind))
     fun onFiltersResetAll() = store.accept(Intent.OnFiltersResetAll)
     fun onRetry() = store.accept(Intent.OnRetry)
