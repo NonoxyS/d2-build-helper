@@ -23,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 
@@ -393,6 +394,34 @@ class GuidesExecutorTest {
         assertTrue(store.state.isLoadMoreError)
         assertEquals(1, store.state.guides.size)
 
+        store.dispose()
+    }
+
+    @Test
+    fun `applying a filter while load-more is in flight clears isLoadingMore`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val blockLoadMore = CompletableDeferred<Unit>()
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides(filters: GuidesFilters, page: Int): Result<GuidesPage> {
+                if (page > 0) {
+                    blockLoadMore.await() // load-more hangs until cancelled
+                }
+                return Result.success(guidesPage(174, listOf(1), page = 0, hasMore = true))
+            }
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnLoadMore)
+        assertTrue(store.state.isLoadingMore) // load-more started and is hanging
+
+        store.accept(Intent.OnFiltersResetAll) // triggers fullLoad → cancels the hanging load-more
+
+        assertFalse(store.state.isLoadingMore) // was the bug: stayed true
         store.dispose()
     }
 }

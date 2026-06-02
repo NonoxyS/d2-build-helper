@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 
 private const val GUIDES_JSON = """
 {
-  "pagination": { "page": 0, "pageSize": 50, "hasMore": false },
+  "pagination": { "page": 0, "pageSize": 20, "hasMore": false },
   "gameVersionId": 174,
   "guides": [
     {

@@ -110,6 +110,8 @@ internal class GuidesExecutor(
         dispatch(Message.SetLoading(true))
         dispatch(Message.SetError(false))
         dispatch(Message.SetLoadMoreError(false))
+        dispatch(Message.SetLoadingMore(false))
+        dispatch(Message.SetRefreshing(false))
 
         fetchPageWithConstants(page = 0).fold(
             onSuccess = { loaded ->
@@ -129,6 +131,7 @@ internal class GuidesExecutor(
     private suspend fun runRefresh() {
         dispatch(Message.SetRefreshing(true))
         dispatch(Message.SetLoadMoreError(false))
+        dispatch(Message.SetLoadingMore(false))
 
         fetchPageWithConstants(page = 0).fold(
             onSuccess = { loaded ->

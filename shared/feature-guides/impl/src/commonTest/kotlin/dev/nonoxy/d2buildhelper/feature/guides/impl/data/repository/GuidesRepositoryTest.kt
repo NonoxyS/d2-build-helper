@@ -26,7 +26,7 @@ import kotlinx.coroutines.test.runTest
 class GuidesRepositoryTest {
 
     private fun page(vararg guides: RemoteGuideResponse, gameVersionId: Int = 174) = RemoteGuidesPageResponse(
-        pagination = RemotePaginationResponse(page = 0, pageSize = 50, hasMore = false),
+        pagination = RemotePaginationResponse(page = 0, pageSize = 20, hasMore = false),
         gameVersionId = gameVersionId,
         guides = guides.toList(),
     )
