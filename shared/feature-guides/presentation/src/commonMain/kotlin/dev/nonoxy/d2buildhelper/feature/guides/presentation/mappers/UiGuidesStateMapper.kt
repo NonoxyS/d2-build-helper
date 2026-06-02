@@ -31,7 +31,6 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
 
     override fun map(item: GuidesStore.State): UiGuidesState {
         val visibleGuides = item.guides
-            .applyClientFilters(item.filters.position, item.filters.isRadiant)
             .mapNotNull { guide -> guide.toUi(heroes = item.heroes, items = item.items) }
             .toImmutableList()
 
@@ -45,6 +44,10 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
                 ?.let { buildHeroPicker(item) },
             isLoading = item.isLoading,
             isError = item.isError,
+            isRefreshing = item.isRefreshing,
+            isLoadingMore = item.isLoadingMore,
+            isLoadMoreError = item.isLoadMoreError,
+            canLoadMore = item.pagination.hasMore,
         )
     }
 
@@ -80,14 +83,6 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
                 timeFormatted = purchase?.time?.let { TimeConverter.convertSecondsToMinutesAndSeconds(it) }.orEmpty(),
             )
         }.toImmutableList()
-
-    private fun List<Guide>.applyClientFilters(
-        position: MatchPlayerPosition?,
-        isRadiant: Boolean?,
-    ): List<Guide> = filter { guide ->
-        (position == null || guide.playerStats.position == position) &&
-            (isRadiant == null || guide.playerStats.isRadiant == isRadiant)
-    }
 
     private fun buildHeroPicker(state: GuidesStore.State): UiFilterPicker.Hero {
         val query = state.pickerSearch.trim()
