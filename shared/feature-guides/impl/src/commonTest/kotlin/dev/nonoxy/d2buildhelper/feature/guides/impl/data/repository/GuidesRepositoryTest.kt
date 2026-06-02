@@ -3,6 +3,7 @@ package dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
@@ -56,7 +57,7 @@ class GuidesRepositoryTest {
         val api = FakeGuidesApiClient(guides = Result.success(page(dto, gameVersionId = 174)))
         val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
-        val pageResult = repo.getGuides().getOrThrow()
+        val pageResult = repo.getGuides(GuidesFilters(), 0).getOrThrow()
 
         assertEquals(GameVersion(174), pageResult.gameVersion)
         assertEquals(1, pageResult.guides.size)
@@ -77,7 +78,7 @@ class GuidesRepositoryTest {
         val api = FakeGuidesApiClient(guides = Result.failure(boom))
         val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
-        val result = repo.getGuides()
+        val result = repo.getGuides(GuidesFilters(), 0)
 
         assertTrue(result.isFailure)
         assertEquals(boom, result.exceptionOrNull())
@@ -98,7 +99,7 @@ class GuidesRepositoryTest {
             TestCoroutineDispatchers(),
         )
 
-        val pageResult = repo.getGuides().getOrThrow()
+        val pageResult = repo.getGuides(GuidesFilters(), 0).getOrThrow()
         val guide = pageResult.guides.single()
         val stats = guide.playerStats
 
@@ -125,14 +126,14 @@ class GuidesRepositoryTest {
             TestCoroutineDispatchers(),
         )
 
-        val pageResult = repo.getGuides().getOrThrow()
+        val pageResult = repo.getGuides(GuidesFilters(), 0).getOrThrow()
 
         assertEquals(2, pageResult.pagination.page)
         assertEquals(true, pageResult.pagination.hasMore)
     }
 
     @Test
-    fun `getHeroGuides reads the hero-specific page and maps it to domain`() = runTest {
+    fun `getGuides with heroId forwards heroId`() = runTest {
         val heroDto = RemoteGuideResponse(
             matchId = 300L,
             steamAccountId = 7L,
@@ -140,17 +141,34 @@ class GuidesRepositoryTest {
             heroId = 8,
             player = RemoteGuidePlayerResponse(position = RemoteMatchPlayerPosition.POSITION_1, isRadiant = false),
         )
-        val api = FakeGuidesApiClient(
-            guides = Result.success(page()),
-            heroGuides = Result.success(page(heroDto, gameVersionId = 174)),
-        )
+        val api = FakeGuidesApiClient(guides = Result.success(page(heroDto, gameVersionId = 174)))
         val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
 
-        val pageResult = repo.getHeroGuides(heroId = HeroId(8)).getOrThrow()
+        val pageResult = repo.getGuides(GuidesFilters(heroId = HeroId(8)), 0).getOrThrow()
 
         assertEquals(1, pageResult.guides.size)
         val guide = pageResult.guides.single()
         assertEquals(HeroId(8), guide.heroId)
         assertEquals(false, guide.playerStats.isRadiant)
+    }
+
+    @Test
+    fun `getGuides maps domain filters to wire parameters`() = runTest {
+        val api = FakeGuidesApiClient(guides = Result.success(page()))
+        val repo: GuidesRepository = GuidesRepositoryImpl(api, GuidesPageMapperImpl(), TestCoroutineDispatchers())
+
+        repo.getGuides(
+            GuidesFilters(
+                heroId = HeroId(8),
+                position = MatchPlayerPosition.POSITION_3,
+                isRadiant = false,
+            ),
+            page = 2,
+        ).getOrThrow()
+
+        assertEquals(8.toShort(), api.lastHeroId)
+        assertEquals("POSITION_3", api.lastPosition)
+        assertEquals(false, api.lastIsRadiant)
+        assertEquals(2, api.lastPage)
     }
 }

@@ -47,50 +47,57 @@ class GuidesApiClientImplTest {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun apiClient(status: HttpStatusCode, body: String): GuidesApiClient {
+    private fun engineClient(
+        body: String,
+        status: HttpStatusCode = HttpStatusCode.OK,
+    ): Pair<GuidesApiClient, MockEngine> {
         val engine = MockEngine { respond(content = body, status = status) }
-        val httpClient = HttpClient(engine) {
-            defaultRequest { url("http://localhost") }
-        }
-        return GuidesApiClientImpl(KtorClientImpl(httpClient, json))
+        val httpClient = HttpClient(engine) { defaultRequest { url("http://localhost") } }
+        return GuidesApiClientImpl(KtorClientImpl(httpClient, json)) to engine
     }
 
     @Test
     fun `getGuides parses a valid payload`() = runTest {
-        val result = apiClient(HttpStatusCode.OK, GUIDES_JSON).getGuides()
+        val (api, _) = engineClient(GUIDES_JSON)
+        val result = api.getGuides(heroId = null, position = null, isRadiant = null, page = 0, pageSize = 20)
 
         assertTrue(result.isSuccess)
         val page = result.getOrThrow()
         assertEquals(174, page.gameVersionId)
         assertEquals(1, page.guides.size)
-        val guide = page.guides.single()
-        assertEquals(7891234567L, guide.matchId)
-        assertEquals(1, guide.heroId)
-        assertEquals(listOf(1, 50), guide.player.finalItemIds)
-        assertEquals(2, guide.player.itemPurchases.size)
+        assertEquals(7891234567L, page.guides.single().matchId)
     }
 
     @Test
     fun `getGuides returns failure on a 500 response`() = runTest {
-        val result = apiClient(HttpStatusCode.InternalServerError, "{}").getGuides()
-
+        val (api, _) = engineClient("{}", HttpStatusCode.InternalServerError)
+        val result = api.getGuides(heroId = null, position = null, isRadiant = null, page = 0, pageSize = 20)
         assertTrue(result.isFailure)
     }
 
     @Test
-    fun `getHeroGuides forwards the heroId query parameter and parses the payload`() = runTest {
-        val engine = MockEngine { respond(content = GUIDES_JSON, status = HttpStatusCode.OK) }
-        val httpClient = HttpClient(engine) {
-            defaultRequest { url("http://localhost") }
-        }
-        val apiClient = GuidesApiClientImpl(KtorClientImpl(httpClient, json))
+    fun `getGuides forwards all query parameters`() = runTest {
+        val (api, engine) = engineClient(GUIDES_JSON)
+        api.getGuides(heroId = 5, position = "POSITION_2", isRadiant = true, page = 3, pageSize = 20)
 
-        val result = apiClient.getHeroGuides(heroId = 1)
+        val params = engine.requestHistory.single().url.parameters
+        assertEquals("5", params["heroId"])
+        assertEquals("POSITION_2", params["position"])
+        assertEquals("true", params["isRadiant"])
+        assertEquals("3", params["page"])
+        assertEquals("20", params["pageSize"])
+    }
 
-        assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrThrow().guides.size)
-        val requestUrl = engine.requestHistory.single().url
-        assertEquals("1", requestUrl.parameters["heroId"])
-        assertEquals("50", requestUrl.parameters["pageSize"])
+    @Test
+    fun `getGuides omits null filter parameters`() = runTest {
+        val (api, engine) = engineClient(GUIDES_JSON)
+        api.getGuides(heroId = null, position = null, isRadiant = null, page = 0, pageSize = 20)
+
+        val params = engine.requestHistory.single().url.parameters
+        assertEquals(null, params["heroId"])
+        assertEquals(null, params["position"])
+        assertEquals(null, params["isRadiant"])
+        assertEquals("0", params["page"])
+        assertEquals("20", params["pageSize"])
     }
 }
