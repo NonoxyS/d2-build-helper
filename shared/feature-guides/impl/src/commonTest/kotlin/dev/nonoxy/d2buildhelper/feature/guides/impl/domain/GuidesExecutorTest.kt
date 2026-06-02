@@ -11,6 +11,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Pagination
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.PlayerStats
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeResourcesRepository
@@ -61,9 +62,15 @@ class GuidesExecutorTest {
         ),
     )
 
-    private fun guidesPage(versionId: Int, heroIds: List<Short>) = GuidesPage(
+    private fun guidesPage(
+        versionId: Int,
+        heroIds: List<Short>,
+        page: Int = 0,
+        hasMore: Boolean = false,
+    ) = GuidesPage(
         gameVersion = GameVersion(versionId),
         guides = heroIds.map { guide(it) },
+        pagination = Pagination(page = page, hasMore = hasMore),
     )
 
     @Test

@@ -113,6 +113,25 @@ class GuidesRepositoryTest {
     }
 
     @Test
+    fun `getGuides maps pagination from DTO`() = runTest {
+        val dtoPage = RemoteGuidesPageResponse(
+            pagination = RemotePaginationResponse(page = 2, pageSize = 20, hasMore = true),
+            gameVersionId = 174,
+            guides = emptyList(),
+        )
+        val repo: GuidesRepository = GuidesRepositoryImpl(
+            FakeGuidesApiClient(guides = Result.success(dtoPage)),
+            GuidesPageMapperImpl(),
+            TestCoroutineDispatchers(),
+        )
+
+        val pageResult = repo.getGuides().getOrThrow()
+
+        assertEquals(2, pageResult.pagination.page)
+        assertEquals(true, pageResult.pagination.hasMore)
+    }
+
+    @Test
     fun `getHeroGuides reads the hero-specific page and maps it to domain`() = runTest {
         val heroDto = RemoteGuideResponse(
             matchId = 300L,
