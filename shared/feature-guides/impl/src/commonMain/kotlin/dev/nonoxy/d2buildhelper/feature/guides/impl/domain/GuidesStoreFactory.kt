@@ -9,6 +9,7 @@ import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesReposi
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Pagination
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Label
@@ -50,5 +51,10 @@ internal class GuidesStoreFactory(
         data class SetFilters(val filters: GuidesFilters) : Message
         data class SetActivePicker(val kind: GuidesFilterKind?) : Message
         data class SetPickerSearch(val value: String) : Message
+        data class SetPagination(val pagination: Pagination) : Message
+        data class AppendGuides(val guides: List<Guide>) : Message
+        data class SetLoadingMore(val isLoadingMore: Boolean) : Message
+        data class SetRefreshing(val isRefreshing: Boolean) : Message
+        data class SetLoadMoreError(val isLoadMoreError: Boolean) : Message
     }
 }

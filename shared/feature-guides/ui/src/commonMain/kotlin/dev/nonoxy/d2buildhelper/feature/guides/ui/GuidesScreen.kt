@@ -44,6 +44,8 @@ internal fun GuidesScreen(viewModel: GuidesViewModel = koinViewModel()) {
             onHeroReset = { viewModel.onFilterReset(GuidesFilterKind.Hero) },
             onPositionToggle = viewModel::onPositionToggle,
             onSideToggle = viewModel::onSideToggle,
+            onLoadMore = viewModel::onLoadMore,
+            onRefresh = viewModel::onRefresh,
             modifier = Modifier.fillMaxSize(),
         )
     }

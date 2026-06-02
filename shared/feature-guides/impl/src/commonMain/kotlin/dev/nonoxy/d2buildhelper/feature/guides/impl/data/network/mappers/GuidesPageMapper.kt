@@ -8,11 +8,13 @@ import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Pagination
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.PlayerStats
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidePlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuideResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidesPageResponse
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemotePaginationResponse
 
 private const val DEFAULT_IMPACT: Short = 25
 
@@ -23,6 +25,12 @@ internal class GuidesPageMapperImpl : GuidesPageMapper {
     override fun map(item: RemoteGuidesPageResponse): GuidesPage = GuidesPage(
         gameVersion = GameVersion(item.gameVersionId),
         guides = item.guides.map { it.toDomain() },
+        pagination = item.pagination.toDomain(),
+    )
+
+    private fun RemotePaginationResponse.toDomain(): Pagination = Pagination(
+        page = page,
+        hasMore = hasMore,
     )
 
     private fun RemoteGuideResponse.toDomain(): Guide = Guide(

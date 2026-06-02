@@ -41,6 +41,8 @@ class GuidesViewModel internal constructor(
     fun onFilterReset(kind: GuidesFilterKind) = store.accept(Intent.OnFilterReset(kind))
     fun onFiltersResetAll() = store.accept(Intent.OnFiltersResetAll)
     fun onRetry() = store.accept(Intent.OnRetry)
+    fun onLoadMore() = store.accept(Intent.OnLoadMore)
+    fun onRefresh() = store.accept(Intent.OnRefresh)
 
     override fun onCleared() {
         store.dispose()

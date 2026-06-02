@@ -11,4 +11,8 @@ data class UiGuidesState(
     val heroPicker: UiFilterPicker.Hero? = null,
     val isLoading: Boolean = true,
     val isError: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val isLoadMoreError: Boolean = false,
+    val canLoadMore: Boolean = false,
 )

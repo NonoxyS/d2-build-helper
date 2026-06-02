@@ -18,8 +18,10 @@ import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.GuidesStoreFactory.Ac
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.GuidesStoreFactory.Message
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 internal class GuidesExecutor(
     private val guidesRepository: GuidesRepository,
@@ -27,9 +29,11 @@ internal class GuidesExecutor(
     private val dispatchers: CoroutineDispatchers,
 ) : BaseExecutor<Intent, Action, State, Message, Label>(mainContext = dispatchers.main) {
 
+    private var loadJob: Job? = null
+
     override suspend fun suspendExecuteAction(action: Action) {
         when (action) {
-            Action.LoadInitial -> loadForCurrentFilters()
+            Action.LoadInitial -> fullLoad()
         }
     }
 
@@ -46,14 +50,16 @@ internal class GuidesExecutor(
             is Intent.OnFilterReset -> resetFilter(intent.kind)
             Intent.OnFiltersResetAll -> {
                 dispatch(Message.SetFilters(GuidesFilters()))
-                loadForCurrentFilters()
+                fullLoad()
             }
 
-            Intent.OnRetry -> loadForCurrentFilters()
+            Intent.OnRetry -> fullLoad()
+            Intent.OnRefresh -> refresh()
+            Intent.OnLoadMore -> loadMore()
         }
     }
 
-    private suspend fun applyFilter(value: FilterValue) {
+    private fun applyFilter(value: FilterValue) {
         val current = state().filters
         val newFilters = when (value) {
             is FilterValue.Hero -> current.copy(heroId = current.heroId.toggle(value.heroId))
@@ -63,60 +69,111 @@ internal class GuidesExecutor(
         dispatch(Message.SetFilters(newFilters))
         dispatch(Message.SetActivePicker(null))
         dispatch(Message.SetPickerSearch(""))
-        loadForCurrentFilters()
+        fullLoad()
     }
 
     private fun <T> T?.toggle(selected: T): T? = if (this == selected) null else selected
 
-    private suspend fun resetFilter(kind: GuidesFilterKind) {
+    private fun resetFilter(kind: GuidesFilterKind) {
         val cleared = when (kind) {
             GuidesFilterKind.Hero -> state().filters.copy(heroId = null)
             GuidesFilterKind.Position -> state().filters.copy(position = null)
             GuidesFilterKind.Side -> state().filters.copy(isRadiant = null)
         }
         dispatch(Message.SetFilters(cleared))
-        loadForCurrentFilters()
+        fullLoad()
     }
 
-    private suspend fun loadForCurrentFilters() {
-        val heroId = state().filters.heroId
-        if (heroId != null) {
-            renderGuidesPage { guidesRepository.getHeroGuides(heroId) }
-        } else {
-            renderGuidesPage { guidesRepository.getGuides() }
+    private fun fullLoad() {
+        loadJob?.cancel()
+        loadJob = scope.launch { runFullLoad() }
+    }
+
+    private fun refresh() {
+        if (state().isRefreshing) return
+        loadJob?.cancel()
+        loadJob = scope.launch { runRefresh() }
+    }
+
+    private fun loadMore() {
+        val current = state()
+        if (!current.pagination.hasMore || current.isLoadingMore || current.isLoading || current.isRefreshing) {
+            return
+        }
+        loadJob?.cancel()
+        loadJob = scope.launch {
+            runLoadMore(page = current.pagination.page + 1, filters = current.filters)
         }
     }
 
-    private suspend fun renderGuidesPage(fetcher: suspend () -> Result<GuidesPage>) {
+    private suspend fun runFullLoad() {
         dispatch(Message.SetLoading(true))
         dispatch(Message.SetError(false))
+        dispatch(Message.SetLoadMoreError(false))
+        dispatch(Message.SetLoadingMore(false))
+        dispatch(Message.SetRefreshing(false))
 
-        fetchGuidesWithSyncedConstants(fetcher).fold(
+        fetchPageWithConstants(page = 0).fold(
             onSuccess = { loaded ->
                 dispatch(Message.SetConstants(loaded.constants))
                 dispatch(Message.SetGuides(loaded.guidesPage.guides))
+                dispatch(Message.SetPagination(loaded.guidesPage.pagination))
                 dispatch(Message.SetLoading(false))
             },
             onFailure = { error ->
-                Napier.e(throwable = error, message = "GuidesExecutor: failed to load guides page")
+                Napier.e(throwable = error, message = "GuidesExecutor: full load failed")
                 dispatch(Message.SetError(true))
                 dispatch(Message.SetLoading(false))
             },
         )
     }
 
-    private suspend fun fetchGuidesWithSyncedConstants(
-        fetcher: suspend () -> Result<GuidesPage>,
-    ): Result<GuidesAndConstants> = coroutineScope {
+    private suspend fun runRefresh() {
+        dispatch(Message.SetRefreshing(true))
+        dispatch(Message.SetLoadMoreError(false))
+        dispatch(Message.SetLoadingMore(false))
+
+        fetchPageWithConstants(page = 0).fold(
+            onSuccess = { loaded ->
+                dispatch(Message.SetConstants(loaded.constants))
+                dispatch(Message.SetGuides(loaded.guidesPage.guides))
+                dispatch(Message.SetPagination(loaded.guidesPage.pagination))
+                dispatch(Message.SetError(false))
+                dispatch(Message.SetRefreshing(false))
+            },
+            onFailure = { error ->
+                Napier.e(throwable = error, message = "GuidesExecutor: refresh failed")
+                if (state().guides.isEmpty()) dispatch(Message.SetError(true))
+                dispatch(Message.SetRefreshing(false))
+            },
+        )
+    }
+
+    private suspend fun runLoadMore(page: Int, filters: GuidesFilters) {
+        dispatch(Message.SetLoadingMore(true))
+        dispatch(Message.SetLoadMoreError(false))
+
+        guidesRepository.getGuides(filters = filters, page = page).fold(
+            onSuccess = { loaded ->
+                dispatch(Message.AppendGuides(loaded.guides))
+                dispatch(Message.SetPagination(loaded.pagination))
+                dispatch(Message.SetLoadingMore(false))
+            },
+            onFailure = { error ->
+                Napier.e(throwable = error, message = "GuidesExecutor: load-more failed")
+                dispatch(Message.SetLoadingMore(false))
+                dispatch(Message.SetLoadMoreError(true))
+            },
+        )
+    }
+
+    private suspend fun fetchPageWithConstants(page: Int): Result<GuidesAndConstants> = coroutineScope {
         val constantsDef = async { resourcesRepository.getDotaConstants() }
-        val guidesDef = async { fetcher() }
+        val guidesDef = async { guidesRepository.getGuides(filters = state().filters, page = page) }
 
-        val cachedConstants = constantsDef
-            .await()
+        val cachedConstants = constantsDef.await()
             .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
-
-        val guidesPage = guidesDef
-            .await()
+        val guidesPage = guidesDef.await()
             .getOrElse { error -> return@coroutineScope error.wrapResultFailure() }
 
         val finalConstants = syncConstantsToGuidesVersion(cachedConstants, guidesPage.gameVersion)

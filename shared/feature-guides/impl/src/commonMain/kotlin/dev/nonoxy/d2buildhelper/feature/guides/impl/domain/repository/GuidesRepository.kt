@@ -1,11 +1,9 @@
 package dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository
 
-import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
 
 internal interface GuidesRepository {
 
-    suspend fun getGuides(): Result<GuidesPage>
-
-    suspend fun getHeroGuides(heroId: HeroId): Result<GuidesPage>
+    suspend fun getGuides(filters: GuidesFilters, page: Int): Result<GuidesPage>
 }

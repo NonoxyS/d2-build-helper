@@ -18,5 +18,10 @@ internal class GuidesReducer : Reducer<State, Message> {
         is Message.SetFilters -> copy(filters = msg.filters)
         is Message.SetActivePicker -> copy(activePicker = msg.kind)
         is Message.SetPickerSearch -> copy(pickerSearch = msg.value)
+        is Message.SetPagination -> copy(pagination = msg.pagination)
+        is Message.AppendGuides -> copy(guides = guides + msg.guides)
+        is Message.SetLoadingMore -> copy(isLoadingMore = msg.isLoadingMore)
+        is Message.SetRefreshing -> copy(isRefreshing = msg.isRefreshing)
+        is Message.SetLoadMoreError -> copy(isLoadMoreError = msg.isLoadMoreError)
     }
 }
