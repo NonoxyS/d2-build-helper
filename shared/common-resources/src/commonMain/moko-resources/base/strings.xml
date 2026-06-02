@@ -4,6 +4,8 @@
     <string name="app_name">D2 Build Helper</string>
     <string name="error_loading">Failed to load</string>
     <string name="retry">Retry</string>
+    <string name="guides_empty">No guides match the selected filters</string>
+    <string name="load_more_failed">Couldn\'t load more</string>
 
     <string name="filter_chip_hero">Hero</string>
     <string name="filter_chip_position">Position</string>
