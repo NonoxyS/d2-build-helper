@@ -67,6 +67,7 @@ internal fun GuidesView(
                 selectedSide = state.selectedSide,
                 onPositionToggle = onPositionToggle,
                 onSideToggle = onSideToggle,
+                sideFilterAvailable = state.isSideFilterAvailable,
             )
 
             D2PullToRefreshBox(
