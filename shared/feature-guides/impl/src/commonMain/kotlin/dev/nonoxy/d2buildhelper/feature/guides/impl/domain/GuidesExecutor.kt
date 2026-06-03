@@ -71,7 +71,11 @@ internal class GuidesExecutor(
                 )
             }
             is FilterValue.Position -> current.copy(position = current.position.toggle(value.position))
-            is FilterValue.Side -> current.copy(isRadiant = current.isRadiant.toggle(value.isRadiant))
+            is FilterValue.Side -> {
+                // Side filter only applies to the cross-hero feed; backend 400s on side+heroId.
+                if (current.heroId != null) current
+                else current.copy(isRadiant = current.isRadiant.toggle(value.isRadiant))
+            }
         }
         dispatch(Message.SetFilters(newFilters))
         dispatch(Message.SetActivePicker(null))

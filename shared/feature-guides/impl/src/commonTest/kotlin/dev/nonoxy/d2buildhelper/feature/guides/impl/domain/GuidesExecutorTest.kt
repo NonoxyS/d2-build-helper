@@ -435,15 +435,18 @@ class GuidesExecutorTest {
             dispatchers = TestCoroutineDispatchers(),
         ).create()
 
-        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        // Set side filter first (no hero active), then select hero (side is cleared by hero-select).
         store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = false)))
-        assertEquals(HeroId(7), store.state.filters.heroId)
         assertEquals(false, store.state.filters.isRadiant)
 
-        // Deselecting the hero: side should remain intact
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        assertEquals(HeroId(7), store.state.filters.heroId)
+        assertNull(store.state.filters.isRadiant)
+
+        // Deselecting the hero: side must NOT be restored — it was cleared by hero-select, not saved.
         store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
         assertNull(store.state.filters.heroId)
-        assertEquals(false, store.state.filters.isRadiant)
+        assertNull(store.state.filters.isRadiant)
 
         store.dispose()
     }
@@ -473,6 +476,32 @@ class GuidesExecutorTest {
         store.accept(Intent.OnFiltersResetAll) // triggers fullLoad → cancels the hanging load-more
 
         assertFalse(store.state.isLoadingMore) // was the bug: stayed true
+        store.dispose()
+    }
+
+    @Test
+    fun `applying a side filter while a hero is selected is ignored`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides(filters: GuidesFilters, page: Int) =
+                Result.success(guidesPage(174, listOf(filters.heroId?.raw ?: 1)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        assertEquals(HeroId(7), store.state.filters.heroId)
+        assertNull(store.state.filters.isRadiant)
+
+        // Side filter must be a no-op while a hero is active — backend 400s on side+heroId.
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = true)))
+        assertNull(store.state.filters.isRadiant)
+        assertEquals(HeroId(7), store.state.filters.heroId)
+
         store.dispose()
     }
 }
