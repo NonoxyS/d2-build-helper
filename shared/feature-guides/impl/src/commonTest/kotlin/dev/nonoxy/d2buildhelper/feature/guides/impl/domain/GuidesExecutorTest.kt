@@ -398,6 +398,57 @@ class GuidesExecutorTest {
     }
 
     @Test
+    fun `selecting a hero clears the active side filter`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides(filters: GuidesFilters, page: Int) =
+                Result.success(guidesPage(174, listOf(filters.heroId?.raw ?: 1)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = true)))
+        assertEquals(true, store.state.filters.isRadiant)
+
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        assertEquals(HeroId(7), store.state.filters.heroId)
+        assertNull(store.state.filters.isRadiant)
+
+        store.dispose()
+    }
+
+    @Test
+    fun `deselecting a hero does not clear a previously set side filter`() = runTest {
+        val resources = FakeResourcesRepository(constants(174))
+        val guidesRepo = object : GuidesRepository {
+            override suspend fun getGuides(filters: GuidesFilters, page: Int) =
+                Result.success(guidesPage(174, listOf(filters.heroId?.raw ?: 1)))
+        }
+        val store = GuidesStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            guidesRepository = guidesRepo,
+            resourcesRepository = resources,
+            dispatchers = TestCoroutineDispatchers(),
+        ).create()
+
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        store.accept(Intent.OnFilterApply(FilterValue.Side(isRadiant = false)))
+        assertEquals(HeroId(7), store.state.filters.heroId)
+        assertEquals(false, store.state.filters.isRadiant)
+
+        // Deselecting the hero: side should remain intact
+        store.accept(Intent.OnFilterApply(FilterValue.Hero(HeroId(7))))
+        assertNull(store.state.filters.heroId)
+        assertEquals(false, store.state.filters.isRadiant)
+
+        store.dispose()
+    }
+
+    @Test
     fun `applying a filter while load-more is in flight clears isLoadingMore`() = runTest {
         val resources = FakeResourcesRepository(constants(174))
         val blockLoadMore = CompletableDeferred<Unit>()
