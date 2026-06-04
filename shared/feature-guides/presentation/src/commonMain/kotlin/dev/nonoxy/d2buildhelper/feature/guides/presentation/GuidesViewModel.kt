@@ -10,10 +10,10 @@ import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore.Intent
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.mappers.UiGuidesLabelMapper
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.mappers.UiGuidesStateMapper
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.mappers.toDomain
+import dev.nonoxy.d2buildhelper.common.ui.match.toDomain
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesLabel
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
 import kotlinx.coroutines.flow.mapNotNull
 
 class GuidesViewModel internal constructor(

@@ -22,7 +22,7 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.refresh.D2Pu
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.GuideFilterBar
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.GuideListView
 import dev.nonoxy.d2buildhelper.feature.guides.ui.views.HeroFilterChip

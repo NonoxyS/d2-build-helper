@@ -9,7 +9,6 @@ import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
 import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
@@ -17,7 +16,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHero
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHeroFilter
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchase
-import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.common.ui.match.toUi
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiNeutralItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -112,22 +111,6 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
             iconUrl = iconUrl
         )
     }
-}
-
-internal fun MatchPlayerPosition.toUi(): UiMatchPlayerPosition = when (this) {
-    MatchPlayerPosition.POSITION_1 -> UiMatchPlayerPosition.POSITION_1
-    MatchPlayerPosition.POSITION_2 -> UiMatchPlayerPosition.POSITION_2
-    MatchPlayerPosition.POSITION_3 -> UiMatchPlayerPosition.POSITION_3
-    MatchPlayerPosition.POSITION_4 -> UiMatchPlayerPosition.POSITION_4
-    MatchPlayerPosition.POSITION_5 -> UiMatchPlayerPosition.POSITION_5
-}
-
-internal fun UiMatchPlayerPosition.toDomain(): MatchPlayerPosition = when (this) {
-    UiMatchPlayerPosition.POSITION_1 -> MatchPlayerPosition.POSITION_1
-    UiMatchPlayerPosition.POSITION_2 -> MatchPlayerPosition.POSITION_2
-    UiMatchPlayerPosition.POSITION_3 -> MatchPlayerPosition.POSITION_3
-    UiMatchPlayerPosition.POSITION_4 -> MatchPlayerPosition.POSITION_4
-    UiMatchPlayerPosition.POSITION_5 -> MatchPlayerPosition.POSITION_5
 }
 
 private fun Short.toSignedLabel(): String = when {
