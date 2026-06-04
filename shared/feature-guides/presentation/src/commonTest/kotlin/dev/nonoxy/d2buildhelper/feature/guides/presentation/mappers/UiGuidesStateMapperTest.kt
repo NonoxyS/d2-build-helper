@@ -10,6 +10,8 @@ import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Pagination
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.PlayerStats
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
 class UiGuidesStateMapperTest {
@@ -83,5 +85,17 @@ class UiGuidesStateMapperTest {
         assertEquals(true, ui.isLoadingMore)
         assertEquals(true, ui.isRefreshing)
         assertEquals(true, ui.isLoadMoreError)
+    }
+
+    @Test
+    fun `side filter available when no hero selected`() {
+        val state = GuidesStore.State(filters = GuidesFilters(heroId = null))
+        assertTrue(mapper.map(state).isSideFilterAvailable)
+    }
+
+    @Test
+    fun `side filter unavailable when a hero is selected`() {
+        val state = GuidesStore.State(filters = GuidesFilters(heroId = HeroId(7)))
+        assertFalse(mapper.map(state).isSideFilterAvailable)
     }
 }

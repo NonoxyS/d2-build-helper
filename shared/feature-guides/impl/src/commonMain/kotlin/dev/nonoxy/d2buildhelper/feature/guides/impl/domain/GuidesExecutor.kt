@@ -62,9 +62,20 @@ internal class GuidesExecutor(
     private fun applyFilter(value: FilterValue) {
         val current = state().filters
         val newFilters = when (value) {
-            is FilterValue.Hero -> current.copy(heroId = current.heroId.toggle(value.heroId))
+            is FilterValue.Hero -> {
+                val newHeroId = current.heroId.toggle(value.heroId)
+                // Side filter is unsupported on the per-hero deep feed (backend 400s on side+heroId).
+                current.copy(
+                    heroId = newHeroId,
+                    isRadiant = if (newHeroId != null) null else current.isRadiant,
+                )
+            }
             is FilterValue.Position -> current.copy(position = current.position.toggle(value.position))
-            is FilterValue.Side -> current.copy(isRadiant = current.isRadiant.toggle(value.isRadiant))
+            is FilterValue.Side -> {
+                // Side filter only applies to the cross-hero feed; backend 400s on side+heroId.
+                if (current.heroId != null) current
+                else current.copy(isRadiant = current.isRadiant.toggle(value.isRadiant))
+            }
         }
         dispatch(Message.SetFilters(newFilters))
         dispatch(Message.SetActivePicker(null))

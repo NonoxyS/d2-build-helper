@@ -39,6 +39,7 @@ internal class UiGuidesStateMapperImpl : UiGuidesStateMapper {
             heroFilter = item.filters.heroId?.let { id -> item.heroes[id]?.toUiHeroFilter() },
             selectedPosition = item.filters.position?.toUi(),
             selectedSide = item.filters.isRadiant,
+            isSideFilterAvailable = item.filters.heroId == null,
             heroPicker = item.activePicker
                 ?.takeIf { it == GuidesFilterKind.Hero }
                 ?.let { buildHeroPicker(item) },

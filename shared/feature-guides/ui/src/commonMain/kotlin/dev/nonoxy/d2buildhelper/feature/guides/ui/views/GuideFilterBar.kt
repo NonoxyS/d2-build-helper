@@ -26,6 +26,7 @@ internal fun GuideFilterBar(
     selectedSide: Boolean?,
     onPositionToggle: (UiMatchPlayerPosition) -> Unit,
     onSideToggle: (Boolean) -> Unit,
+    sideFilterAvailable: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyRow(
@@ -53,26 +54,28 @@ internal fun GuideFilterBar(
             )
         }
 
-        items(items = SIDE_OPTIONS) { isRadiant ->
-            val emblem = if (isRadiant) MR.images.radiant_square else MR.images.dire_square
-            val labelRes = if (isRadiant) MR.strings.side_radiant else MR.strings.side_dire
-            D2FilterChip(
-                selected = selectedSide == isRadiant,
-                onClick = { onSideToggle(isRadiant) },
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(emblem),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(labelRes),
-                        style = D2BuildHelperTheme.typography.captionMD,
-                    )
-                },
-            )
+        if (sideFilterAvailable) {
+            items(items = SIDE_OPTIONS) { isRadiant ->
+                val emblem = if (isRadiant) MR.images.radiant_square else MR.images.dire_square
+                val labelRes = if (isRadiant) MR.strings.side_radiant else MR.strings.side_dire
+                D2FilterChip(
+                    selected = selectedSide == isRadiant,
+                    onClick = { onSideToggle(isRadiant) },
+                    leadingIcon = {
+                        Image(
+                            painter = painterResource(emblem),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(labelRes),
+                            style = D2BuildHelperTheme.typography.captionMD,
+                        )
+                    },
+                )
+            }
         }
     }
 }

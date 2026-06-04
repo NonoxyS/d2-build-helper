@@ -8,6 +8,7 @@ data class UiGuidesState(
     val heroFilter: UiHeroFilter? = null,
     val selectedPosition: UiMatchPlayerPosition? = null,
     val selectedSide: Boolean? = null,
+    val isSideFilterAvailable: Boolean = true,
     val heroPicker: UiFilterPicker.Hero? = null,
     val isLoading: Boolean = true,
     val isError: Boolean = false,
