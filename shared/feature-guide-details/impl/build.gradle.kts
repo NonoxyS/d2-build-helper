@@ -25,5 +25,6 @@ commonTestDependencies {
     implementations(
         kotlin("test"),
         libs.kotlinx.coroutines.test,
+        libs.ktor.client.mock,
     )
 }
