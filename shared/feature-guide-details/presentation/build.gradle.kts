@@ -1,5 +1,6 @@
 import extensions.androidLibraryConfig
 import extensions.commonMainDependencies
+import extensions.commonTestDependencies
 import extensions.implementations
 
 plugins {
@@ -14,5 +15,14 @@ commonMainDependencies {
     implementations(
         projects.shared.commonUi,
         projects.shared.coreMatch,
+        projects.shared.commonResources,
+        libs.kotlinx.collections.immutable,
+        libs.moko.resources.compose,
+    )
+}
+
+commonTestDependencies {
+    implementations(
+        kotlin("test"),
     )
 }
