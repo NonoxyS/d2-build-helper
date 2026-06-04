@@ -4,7 +4,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.FakeGuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesPageMapperImpl

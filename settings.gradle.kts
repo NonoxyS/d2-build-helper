@@ -45,6 +45,7 @@ include(":shared:common-ui")
 include(":shared:common-resources")
 
 include(":shared:core-domain")
+include(":shared:core-match")
 include(":shared:core-mvikotlin")
 include(":shared:core-presentation")
 include(":shared:core-navigation")

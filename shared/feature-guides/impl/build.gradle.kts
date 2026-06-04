@@ -15,6 +15,7 @@ androidLibraryConfig {
 
 commonMainDependencies {
     implementations(
+        projects.shared.coreMatch,
         projects.shared.coreNetwork,
         projects.shared.coreResources,
     )

@@ -8,8 +8,8 @@ import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.ItemPurchase
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
