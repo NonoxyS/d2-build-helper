@@ -26,6 +26,8 @@ data class UiSkillSummary(
 
 data class UiAbilitySummary(
     val iconUrl: ImageUrl?,
+    /** Ability display name from constants (popup title); `null` when unknown. */
+    val name: String?,
     val pointCount: Int,
     /** `true` for the R/ultimate ability (spec §2). */
     val isUltimate: Boolean,
@@ -51,6 +53,8 @@ data class UiSkillMatrix(
  */
 data class UiSkillMatrixRow(
     val iconUrl: ImageUrl?,
+    /** Ability display name from constants; `null` for the stats row (uses a fixed label). */
+    val name: String?,
     val isStat: Boolean,
     val isUltimate: Boolean,
     val marks: ImmutableList<Boolean>,

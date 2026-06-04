@@ -103,8 +103,9 @@ internal fun SkillBuildCard(
 
     explainedAbilityIndex?.let { index ->
         val ability = skillBuild.summary.abilities.getOrNull(index)
+        val fallbackTitle = stringResource(MR.strings.guide_detail_card_skill_build)
         ExplainPopup(
-            title = stringResource(MR.strings.guide_detail_card_skill_build),
+            title = ability?.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
             body = ability?.let { "${it.pointCount}" },
             onDismissRequest = { explainedAbilityIndex = null },
         )

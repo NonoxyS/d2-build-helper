@@ -119,6 +119,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val abilityRows = orderedAbilityIds.map { abilityId ->
             UiSkillMatrixRow(
                 iconUrl = abilities[abilityId]?.iconUrl,
+                name = abilities[abilityId]?.name,
                 isStat = false,
                 isUltimate = skillEvents.isUltimate(abilityId),
                 marks = levelMarks(skillEvents.filter { it.abilityId == abilityId }),
@@ -126,6 +127,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         }
         val statsRow = UiSkillMatrixRow(
             iconUrl = null,
+            // Stats row uses the fixed "+" label rendered in the UI (no constants name).
+            name = null,
             isStat = true,
             isUltimate = false,
             marks = levelMarks(statEvents),
@@ -138,6 +141,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             abilities = orderedAbilityIds.map { abilityId ->
                 UiAbilitySummary(
                     iconUrl = abilities[abilityId]?.iconUrl,
+                    name = abilities[abilityId]?.name,
                     pointCount = skillEvents.count { it.abilityId == abilityId },
                     isUltimate = skillEvents.isUltimate(abilityId),
                 )
@@ -183,7 +187,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
 
     private fun buildItemBuild(player: BuildPlayer, items: Map<ItemId, Item>): UiItemBuild {
         val neutral = player.neutralItemId?.let { id ->
-            UiItemBuildEntry(iconUrl = items[id]?.iconUrl, timeText = "")
+            UiItemBuildEntry(iconUrl = items[id]?.iconUrl, name = items[id]?.displayName, timeText = "")
         }
         val purchases = player.itemPurchases
             .sortedBy { it.time ?: Int.MAX_VALUE }
@@ -195,6 +199,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun ItemPurchase.toEntry(items: Map<ItemId, Item>): UiItemBuildEntry =
         UiItemBuildEntry(
             iconUrl = items[itemId]?.iconUrl,
+            name = items[itemId]?.displayName,
             timeText = formatTime(time),
         )
 

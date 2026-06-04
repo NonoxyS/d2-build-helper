@@ -17,5 +17,7 @@ data class UiItemBuild(
 
 data class UiItemBuildEntry(
     val iconUrl: ImageUrl?,
+    /** Item display name from constants (popup title); `null` when unknown. */
+    val name: String?,
     val timeText: String,
 )

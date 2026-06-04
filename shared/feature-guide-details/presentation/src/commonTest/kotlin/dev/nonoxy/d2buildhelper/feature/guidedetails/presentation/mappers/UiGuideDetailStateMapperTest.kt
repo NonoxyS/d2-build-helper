@@ -203,6 +203,12 @@ class UiGuideDetailStateMapperTest {
         assertTrue(summaryAbilities.single { it.iconUrl == ImageUrl("ab12") }.isUltimate)
         assertFalse(summaryAbilities.single { it.iconUrl == ImageUrl("ab10") }.isUltimate)
 
+        // ability names come from constants; stats matrix row carries no name
+        assertEquals("A10", summaryAbilities.single { it.iconUrl == ImageUrl("ab10") }.name) // Q
+        assertEquals("A12", summaryAbilities.single { it.iconUrl == ImageUrl("ab12") }.name) // R
+        assertEquals("A12", matrix.rows.single { it.iconUrl == ImageUrl("ab12") }.name)
+        assertNull(matrix.rows.single { it.isStat }.name)
+
         // talent is separated into talents list
         assertEquals(1, ui.skillBuild!!.talents.size)
         assertEquals(10, ui.skillBuild!!.talents.first().level)
@@ -254,8 +260,11 @@ class UiGuideDetailStateMapperTest {
 
         val build = ui.itemBuild!!
         assertEquals(ImageUrl("item50"), build.neutralItem!!.iconUrl)
+        assertEquals("I50", build.neutralItem!!.name) // neutral display name from constants
         // sorted by time ascending: -89 first, then 183
         assertEquals(ImageUrl("item1"), build.purchases.first().iconUrl)
+        assertEquals("I1", build.purchases.first().name) // item display name from constants
+        assertEquals("I2", build.purchases[1].name)
         assertEquals("-1:29", build.purchases.first().timeText)
         assertEquals("3:03", build.purchases[1].timeText)
     }

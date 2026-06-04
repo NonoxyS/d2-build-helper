@@ -66,8 +66,9 @@ internal fun ItemBuildCard(
     }
 
     explained?.let { entry ->
+        val fallbackTitle = stringResource(MR.strings.guide_detail_card_item_build)
         ExplainPopup(
-            title = stringResource(MR.strings.guide_detail_card_item_build),
+            title = entry.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
             body = entry.timeText,
             onDismissRequest = { explained = null },
         )
