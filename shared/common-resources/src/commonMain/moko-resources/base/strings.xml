@@ -21,4 +21,26 @@
     <string name="content_desc_clear">Clear</string>
     <string name="content_desc_radiant">Radiant</string>
     <string name="content_desc_dire">Dire</string>
+
+    <string name="guide_detail_title">Билд</string>
+    <string name="guide_detail_back">Назад</string>
+
+    <string name="guide_detail_card_skill_build">Сборка способностей</string>
+    <string name="guide_detail_card_item_build">Билд предметов</string>
+    <string name="guide_detail_card_inventory">Инвентарь по минутам</string>
+    <string name="guide_detail_card_economy">Экономика</string>
+    <string name="guide_detail_card_lineup">Состав</string>
+
+    <string name="guide_detail_win">WIN</string>
+    <string name="guide_detail_loss">LOSS</string>
+
+    <string name="guide_detail_gpm">GPM</string>
+    <string name="guide_detail_networth">Networth</string>
+    <string name="guide_detail_last_hits_at_10">LH @10мин</string>
+    <string name="guide_detail_economy_caption">networth по минутам · ● покупки значимых</string>
+
+    <string name="guide_detail_skill_matrix_caption">← скролл до 30 · одна отметка/столбец · тап по иконке → popup</string>
+    <string name="guide_detail_skill_stat_row">+</string>
+
+    <string name="guide_detail_impact_format">imp %1$s</string>
 </resources>
