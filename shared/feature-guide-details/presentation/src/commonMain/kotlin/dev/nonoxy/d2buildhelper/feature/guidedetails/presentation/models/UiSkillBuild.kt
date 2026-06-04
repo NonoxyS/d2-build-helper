@@ -27,6 +27,8 @@ data class UiSkillSummary(
 data class UiAbilitySummary(
     val iconUrl: ImageUrl?,
     val pointCount: Int,
+    /** `true` for the R/ultimate ability (spec §2). */
+    val isUltimate: Boolean,
 )
 
 /**
@@ -43,11 +45,13 @@ data class UiSkillMatrix(
 
 /**
  * A single matrix row. [isStat] flags the "+" attribute-bonus row (no icon).
+ * [isUltimate] flags the R/ultimate ability row (spec §2); always `false` for the stats row.
  * [marks] has [UiSkillMatrix.LEVEL_COLUMNS] entries; `true` at index `i`
  * means this ability/stat was leveled at level `i + 1`.
  */
 data class UiSkillMatrixRow(
     val iconUrl: ImageUrl?,
     val isStat: Boolean,
+    val isUltimate: Boolean,
     val marks: ImmutableList<Boolean>,
 )

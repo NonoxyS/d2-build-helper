@@ -120,12 +120,14 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             UiSkillMatrixRow(
                 iconUrl = abilities[abilityId]?.iconUrl,
                 isStat = false,
+                isUltimate = skillEvents.isUltimate(abilityId),
                 marks = levelMarks(skillEvents.filter { it.abilityId == abilityId }),
             )
         }
         val statsRow = UiSkillMatrixRow(
             iconUrl = null,
             isStat = true,
+            isUltimate = false,
             marks = levelMarks(statEvents),
         )
 
@@ -137,6 +139,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
                 UiAbilitySummary(
                     iconUrl = abilities[abilityId]?.iconUrl,
                     pointCount = skillEvents.count { it.abilityId == abilityId },
+                    isUltimate = skillEvents.isUltimate(abilityId),
                 )
             }.toImmutableList(),
             scepterPurchased = hasScepter(player),
@@ -151,9 +154,15 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         )
     }
 
+    /** `true` if any learn event for [abilityId] is flagged as the ultimate (spec §2). */
+    private fun List<AbilityLearnEvent>.isUltimate(abilityId: AbilityId): Boolean =
+        any { it.abilityId == abilityId && it.isUltimate }
+
     private fun AbilityLearnEvent.toTalent(abilities: Map<AbilityId, Ability>): UiTalent? {
+        // Talents are only learnable at 10/15/20/25, so match the exact tier —
+        // same rule as `talentTierTaken` (no nearest-tier bucketing divergence).
         val level = level ?: return null
-        val tier = TALENT_TIERS.minByOrNull { kotlin.math.abs(it - level) } ?: level
+        val tier = TALENT_TIERS.firstOrNull { it == level } ?: return null
         return UiTalent(
             level = tier,
             text = abilityId?.let { abilities[it]?.name }.orEmpty(),

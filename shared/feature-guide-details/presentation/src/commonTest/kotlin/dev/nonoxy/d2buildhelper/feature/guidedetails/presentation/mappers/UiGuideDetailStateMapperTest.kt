@@ -187,6 +187,21 @@ class UiGuideDetailStateMapperTest {
         val statsRow = matrix.rows.single { it.isStat }
         assertTrue(statsRow.marks[2])
         assertNull(statsRow.iconUrl)
+        assertFalse(statsRow.isUltimate)
+
+        // R (lvl 6) is the ultimate row; Q/W are not; stats row never ultimate
+        val ultimateRows = matrix.rows.filter { it.isUltimate }
+        assertEquals(1, ultimateRows.size)
+        assertEquals(ImageUrl("ab12"), ultimateRows.single().iconUrl) // R = ability(12)
+        assertTrue(matrix.rows.single { it.iconUrl == ImageUrl("ab12") }.isUltimate)
+        assertFalse(matrix.rows.single { it.iconUrl == ImageUrl("ab10") }.isUltimate) // Q
+        assertFalse(matrix.rows.single { it.iconUrl == ImageUrl("ab11") }.isUltimate) // W
+
+        // summary mirrors the ultimate flag on the R ability
+        val summaryAbilities = ui.skillBuild!!.summary.abilities
+        assertEquals(1, summaryAbilities.count { it.isUltimate })
+        assertTrue(summaryAbilities.single { it.iconUrl == ImageUrl("ab12") }.isUltimate)
+        assertFalse(summaryAbilities.single { it.iconUrl == ImageUrl("ab10") }.isUltimate)
 
         // talent is separated into talents list
         assertEquals(1, ui.skillBuild!!.talents.size)
