@@ -24,7 +24,10 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun GuidesScreen(viewModel: GuidesViewModel = koinViewModel()) {
+internal fun GuidesScreen(
+    onGuideClick: (matchId: Long, steamAccountId: Long) -> Unit,
+    viewModel: GuidesViewModel = koinViewModel(),
+) {
 
     val state by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -46,6 +49,7 @@ internal fun GuidesScreen(viewModel: GuidesViewModel = koinViewModel()) {
             onSideToggle = viewModel::onSideToggle,
             onLoadMore = viewModel::onLoadMore,
             onRefresh = viewModel::onRefresh,
+            onGuideClick = onGuideClick,
             modifier = Modifier.fillMaxSize(),
         )
     }

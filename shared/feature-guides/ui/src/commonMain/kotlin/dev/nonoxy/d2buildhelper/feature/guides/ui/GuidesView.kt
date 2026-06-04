@@ -39,6 +39,7 @@ internal fun GuidesView(
     onSideToggle: (Boolean) -> Unit,
     onLoadMore: () -> Unit,
     onRefresh: () -> Unit,
+    onGuideClick: (matchId: Long, steamAccountId: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -94,6 +95,7 @@ internal fun GuidesView(
                         isLoadingMore = state.isLoadingMore,
                         isLoadMoreError = state.isLoadMoreError,
                         onLoadMore = onLoadMore,
+                        onGuideClick = onGuideClick,
                     )
                 }
             }

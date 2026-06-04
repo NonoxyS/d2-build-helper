@@ -2,6 +2,7 @@ package dev.nonoxy.d2buildhelper.feature.guides.ui.views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,11 +39,14 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchas
 @Composable
 internal fun GuideItemView(
     guide: UiGuide,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clip(D2BuildHelperTheme.shapes.cornerRadius4)
+            .clickable(onClick = onClick)
             .background(
                 color = D2BuildHelperTheme.colors.surface,
                 shape = D2BuildHelperTheme.shapes.cornerRadius4

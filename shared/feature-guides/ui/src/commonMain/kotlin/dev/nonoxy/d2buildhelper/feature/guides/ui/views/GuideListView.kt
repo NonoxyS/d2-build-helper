@@ -42,6 +42,7 @@ internal fun GuideListView(
     isLoadingMore: Boolean,
     isLoadMoreError: Boolean,
     onLoadMore: () -> Unit,
+    onGuideClick: (matchId: Long, steamAccountId: Long) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
@@ -76,7 +77,10 @@ internal fun GuideListView(
             items = guides,
             key = { guide -> guide.matchId to guide.steamAccountId },
         ) { guide ->
-            GuideItemView(guide = guide)
+            GuideItemView(
+                guide = guide,
+                onClick = { onGuideClick(guide.matchId, guide.steamAccountId) },
+            )
         }
 
         if (isLoadingMore) {

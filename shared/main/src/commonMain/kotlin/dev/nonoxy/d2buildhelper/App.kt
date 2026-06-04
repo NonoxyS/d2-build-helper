@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.api.composableGuideDetailScreen
+import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.api.navigateToGuideDetailScreen
 import dev.nonoxy.d2buildhelper.feature.guides.ui.api.GuidesRoute
 import dev.nonoxy.d2buildhelper.feature.guides.ui.api.composableGuidesScreen
 
@@ -23,6 +25,14 @@ private fun D2BuildHelperApp(
         navController = navController,
         startDestination = GuidesRoute,
     ) {
-        composableGuidesScreen()
+        composableGuidesScreen(
+            onGuideClick = { matchId, steamAccountId ->
+                navController.navigateToGuideDetailScreen(
+                    matchId = matchId,
+                    steamAccountId = steamAccountId,
+                )
+            },
+        )
+        composableGuideDetailScreen(navController = navController)
     }
 }
