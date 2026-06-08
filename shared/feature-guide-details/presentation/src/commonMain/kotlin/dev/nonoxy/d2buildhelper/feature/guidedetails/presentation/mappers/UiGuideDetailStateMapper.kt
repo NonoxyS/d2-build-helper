@@ -24,6 +24,7 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemB
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineup
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthCurve
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthMarker
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrix
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixRow
@@ -71,7 +72,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             header = buildHeader(detail, player, item.heroes),
             skillBuild = buildSkillBuild(player, item.abilities),
             itemBuild = buildItemBuild(player, item.items),
-            networth = buildNetworth(player),
+            networth = buildNetworth(player, item.items),
             lineup = buildLineup(detail, player, item.heroes),
             isLoading = item.isLoading,
             isError = item.isError,
@@ -225,17 +226,31 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             timeText = formatTime(time),
         )
 
-    private fun buildNetworth(player: BuildPlayer): UiNetworthCurve {
-        // v1: no significance flag — mark each purchase's minute (time / 60).
-        val markerMinutes = player.itemPurchases
-            .mapNotNull { it.time }
-            .map { it / SECONDS_PER_MINUTE }
-            .distinct()
-            .sorted()
+    private fun buildNetworth(player: BuildPlayer, items: Map<ItemId, Item>): UiNetworthCurve {
+        // "Significant" = item ended up in the final build (final ∪ backpack ∪ neutral).
+        val significantIds = (
+            player.finalItemIds + player.backpackItemIds + listOfNotNull(player.neutralItemId)
+        ).toSet()
+
+        // For each significant itemId, keep only its FIRST purchase (min time).
+        // This avoids duplicate markers when items are rebought or built from components.
+        val markers = player.itemPurchases
+            .filter { it.itemId in significantIds && it.time != null }
+            .groupBy { it.itemId }
+            .map { (_, purchases) -> purchases.minBy { it.time!! } }
+            .sortedBy { it.time!! }
+            .map { purchase ->
+                UiNetworthMarker(
+                    minute = purchase.time!! / SECONDS_PER_MINUTE,
+                    iconUrl = items[purchase.itemId]?.iconUrl,
+                    name = items[purchase.itemId]?.displayName,
+                )
+            }
             .toImmutableList()
+
         return UiNetworthCurve(
             points = player.networthPerMinute.toImmutableList(),
-            purchaseMarkerMinutes = markerMinutes,
+            markers = markers,
             gpm = player.goldPerMinute,
             networth = player.networth,
             lastHitsAt10 = player.lastHitsPerMinute.getOrNull(LAST_HITS_AT_MINUTE),
