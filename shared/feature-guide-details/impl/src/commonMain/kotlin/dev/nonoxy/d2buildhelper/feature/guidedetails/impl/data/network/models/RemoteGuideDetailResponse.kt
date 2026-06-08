@@ -35,7 +35,6 @@ internal data class RemoteGuideDetailPlayerResponse(
     @SerialName("neutralItemId") val neutralItemId: Int? = null,
     @SerialName("abilityLearnEvents") val abilityLearnEvents: List<RemoteAbilityLearnEventResponse> = emptyList(),
     @SerialName("itemPurchases") val itemPurchases: List<RemoteItemPurchaseResponse> = emptyList(),
-    @SerialName("inventorySnapshots") val inventorySnapshots: List<RemoteInventorySnapshotResponse> = emptyList(),
     @SerialName("networthPerMinute") val networthPerMinute: List<Int> = emptyList(),
     @SerialName("lastHitsPerMinute") val lastHitsPerMinute: List<Int> = emptyList(),
     @SerialName("goldPerMinuteSeries") val goldPerMinuteSeries: List<Int> = emptyList(),
@@ -48,13 +47,6 @@ internal data class RemoteAbilityLearnEventResponse(
     @SerialName("level") val level: Int? = null,
     @SerialName("isTalent") val isTalent: Boolean? = null,
     @SerialName("isUltimate") val isUltimate: Boolean? = null,
-)
-
-@Serializable
-internal data class RemoteInventorySnapshotResponse(
-    @SerialName("itemIds") val itemIds: List<Int?> = emptyList(),
-    @SerialName("backpackIds") val backpackIds: List<Int?> = emptyList(),
-    @SerialName("neutralId") val neutralId: Int? = null,
 )
 
 @Serializable

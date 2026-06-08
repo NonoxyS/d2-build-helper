@@ -27,7 +27,6 @@
 
     <string name="guide_detail_card_skill_build">Сборка способностей</string>
     <string name="guide_detail_card_item_build">Билд предметов</string>
-    <string name="guide_detail_card_inventory">Инвентарь по минутам</string>
     <string name="guide_detail_card_economy">Экономика</string>
     <string name="guide_detail_card_lineup">Состав</string>
 

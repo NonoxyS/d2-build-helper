@@ -7,7 +7,6 @@ import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteAbilityLearnEventResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailPlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailResponse
-import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteInventorySnapshotResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteItemPurchaseResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteLineupMemberResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerPosition
@@ -62,13 +61,6 @@ class GuideDetailMapperTest {
             itemPurchases = listOf(
                 RemoteItemPurchaseResponse(itemId = 1, time = 620),
                 RemoteItemPurchaseResponse(itemId = 50, time = null),
-            ),
-            inventorySnapshots = listOf(
-                RemoteInventorySnapshotResponse(
-                    itemIds = listOf(1, null, 50),
-                    backpackIds = listOf(null),
-                    neutralId = 100,
-                ),
             ),
             networthPerMinute = listOf(0, 300, 700),
             lastHitsPerMinute = listOf(0, 8, 15),
@@ -141,15 +133,6 @@ class GuideDetailMapperTest {
         assertEquals(620, purchases.first().time)
         assertEquals(ItemId(50), purchases.last().itemId)
         assertNull(purchases.last().time)
-    }
-
-    @Test
-    fun `maps inventory snapshots preserving null slots`() {
-        val snapshot = mapper.map(response).player.inventorySnapshots.single()
-
-        assertEquals(listOf(ItemId(1), null, ItemId(50)), snapshot.itemIds)
-        assertEquals(listOf(null), snapshot.backpackIds)
-        assertEquals(ItemId(100), snapshot.neutralId)
     }
 
     @Test

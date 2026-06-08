@@ -39,9 +39,6 @@ private const val GUIDE_DETAIL_JSON = """
       { "itemId": 1, "time": 620 },
       { "itemId": 50, "time": 410 }
     ],
-    "inventorySnapshots": [
-      { "itemIds": [1, null], "backpackIds": [], "neutralId": 100 }
-    ],
     "networthPerMinute": [100, 500],
     "lastHitsPerMinute": [2, 8],
     "goldPerMinuteSeries": [300, 420]

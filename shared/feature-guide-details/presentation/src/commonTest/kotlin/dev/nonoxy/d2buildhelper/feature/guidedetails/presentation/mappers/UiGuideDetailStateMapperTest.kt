@@ -12,7 +12,6 @@ import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
-import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.InventorySnapshot
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
 import kotlin.test.Test
@@ -68,7 +67,6 @@ class UiGuideDetailStateMapperTest {
         neutralItemId = null,
         abilityLearnEvents = emptyList(),
         itemPurchases = emptyList(),
-        inventorySnapshots = emptyList(),
         networthPerMinute = emptyList(),
         lastHitsPerMinute = emptyList(),
         goldPerMinuteSeries = emptyList(),
@@ -270,39 +268,6 @@ class UiGuideDetailStateMapperTest {
     }
 
     @Test
-    fun `inventory snapshots map item slots and preserve null empty slots`() {
-        val player = emptyPlayer(heroId = 1).copy(
-            inventorySnapshots = listOf(
-                InventorySnapshot(
-                    itemIds = listOf(ItemId(1), null, ItemId(2), null, null, null),
-                    backpackIds = listOf(null, ItemId(3), null),
-                    neutralId = ItemId(50),
-                ),
-            ),
-        )
-        val ui = mapper.map(
-            state(
-                detail(player),
-                heroes = mapOf(HeroId(1) to hero(1)),
-                items = mapOf(
-                    ItemId(1) to item(1),
-                    ItemId(2) to item(2),
-                    ItemId(3) to item(3),
-                    ItemId(50) to item(50),
-                ),
-            ),
-        )
-
-        val snap = ui.inventory!!.snapshots.single()
-        assertEquals(ImageUrl("item1"), snap.itemIconUrls[0])
-        assertNull(snap.itemIconUrls[1])
-        assertEquals(ImageUrl("item2"), snap.itemIconUrls[2])
-        assertNull(snap.backpackIconUrls[0])
-        assertEquals(ImageUrl("item3"), snap.backpackIconUrls[1])
-        assertEquals(ImageUrl("item50"), snap.neutralIconUrl)
-    }
-
-    @Test
     fun `lineup splits allies and enemies, sorts by position, flags isMe`() {
         val player = emptyPlayer(heroId = 1).copy(isRadiant = true)
         val lineup = listOf(
@@ -384,7 +349,6 @@ class UiGuideDetailStateMapperTest {
         assertNull(ui.header)
         assertNull(ui.skillBuild)
         assertNull(ui.itemBuild)
-        assertNull(ui.inventory)
         assertNull(ui.networth)
         assertNull(ui.lineup)
         assertTrue(ui.isLoading)
@@ -397,7 +361,6 @@ class UiGuideDetailStateMapperTest {
         val ui = mapper.map(state(detail(player), heroes = mapOf(HeroId(1) to hero(1))))
 
         assertNull(ui.skillBuild)
-        assertNull(ui.inventory) // no snapshots
         assertTrue(ui.header != null)
         assertTrue(ui.itemBuild != null)
         assertTrue(ui.networth != null)

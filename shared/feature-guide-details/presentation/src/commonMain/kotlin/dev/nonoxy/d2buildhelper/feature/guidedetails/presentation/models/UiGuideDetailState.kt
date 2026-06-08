@@ -4,7 +4,6 @@ data class UiGuideDetailState(
     val header: UiBuildHeader? = null,
     val skillBuild: UiSkillBuild? = null,
     val itemBuild: UiItemBuild? = null,
-    val inventory: UiInventoryTimeline? = null,
     val networth: UiNetworthCurve? = null,
     val lineup: UiLineup? = null,
     val isLoading: Boolean = true,

@@ -66,7 +66,6 @@ class GuideDetailExecutorTest {
             neutralItemId = null,
             abilityLearnEvents = emptyList(),
             itemPurchases = emptyList(),
-            inventorySnapshots = emptyList(),
             networthPerMinute = emptyList(),
             lastHitsPerMinute = emptyList(),
             goldPerMinuteSeries = emptyList(),

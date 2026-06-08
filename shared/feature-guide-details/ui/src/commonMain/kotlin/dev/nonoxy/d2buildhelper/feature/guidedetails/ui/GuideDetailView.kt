@@ -25,7 +25,6 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2Top
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.BuildHeaderCard
-import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.InventoryScrubberCard
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.ItemBuildCard
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.LineupCard
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.NetworthCard
@@ -82,11 +81,6 @@ internal fun GuideDetailView(
             state.itemBuild?.let { itemBuild ->
                 item(key = "itemBuild") {
                     ItemBuildCard(itemBuild = itemBuild, modifier = Modifier.fillMaxWidth())
-                }
-            }
-            state.inventory?.let { inventory ->
-                item(key = "inventory") {
-                    InventoryScrubberCard(inventory = inventory, modifier = Modifier.fillMaxWidth())
                 }
             }
             state.networth?.let { networth ->

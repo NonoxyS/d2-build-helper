@@ -37,9 +37,6 @@ private const val GUIDE_DETAIL_JSON = """
       { "itemId": 1, "time": 620 },
       { "itemId": 50, "time": 410 }
     ],
-    "inventorySnapshots": [
-      { "itemIds": [1, null, 50], "backpackIds": [null], "neutralId": 100 }
-    ],
     "networthPerMinute": [0, 300, 700],
     "lastHitsPerMinute": [0, 8, 15],
     "goldPerMinuteSeries": [0, 280, 540]
@@ -102,17 +99,12 @@ class RemoteGuideDetailResponseTest {
     }
 
     @Test
-    fun `deserializes item purchases and inventory snapshots with nulls`() {
+    fun `deserializes item purchases`() {
         val player = json.decodeFromString<RemoteGuideDetailResponse>(GUIDE_DETAIL_JSON).player
 
         assertEquals(2, player.itemPurchases.size)
         assertEquals(1, player.itemPurchases.first().itemId)
         assertEquals(620, player.itemPurchases.first().time)
-
-        val snapshot = player.inventorySnapshots.single()
-        assertEquals(listOf(1, null, 50), snapshot.itemIds)
-        assertEquals(listOf(null), snapshot.backpackIds)
-        assertEquals(100, snapshot.neutralId)
     }
 
     @Test
@@ -137,7 +129,7 @@ class RemoteGuideDetailResponseTest {
               "player": {
                 "heroId": 1,
                 "finalItemIds": [], "backpackItemIds": [],
-                "abilityLearnEvents": [], "itemPurchases": [], "inventorySnapshots": [],
+                "abilityLearnEvents": [], "itemPurchases": [],
                 "networthPerMinute": [], "lastHitsPerMinute": [], "goldPerMinuteSeries": []
               }
             }

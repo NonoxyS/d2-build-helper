@@ -35,7 +35,6 @@ data class BuildPlayer(
     val neutralItemId: ItemId?,
     val abilityLearnEvents: List<AbilityLearnEvent>,
     val itemPurchases: List<ItemPurchase>,
-    val inventorySnapshots: List<InventorySnapshot>,
     val networthPerMinute: List<Int>,
     val lastHitsPerMinute: List<Int>,
     val goldPerMinuteSeries: List<Int>,
@@ -47,13 +46,6 @@ data class AbilityLearnEvent(
     val level: Int?,
     val isTalent: Boolean,
     val isUltimate: Boolean,
-)
-
-/** index = minute of match. */
-data class InventorySnapshot(
-    val itemIds: List<ItemId?>,
-    val backpackIds: List<ItemId?>,
-    val neutralId: ItemId?,
 )
 
 data class LineupMember(

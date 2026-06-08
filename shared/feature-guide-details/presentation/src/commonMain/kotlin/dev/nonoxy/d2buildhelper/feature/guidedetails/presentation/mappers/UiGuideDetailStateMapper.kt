@@ -12,14 +12,11 @@ import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
-import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.InventorySnapshot
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
-import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiInventorySnapshot
-import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiInventoryTimeline
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildEntry
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineup
@@ -34,10 +31,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * RISK (spec §6.5 — smoke-verify-needed): the generic `attribute_bonus` ("+2 stats")
- * ability id. Best-guess from the well-known Dota/Stratz constants. Verify against
- * real `/v1/constants` data on first device smoke; if wrong, the "+" stats matrix row
- * will be empty and stat picks would leak into the skill rows.
+ * Ability id for `special_bonus_attributes` (the generic "+2 stats" talent).
+ * Verified against live Stratz `/v1/constants` — id 730 is confirmed correct.
  */
 internal const val STAT_ABILITY_ID_RAW: Short = 730
 
@@ -68,7 +63,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             header = buildHeader(detail, player, item.heroes),
             skillBuild = buildSkillBuild(player, item.abilities),
             itemBuild = buildItemBuild(player, item.items),
-            inventory = buildInventory(player, item.items),
             networth = buildNetworth(player),
             lineup = buildLineup(detail, player, item.heroes),
             isLoading = item.isLoading,
@@ -201,22 +195,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             iconUrl = items[itemId]?.iconUrl,
             name = items[itemId]?.displayName,
             timeText = formatTime(time),
-        )
-
-    private fun buildInventory(player: BuildPlayer, items: Map<ItemId, Item>): UiInventoryTimeline? {
-        if (player.inventorySnapshots.isEmpty()) return null
-        return UiInventoryTimeline(
-            snapshots = player.inventorySnapshots
-                .map { snapshot -> snapshot.toUi(items) }
-                .toImmutableList(),
-        )
-    }
-
-    private fun InventorySnapshot.toUi(items: Map<ItemId, Item>): UiInventorySnapshot =
-        UiInventorySnapshot(
-            itemIconUrls = itemIds.map { it?.let { id -> items[id]?.iconUrl } }.toImmutableList(),
-            backpackIconUrls = backpackIds.map { it?.let { id -> items[id]?.iconUrl } }.toImmutableList(),
-            neutralIconUrl = neutralId?.let { items[it]?.iconUrl },
         )
 
     private fun buildNetworth(player: BuildPlayer): UiNetworthCurve {

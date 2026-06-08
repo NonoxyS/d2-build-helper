@@ -9,12 +9,10 @@ import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
-import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.InventorySnapshot
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteAbilityLearnEventResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailPlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailResponse
-import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteInventorySnapshotResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteItemPurchaseResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteLineupMemberResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerPosition
@@ -52,7 +50,6 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
         neutralItemId = neutralItemId?.toItemId(),
         abilityLearnEvents = abilityLearnEvents.map { it.toDomain() },
         itemPurchases = itemPurchases.map { it.toDomain() },
-        inventorySnapshots = inventorySnapshots.map { it.toDomain() },
         networthPerMinute = networthPerMinute,
         lastHitsPerMinute = lastHitsPerMinute,
         goldPerMinuteSeries = goldPerMinuteSeries,
@@ -69,12 +66,6 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
     private fun RemoteItemPurchaseResponse.toDomain(): ItemPurchase = ItemPurchase(
         itemId = ItemId(itemId.toShort()),
         time = time,
-    )
-
-    private fun RemoteInventorySnapshotResponse.toDomain(): InventorySnapshot = InventorySnapshot(
-        itemIds = itemIds.map { it?.toItemId() },
-        backpackIds = backpackIds.map { it?.toItemId() },
-        neutralId = neutralId?.toItemId(),
     )
 
     private fun RemoteLineupMemberResponse.toDomain(): LineupMember = LineupMember(
