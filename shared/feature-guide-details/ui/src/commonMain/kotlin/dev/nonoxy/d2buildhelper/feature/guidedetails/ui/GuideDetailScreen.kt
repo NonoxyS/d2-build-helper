@@ -2,9 +2,9 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.error.D2ErrorView
@@ -21,7 +21,7 @@ fun GuideDetailScreen(
     onBack: () -> Unit = {},
     viewModel: GuideDetailViewModel = koinViewModel { parametersOf(matchId, steamAccountId) },
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     when {
         state.isLoading -> D2LoadingView(modifier = modifier.fillMaxSize())
