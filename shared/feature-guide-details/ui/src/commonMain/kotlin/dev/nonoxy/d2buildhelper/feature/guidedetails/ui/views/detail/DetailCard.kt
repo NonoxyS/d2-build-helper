@@ -13,10 +13,6 @@ import androidx.compose.ui.unit.dp
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space12
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 
-/**
- * Surface card chrome shared by every GuideDetail card (prototype `.card`):
- * surface background, hairline outline, 14dp inner padding.
- */
 @Composable
 internal fun DetailCard(
     modifier: Modifier = Modifier,
@@ -38,7 +34,6 @@ internal fun DetailCard(
     )
 }
 
-/** Uppercase muted card label (prototype `.lbl`). */
 @Composable
 internal fun ColumnScope.CardLabel(
     text: String,

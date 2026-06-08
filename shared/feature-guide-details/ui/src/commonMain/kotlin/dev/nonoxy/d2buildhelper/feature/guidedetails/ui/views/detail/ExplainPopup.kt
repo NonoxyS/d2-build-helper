@@ -9,10 +9,6 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space4
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 
-/**
- * Reusable explanation popup (skill / item / hero) — prototype `.popup`.
- * [meta] is the optional small footnote line (e.g. role/position for a hero).
- */
 @Composable
 internal fun ExplainPopup(
     title: String,

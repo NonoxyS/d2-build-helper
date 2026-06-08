@@ -8,16 +8,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 
-// TODO talent-tree asset: minimal Compose rendering of the 4-tier talent tree
-//  (central trunk + two petals per tier). [tiersTaken] order = 10/15/20/25.
 private val TALENT_TREE_WIDTH = 26.dp
 private val TALENT_TREE_HEIGHT = 30.dp
 
-/**
- * Talent-tree glyph mirroring the prototype SVG: a vertical trunk with four
- * tiers of two petals each. The left petal of a tier is lit (gold) when that
- * tier has a talent taken; otherwise both petals are muted.
- */
 @Composable
 internal fun TalentTreeIcon(
     tiersTaken: ImmutableList<Boolean>,

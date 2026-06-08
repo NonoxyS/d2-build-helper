@@ -21,16 +21,7 @@ private val GLOW_BLUR_RADIUS = 6.dp
 private const val GLOW_ALPHA = 0.6f
 private val RING_WIDTH = 1.5.dp
 
-/**
- * Hero icon with a colored silhouette glow (prototype `.team.enemy/.ally .hc`).
- *
- * Cross-platform glow strategy:
- * - A tinted blurred copy of the icon is drawn underneath via [Modifier.blur].
- *   This renders on iOS (Skia) and on Android API 31+ (RenderEffect). On
- *   Android API 26-30 `Modifier.blur` is a no-op (graceful, never crashes).
- * - A colored ring is ALWAYS drawn around the icon as the reliable fallback so
- *   the team tint reads on every platform/SDK regardless of blur support.
- */
+// Modifier.blur is a no-op on Android API 26-30; colored ring is the always-visible fallback
 @Composable
 internal fun HeroGlowIcon(
     iconUrl: ImageUrl?,
@@ -40,7 +31,6 @@ internal fun HeroGlowIcon(
     iconSize: Dp = 36.dp,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        // Blurred tinted copy underneath (silhouette glow where blur is supported).
         AsyncImage(
             model = iconUrl?.raw,
             contentDescription = null,
@@ -52,7 +42,6 @@ internal fun HeroGlowIcon(
             colorFilter = ColorFilter.tint(glowColor.copy(alpha = GLOW_ALPHA)),
         )
 
-        // Crisp icon + colored ring fallback (always visible).
         AsyncImage(
             model = iconUrl?.raw,
             contentDescription = contentDescription,

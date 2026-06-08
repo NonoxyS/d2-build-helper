@@ -33,18 +33,10 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalen
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-/**
- * Ability id for `special_bonus_attributes` (the generic "+2 stats" talent).
- * Verified against live Stratz `/v1/constants` — id 730 is confirmed correct.
- */
+// 730 = special_bonus_attributes (generic +stats talent), verified vs live Stratz
 internal const val STAT_ABILITY_ID_RAW: Short = 730
 
-/**
- * RISK (spec §6.5 / §3.2 — smoke-verify-needed): `item_ultimate_scepter`
- * (Aghanim's Scepter) item id. Best-guess from the well-known Dota/Stratz constants.
- * Scepter has no dedicated flag — it is derived from purchases/final items.
- * Verify against real constants; if wrong, the summary scepter chip stays grey.
- */
+// 108 = item_ultimate_scepter; no dedicated flag in Stratz — derived from purchases/final items
 internal const val ULTIMATE_SCEPTER_ITEM_ID_RAW: Short = 108
 
 private const val MAX_LEVEL = UiSkillMatrix.LEVEL_COLUMNS
@@ -53,11 +45,9 @@ private const val SECONDS_PER_MINUTE = 60
 private const val LAST_HITS_AT_MINUTE = 10
 private val TALENT_TIERS = listOf(10, 15, 20, 25)
 
-/** Purchases at or before this time (seconds) — including pre-horn negatives — belong to Laning. */
-private const val LANING_END_SECONDS = 600 // ≤10:00
+private const val LANING_END_SECONDS = 600
 
-/** Purchases after [LANING_END_SECONDS] and at or before this time belong to Mid-game. */
-private const val MID_GAME_END_SECONDS = 1500 // ≤25:00
+private const val MID_GAME_END_SECONDS = 1500
 
 internal interface UiGuideDetailStateMapper : Mapper<GuideDetailStore.State, UiGuideDetailState>
 
@@ -113,7 +103,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val statEvents = events.filter { !it.isTalent && it.abilityId?.raw == STAT_ABILITY_ID_RAW }
         val skillEvents = events.filter { !it.isTalent && it.abilityId?.raw != STAT_ABILITY_ID_RAW }
 
-        // Distinct ability ids in learn order → up to 4 ability rows (Q/W/E/R).
         val orderedAbilityIds = skillEvents
             .mapNotNull { it.abilityId }
             .distinct()
@@ -130,7 +119,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         }
         val statsRow = UiSkillMatrixRow(
             iconUrl = null,
-            // Stats row uses the fixed "+" label rendered in the UI (no constants name).
             name = null,
             isStat = true,
             isUltimate = false,
@@ -161,13 +149,10 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         )
     }
 
-    /** `true` if any learn event for [abilityId] is flagged as the ultimate (spec §2). */
     private fun List<AbilityLearnEvent>.isUltimate(abilityId: AbilityId): Boolean =
         any { it.abilityId == abilityId && it.isUltimate }
 
     private fun AbilityLearnEvent.toTalent(abilities: Map<AbilityId, Ability>): UiTalent? {
-        // Talents are only learnable at 10/15/20/25, so match the exact tier —
-        // same rule as `talentTierTaken` (no nearest-tier bucketing divergence).
         val level = level ?: return null
         val tier = TALENT_TIERS.firstOrNull { it == level } ?: return null
         return UiTalent(
@@ -176,7 +161,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         )
     }
 
-    /** A [MAX_LEVEL]-wide boolean mark list: `true` where this ability/stat was leveled. */
     private fun levelMarks(events: List<AbilityLearnEvent>): ImmutableList<Boolean> {
         val levels = events.mapNotNull { it.level }.toSet()
         return (1..MAX_LEVEL).map { it in levels }.toImmutableList()
@@ -227,13 +211,10 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         )
 
     private fun buildNetworth(player: BuildPlayer, items: Map<ItemId, Item>): UiNetworthCurve {
-        // "Significant" = item ended up in the final build (final ∪ backpack ∪ neutral).
         val significantIds = (
             player.finalItemIds + player.backpackItemIds + listOfNotNull(player.neutralItemId)
         ).toSet()
 
-        // For each significant itemId, keep only its FIRST purchase (min time).
-        // This avoids duplicate markers when items are rebought or built from components.
         val markers = player.itemPurchases
             .filter { it.itemId in significantIds && it.time != null }
             .groupBy { it.itemId }
@@ -273,7 +254,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         mySteamAccountId: Long,
         heroes: Map<HeroId, Hero>,
     ): ImmutableList<UiLineupMember> =
-        // sort by position 1..5, nulls last
         sortedBy { it.position?.ordinal ?: Int.MAX_VALUE }
             .map { member ->
                 UiLineupMember(
@@ -285,10 +265,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             .toImmutableList()
 }
 
-/**
- * MM:SS, pre-horn negative times formatted as `-M:SS` (spec §2.3).
- * `TimeConverter` collapses negatives to "00:00", so format here.
- */
+// TimeConverter collapses negatives to "00:00", so we format pre-horn times here
 private fun formatTime(seconds: Int?): String {
     if (seconds == null) return ""
     val sign = if (seconds < 0) "-" else ""
