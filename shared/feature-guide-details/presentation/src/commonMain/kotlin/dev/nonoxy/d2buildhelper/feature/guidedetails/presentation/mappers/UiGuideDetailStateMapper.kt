@@ -19,6 +19,8 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildEntry
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildPhase
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildSection
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineup
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthCurve
@@ -49,6 +51,12 @@ private const val MAX_ABILITY_ROWS = 4
 private const val SECONDS_PER_MINUTE = 60
 private const val LAST_HITS_AT_MINUTE = 10
 private val TALENT_TIERS = listOf(10, 15, 20, 25)
+
+/** Purchases at or before this time (seconds) — including pre-horn negatives — belong to Laning. */
+private const val LANING_END_SECONDS = 600 // ≤10:00
+
+/** Purchases after [LANING_END_SECONDS] and at or before this time belong to Mid-game. */
+private const val MID_GAME_END_SECONDS = 1500 // ≤25:00
 
 internal interface UiGuideDetailStateMapper : Mapper<GuideDetailStore.State, UiGuideDetailState>
 
@@ -183,11 +191,31 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val neutral = player.neutralItemId?.let { id ->
             UiItemBuildEntry(iconUrl = items[id]?.iconUrl, name = items[id]?.displayName, timeText = "")
         }
-        val purchases = player.itemPurchases
-            .sortedBy { it.time ?: Int.MAX_VALUE }
-            .map { purchase -> purchase.toEntry(items) }
+
+        val phaseOf: (Int?) -> UiItemBuildPhase = { time ->
+            when {
+                time == null -> UiItemBuildPhase.LATE_GAME
+                time <= LANING_END_SECONDS -> UiItemBuildPhase.LANING
+                time <= MID_GAME_END_SECONDS -> UiItemBuildPhase.MID_GAME
+                else -> UiItemBuildPhase.LATE_GAME
+            }
+        }
+
+        val grouped: Map<UiItemBuildPhase, List<ItemPurchase>> = player.itemPurchases
+            .groupBy { phaseOf(it.time) }
+
+        val sections = UiItemBuildPhase.entries
+            .mapNotNull { phase ->
+                val entries = grouped[phase]
+                    ?.sortedBy { it.time ?: Int.MAX_VALUE }
+                    ?.map { it.toEntry(items) }
+                    ?.toImmutableList()
+                    ?: return@mapNotNull null
+                UiItemBuildSection(phase = phase, entries = entries)
+            }
             .toImmutableList()
-        return UiItemBuild(neutralItem = neutral, purchases = purchases)
+
+        return UiItemBuild(neutralItem = neutral, sections = sections)
     }
 
     private fun ItemPurchase.toEntry(items: Map<ItemId, Item>): UiItemBuildEntry =

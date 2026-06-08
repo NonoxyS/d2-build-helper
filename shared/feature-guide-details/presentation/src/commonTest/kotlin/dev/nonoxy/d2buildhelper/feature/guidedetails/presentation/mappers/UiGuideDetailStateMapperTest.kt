@@ -14,6 +14,7 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlay
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildPhase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -259,12 +260,80 @@ class UiGuideDetailStateMapperTest {
         val build = ui.itemBuild!!
         assertEquals(ImageUrl("item50"), build.neutralItem!!.iconUrl)
         assertEquals("I50", build.neutralItem!!.name) // neutral display name from constants
-        // sorted by time ascending: -89 first, then 183
-        assertEquals(ImageUrl("item1"), build.purchases.first().iconUrl)
-        assertEquals("I1", build.purchases.first().name) // item display name from constants
-        assertEquals("I2", build.purchases[1].name)
-        assertEquals("-1:29", build.purchases.first().timeText)
-        assertEquals("3:03", build.purchases[1].timeText)
+        // Both purchases (time=-89 and time=183) are in LANING (both ≤600s).
+        // Section is sorted by time ascending: -89 first, then 183.
+        assertEquals(1, build.sections.size)
+        val laningSection = build.sections.single()
+        assertEquals(UiItemBuildPhase.LANING, laningSection.phase)
+        assertEquals(ImageUrl("item1"), laningSection.entries.first().iconUrl)
+        assertEquals("I1", laningSection.entries.first().name) // item display name from constants
+        assertEquals("I2", laningSection.entries[1].name)
+        assertEquals("-1:29", laningSection.entries.first().timeText)
+        assertEquals("3:03", laningSection.entries[1].timeText)
+    }
+
+    @Test
+    fun `item build phase bucketing groups purchases into correct phases`() {
+        // times: -60 (pre-horn, LANING), 120 (LANING), 800 (MID_GAME), 1600 (LATE_GAME), null (LATE_GAME)
+        val player = emptyPlayer(heroId = 1).copy(
+            itemPurchases = listOf(
+                ItemPurchase(itemId = ItemId(1), time = -60),
+                ItemPurchase(itemId = ItemId(2), time = 120),
+                ItemPurchase(itemId = ItemId(3), time = 800),
+                ItemPurchase(itemId = ItemId(4), time = 1600),
+                ItemPurchase(itemId = ItemId(5), time = null),
+            ),
+        )
+        val ui = mapper.map(state(detail(player)))
+
+        val build = ui.itemBuild!!
+        // Exactly 3 sections, in LANING → MID_GAME → LATE_GAME order.
+        assertEquals(3, build.sections.size)
+        assertEquals(UiItemBuildPhase.LANING, build.sections[0].phase)
+        assertEquals(UiItemBuildPhase.MID_GAME, build.sections[1].phase)
+        assertEquals(UiItemBuildPhase.LATE_GAME, build.sections[2].phase)
+
+        // LANING: items with time -60 and 120, sorted ascending.
+        val laning = build.sections[0]
+        assertEquals(2, laning.entries.size)
+        assertEquals("-1:00", laning.entries[0].timeText)
+        assertEquals("2:00", laning.entries[1].timeText)
+
+        // MID_GAME: item with time 800.
+        val mid = build.sections[1]
+        assertEquals(1, mid.entries.size)
+        assertEquals("13:20", mid.entries[0].timeText)
+
+        // LATE_GAME: items with time 1600 and null (null sorts last).
+        val late = build.sections[2]
+        assertEquals(2, late.entries.size)
+        assertEquals("26:40", late.entries[0].timeText)
+        assertEquals("", late.entries[1].timeText)
+    }
+
+    @Test
+    fun `item build phase bucketing respects exact boundaries 600 and 1500`() {
+        // time == 600 is the upper boundary of LANING (rule: time ≤ 600 → LANING).
+        // time == 1500 is the upper boundary of MID_GAME (rule: time ≤ 1500 → MID_GAME).
+        // An off-by-one in phaseOf (<  vs <=) would misplace these and fail the test.
+        val player = emptyPlayer(heroId = 1).copy(
+            itemPurchases = listOf(
+                ItemPurchase(itemId = ItemId(1), time = 600),
+                ItemPurchase(itemId = ItemId(2), time = 1500),
+            ),
+        )
+        val ui = mapper.map(state(detail(player)))
+
+        val build = ui.itemBuild!!
+        assertEquals(2, build.sections.size)
+
+        val laningSection = build.sections.single { it.phase == UiItemBuildPhase.LANING }
+        assertEquals(1, laningSection.entries.size)
+        assertEquals("10:00", laningSection.entries.single().timeText)
+
+        val midSection = build.sections.single { it.phase == UiItemBuildPhase.MID_GAME }
+        assertEquals(1, midSection.entries.size)
+        assertEquals("25:00", midSection.entries.single().timeText)
     }
 
     @Test

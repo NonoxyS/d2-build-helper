@@ -27,6 +27,9 @@
 
     <string name="guide_detail_card_skill_build">Сборка способностей</string>
     <string name="guide_detail_card_item_build">Билд предметов</string>
+    <string name="guide_detail_phase_laning">Лайнинг</string>
+    <string name="guide_detail_phase_mid">Мид-гейм</string>
+    <string name="guide_detail_phase_late">Лейт-гейм</string>
     <string name="guide_detail_card_economy">Экономика</string>
     <string name="guide_detail_card_lineup">Состав</string>
 

@@ -31,6 +31,8 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildEntry
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildPhase
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildSection
 
 private val ITEM_WIDTH = 36.dp
 private val ITEM_HEIGHT = 28.dp
@@ -46,15 +48,15 @@ internal fun ItemBuildCard(
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_item_build))
 
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            itemBuild.purchases.fastForEachIndexed { index, entry ->
-                if (index > 0) {
-                    ArrowSeparator()
+        Column {
+            itemBuild.sections.fastForEachIndexed { sectionIndex, section ->
+                if (sectionIndex > 0) {
+                    Space8()
                 }
-                ItemWithTime(entry = entry, onClick = { explained = entry })
+                ItemBuildSection(
+                    section = section,
+                    onItemClick = { entry -> explained = entry },
+                )
             }
 
             itemBuild.neutralItem?.let { neutral ->
@@ -72,6 +74,43 @@ internal fun ItemBuildCard(
             body = entry.timeText,
             onDismissRequest = { explained = null },
         )
+    }
+}
+
+@Composable
+private fun UiItemBuildPhase.toTitle(): String = stringResource(
+    when (this) {
+        UiItemBuildPhase.LANING -> MR.strings.guide_detail_phase_laning
+        UiItemBuildPhase.MID_GAME -> MR.strings.guide_detail_phase_mid
+        UiItemBuildPhase.LATE_GAME -> MR.strings.guide_detail_phase_late
+    },
+)
+
+@Composable
+private fun ItemBuildSection(
+    section: UiItemBuildSection,
+    onItemClick: (UiItemBuildEntry) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = section.phase.toTitle(),
+            color = D2BuildHelperTheme.colors.textSecondary,
+            style = D2BuildHelperTheme.typography.captionMD,
+        )
+        Space4()
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            section.entries.fastForEachIndexed { index, entry ->
+                if (index > 0) {
+                    ArrowSeparator()
+                }
+                ItemWithTime(entry = entry, onClick = { onItemClick(entry) })
+            }
+        }
     }
 }
 
