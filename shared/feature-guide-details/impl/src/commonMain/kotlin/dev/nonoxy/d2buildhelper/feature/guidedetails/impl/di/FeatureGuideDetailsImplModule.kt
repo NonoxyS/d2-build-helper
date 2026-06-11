@@ -7,14 +7,14 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.mappers.G
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.repository.GuideDetailRepositoryImpl
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.domain.GuideDetailStoreFactory
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.domain.repository.GuideDetailRepository
-import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.new
 import org.koin.dsl.module
 
 val featureGuideDetailsImplModule = module {
-    factoryOf(::GuideDetailApiClientImpl) { bind<GuideDetailApiClient>() }
-    factoryOf(::GuideDetailMapperImpl) { bind<GuideDetailMapper>() }
-    factoryOf(::GuideDetailRepositoryImpl) { bind<GuideDetailRepository>() }
+    factory<GuideDetailApiClient> { new(::GuideDetailApiClientImpl) }
+    factoryOf<GuideDetailMapper>(::GuideDetailMapperImpl)
+    factory<GuideDetailRepository> { new(::GuideDetailRepositoryImpl) }
 
     factory { (matchId: Long, steamAccountId: Long) ->
         GuideDetailStoreFactory(get(), get(), get(), get()).create(matchId, steamAccountId)

@@ -5,15 +5,14 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.mappers.UiGuid
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.mappers.UiGuideDetailLabelMapperImpl
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.mappers.UiGuideDetailStateMapper
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.mappers.UiGuideDetailStateMapperImpl
-import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val featureGuideDetailsPresentationModule = module {
-    singleOf(::UiGuideDetailStateMapperImpl) { bind<UiGuideDetailStateMapper>() }
-    singleOf(::UiGuideDetailLabelMapperImpl) { bind<UiGuideDetailLabelMapper>() }
+    singleOf<UiGuideDetailStateMapper>(::UiGuideDetailStateMapperImpl)
+    singleOf<UiGuideDetailLabelMapper>(::UiGuideDetailLabelMapperImpl)
     viewModel { (matchId: Long, steamAccountId: Long) ->
         GuideDetailViewModel(get { parametersOf(matchId, steamAccountId) }, get(), get())
     }
