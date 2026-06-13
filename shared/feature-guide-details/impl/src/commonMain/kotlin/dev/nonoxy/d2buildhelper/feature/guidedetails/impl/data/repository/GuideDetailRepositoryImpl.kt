@@ -20,8 +20,7 @@ internal class GuideDetailRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             coRunCatching(
                 tryBlock = {
-                    val response = apiClient.getGuideDetail(matchId, steamAccountId).getOrThrow()
-                    guideDetailMapper.map(response)
+                    apiClient.getGuideDetail(matchId, steamAccountId).map(guideDetailMapper::map)
                 },
                 catchBlock = { throwable ->
                     Napier.e(throwable = throwable, message = "GuideDetailRepositoryImpl.getGuideDetail failed")

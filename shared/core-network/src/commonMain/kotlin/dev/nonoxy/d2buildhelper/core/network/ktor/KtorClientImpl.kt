@@ -36,7 +36,7 @@ class KtorClientImpl(
                 }
                 when (body) {
                     null -> error("$loggingErrorMessage: empty body")
-                    else -> success(body).getOrThrow()
+                    else -> success(body)
                 }
             } else {
                 error("$loggingErrorMessage: status=${httpResponse.status}")

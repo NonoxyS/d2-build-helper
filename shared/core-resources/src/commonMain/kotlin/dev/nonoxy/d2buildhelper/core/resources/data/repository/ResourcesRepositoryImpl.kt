@@ -54,9 +54,9 @@ internal class ResourcesRepositoryImpl(
             val cached = readL1OrL2()
             if (cached != null) {
                 scope.launch { runCatching { refreshDotaConstants() } }
-                cached
+                Result.success(cached)
             } else {
-                refreshDotaConstants().getOrThrow()
+                refreshDotaConstants()
             }
         },
         catchBlock = { throwable ->
@@ -89,7 +89,7 @@ internal class ResourcesRepositoryImpl(
 
             val deferred = scope.async {
                 coRunCatching(
-                    tryBlock = { fetchAndCache() },
+                    tryBlock = { Result.success(fetchAndCache()) },
                     catchBlock = { throwable ->
                         Napier.e(throwable = throwable, message = "ResourcesRepositoryImpl.fetchAndCache failed")
                         throwable.wrapResultFailure()

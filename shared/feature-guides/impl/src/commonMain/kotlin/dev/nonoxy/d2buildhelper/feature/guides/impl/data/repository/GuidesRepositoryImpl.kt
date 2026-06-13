@@ -24,14 +24,13 @@ internal class GuidesRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             coRunCatching(
                 tryBlock = {
-                    val response = apiClient.getGuides(
+                    apiClient.getGuides(
                         heroId = filters.heroId?.raw,
                         position = filters.position?.toWire(),
                         isRadiant = filters.isRadiant,
                         page = page,
                         pageSize = PAGE_SIZE,
-                    ).getOrThrow()
-                    guidesPageMapper.map(response)
+                    ).map(guidesPageMapper::map)
                 },
                 catchBlock = { throwable ->
                     Napier.e(throwable = throwable, message = "GuidesRepositoryImpl.getGuides failed")
