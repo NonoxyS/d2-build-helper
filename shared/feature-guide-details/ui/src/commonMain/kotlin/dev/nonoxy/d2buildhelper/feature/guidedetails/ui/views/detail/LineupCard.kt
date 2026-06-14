@@ -21,6 +21,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.match.label
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineup
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineupMember
 import kotlinx.collections.immutable.ImmutableList
@@ -55,7 +56,7 @@ internal fun LineupCard(
     explained?.let { member ->
         ExplainPopup(
             title = stringResource(MR.strings.guide_detail_card_lineup),
-            body = member.role,
+            body = member.role?.label(),
             onDismissRequest = { explained = null },
         )
     }
@@ -109,7 +110,7 @@ private fun HeroPlaque(
         HeroGlowIcon(
             iconUrl = member.heroIconUrl,
             glowColor = glowColor,
-            contentDescription = member.role,
+            contentDescription = member.role?.label(),
             iconSize = HERO_ICON_SIZE,
         )
     }

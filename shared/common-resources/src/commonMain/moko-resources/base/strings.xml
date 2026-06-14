@@ -16,6 +16,14 @@
 
     <string name="side_radiant">Radiant</string>
     <string name="side_dire">Dire</string>
+    <string name="role_core">Core</string>
+    <string name="role_light_support">Light Support</string>
+    <string name="role_hard_support">Hard Support</string>
+    <string name="lane_roaming">Roaming</string>
+    <string name="lane_safe">Safe Lane</string>
+    <string name="lane_mid">Mid Lane</string>
+    <string name="lane_off">Off Lane</string>
+    <string name="lane_jungle">Jungle</string>
 
     <string name="search_hero_placeholder">Search hero</string>
     <string name="content_desc_clear">Clear</string>

@@ -5,7 +5,9 @@ import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.MatchLane
 import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
@@ -15,7 +17,9 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.Re
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteItemPurchaseResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteLineupMemberResponse
+import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchLane
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerRole
 
 internal interface GuideDetailMapper : Mapper<RemoteGuideDetailResponse, GuideDetail>
 
@@ -36,8 +40,8 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
         isRadiant = isRadiant,
         isVictory = isVictory,
         position = position?.toDomain(),
-        role = role,
-        lane = lane,
+        role = role?.toDomain(),
+        lane = lane?.toDomain(),
         level = level,
         kills = kills,
         deaths = deaths,
@@ -73,7 +77,7 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
         heroId = heroId?.let { HeroId(it.toShort()) },
         isRadiant = isRadiant,
         position = position?.toDomain(),
-        role = role,
+        role = role?.toDomain(),
     )
 
     private fun Int.toItemId(): ItemId = ItemId(toShort())
@@ -85,5 +89,21 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
         RemoteMatchPlayerPosition.POSITION_4 -> MatchPlayerPosition.POSITION_4
         RemoteMatchPlayerPosition.POSITION_5 -> MatchPlayerPosition.POSITION_5
         RemoteMatchPlayerPosition.UNKNOWN -> null
+    }
+
+    private fun RemoteMatchPlayerRole.toDomain(): MatchPlayerRole? = when (this) {
+        RemoteMatchPlayerRole.CORE -> MatchPlayerRole.CORE
+        RemoteMatchPlayerRole.LIGHT_SUPPORT -> MatchPlayerRole.LIGHT_SUPPORT
+        RemoteMatchPlayerRole.HARD_SUPPORT -> MatchPlayerRole.HARD_SUPPORT
+        RemoteMatchPlayerRole.UNKNOWN -> null
+    }
+
+    private fun RemoteMatchLane.toDomain(): MatchLane? = when (this) {
+        RemoteMatchLane.ROAMING -> MatchLane.ROAMING
+        RemoteMatchLane.SAFE_LANE -> MatchLane.SAFE_LANE
+        RemoteMatchLane.MID_LANE -> MatchLane.MID_LANE
+        RemoteMatchLane.OFF_LANE -> MatchLane.OFF_LANE
+        RemoteMatchLane.JUNGLE -> MatchLane.JUNGLE
+        RemoteMatchLane.UNKNOWN -> null
     }
 }

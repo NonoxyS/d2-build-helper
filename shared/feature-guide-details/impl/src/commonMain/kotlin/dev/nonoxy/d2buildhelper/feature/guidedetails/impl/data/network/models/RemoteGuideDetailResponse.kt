@@ -21,8 +21,8 @@ internal data class RemoteGuideDetailPlayerResponse(
     @SerialName("isRadiant") val isRadiant: Boolean? = null,
     @SerialName("isVictory") val isVictory: Boolean? = null,
     @SerialName("position") val position: RemoteMatchPlayerPosition? = null,
-    @SerialName("role") val role: String? = null,
-    @SerialName("lane") val lane: String? = null,
+    @SerialName("role") val role: RemoteMatchPlayerRole? = null,
+    @SerialName("lane") val lane: RemoteMatchLane? = null,
     @SerialName("level") val level: Int? = null,
     @SerialName("kills") val kills: Int? = null,
     @SerialName("deaths") val deaths: Int? = null,
@@ -55,5 +55,5 @@ internal data class RemoteLineupMemberResponse(
     @SerialName("heroId") val heroId: Int? = null,
     @SerialName("isRadiant") val isRadiant: Boolean? = null,
     @SerialName("position") val position: RemoteMatchPlayerPosition? = null,
-    @SerialName("role") val role: String? = null,
+    @SerialName("role") val role: RemoteMatchPlayerRole? = null,
 )

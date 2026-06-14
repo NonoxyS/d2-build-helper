@@ -3,13 +3,17 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.mappers
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
+import dev.nonoxy.d2buildhelper.core.match.MatchLane
 import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteAbilityLearnEventResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailPlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteItemPurchaseResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteLineupMemberResponse
+import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchLane
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteMatchPlayerRole
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -30,8 +34,8 @@ class GuideDetailMapperTest {
             isRadiant = true,
             isVictory = true,
             position = RemoteMatchPlayerPosition.POSITION_4,
-            role = "HARD_SUPPORT",
-            lane = "OFF_LANE",
+            role = RemoteMatchPlayerRole.HARD_SUPPORT,
+            lane = RemoteMatchLane.OFF_LANE,
             level = 25,
             kills = 12,
             deaths = 3,
@@ -72,7 +76,7 @@ class GuideDetailMapperTest {
                 heroId = 1,
                 isRadiant = true,
                 position = RemoteMatchPlayerPosition.POSITION_4,
-                role = "HARD_SUPPORT",
+                role = RemoteMatchPlayerRole.HARD_SUPPORT,
             ),
             RemoteLineupMemberResponse(
                 steamAccountId = null,
@@ -101,8 +105,8 @@ class GuideDetailMapperTest {
 
         assertEquals(HeroId(1), player.heroId)
         assertEquals(MatchPlayerPosition.POSITION_4, player.position)
-        assertEquals("HARD_SUPPORT", player.role)
-        assertEquals("OFF_LANE", player.lane)
+        assertEquals(MatchPlayerRole.HARD_SUPPORT, player.role)
+        assertEquals(MatchLane.OFF_LANE, player.lane)
         assertEquals(64, player.impact)
         assertEquals(listOf(ItemId(1), ItemId(50)), player.finalItemIds)
         assertEquals(listOf(ItemId(42)), player.backpackItemIds)

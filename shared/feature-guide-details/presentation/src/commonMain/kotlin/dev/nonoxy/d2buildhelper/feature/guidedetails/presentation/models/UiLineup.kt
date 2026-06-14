@@ -1,5 +1,6 @@
 package dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models
 
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import kotlinx.collections.immutable.ImmutableList
 
@@ -11,5 +12,5 @@ data class UiLineup(
 data class UiLineupMember(
     val heroIconUrl: ImageUrl?,
     val isMe: Boolean,
-    val role: String?,
+    val role: UiMatchPlayerRole?,
 )

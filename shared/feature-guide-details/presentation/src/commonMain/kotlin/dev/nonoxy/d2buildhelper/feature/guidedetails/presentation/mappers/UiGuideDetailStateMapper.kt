@@ -80,8 +80,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             heroName = hero?.displayName.orEmpty(),
             isRadiant = player.isRadiant,
             position = player.position?.toUi(),
-            role = player.role,
-            lane = player.lane,
+            role = player.role?.toUi(),
+            lane = player.lane?.toUi(),
             durationText = formatTime(detail.durationSeconds),
             level = player.level,
             isVictory = player.isVictory,
@@ -259,7 +259,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
                 UiLineupMember(
                     heroIconUrl = member.heroId?.let { heroes[it]?.iconUrl },
                     isMe = member.steamAccountId == mySteamAccountId,
-                    role = member.role,
+                    role = member.role?.toUi(),
                 )
             }
             .toImmutableList()

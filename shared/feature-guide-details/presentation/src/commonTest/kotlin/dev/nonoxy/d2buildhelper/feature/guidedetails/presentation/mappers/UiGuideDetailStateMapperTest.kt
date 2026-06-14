@@ -7,8 +7,12 @@ import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchLane
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
 import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.MatchLane
 import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
@@ -110,8 +114,8 @@ class UiGuideDetailStateMapperTest {
             isRadiant = false,
             isVictory = true,
             position = null,
-            role = "offlane",
-            lane = "off",
+            role = MatchPlayerRole.CORE,
+            lane = MatchLane.OFF_LANE,
             level = 27,
             kills = 8,
             deaths = 6,
@@ -127,7 +131,8 @@ class UiGuideDetailStateMapperTest {
         assertEquals(ImageUrl("hero5"), header.heroIconUrl)
         assertEquals(false, header.isRadiant)
         assertNull(header.position)
-        assertEquals("offlane", header.role)
+        assertEquals(UiMatchPlayerRole.CORE, header.role)
+        assertEquals(UiMatchLane.OFF_LANE, header.lane)
         assertEquals("44:00", header.durationText)
         assertEquals(27, header.level)
         assertEquals(true, header.isVictory)
@@ -345,28 +350,28 @@ class UiGuideDetailStateMapperTest {
                 heroId = HeroId(1),
                 isRadiant = true,
                 position = MatchPlayerPosition.POSITION_2,
-                role = "mid",
+                role = MatchPlayerRole.CORE,
             ),
             LineupMember(
                 steamAccountId = 7L,
                 heroId = HeroId(2),
                 isRadiant = true,
                 position = MatchPlayerPosition.POSITION_1,
-                role = "carry",
+                role = MatchPlayerRole.CORE,
             ),
             LineupMember(
                 steamAccountId = 8L,
                 heroId = HeroId(3),
                 isRadiant = false,
                 position = MatchPlayerPosition.POSITION_3,
-                role = "off",
+                role = MatchPlayerRole.CORE,
             ),
             LineupMember(
                 steamAccountId = 9L,
                 heroId = HeroId(4),
                 isRadiant = false,
                 position = MatchPlayerPosition.POSITION_1,
-                role = "carry",
+                role = MatchPlayerRole.CORE,
             ),
         )
         val ui = mapper.map(

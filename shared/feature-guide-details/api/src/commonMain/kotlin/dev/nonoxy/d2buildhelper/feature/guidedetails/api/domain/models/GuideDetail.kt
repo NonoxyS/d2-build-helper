@@ -4,7 +4,9 @@ import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.MatchLane
 import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
 
 data class GuideDetail(
     val matchId: Long,
@@ -21,8 +23,8 @@ data class BuildPlayer(
     val isRadiant: Boolean?,
     val isVictory: Boolean?,
     val position: MatchPlayerPosition?,
-    val role: String?,
-    val lane: String?,
+    val role: MatchPlayerRole?,
+    val lane: MatchLane?,
     val level: Int?,
     val kills: Int?,
     val deaths: Int?,
@@ -53,5 +55,5 @@ data class LineupMember(
     val heroId: HeroId?,
     val isRadiant: Boolean?,
     val position: MatchPlayerPosition?,
-    val role: String?,
+    val role: MatchPlayerRole?,
 )

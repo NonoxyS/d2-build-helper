@@ -23,7 +23,9 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchLane
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
@@ -121,8 +123,8 @@ private fun previewHeader() = UiBuildHeader(
     heroName = "Lion",
     isRadiant = true,
     position = UiMatchPlayerPosition.POSITION_5,
-    role = "Support",
-    lane = "Safe",
+    role = UiMatchPlayerRole.HARD_SUPPORT,
+    lane = UiMatchLane.SAFE_LANE,
     durationText = "38:42",
     level = 25,
     isVictory = true,
@@ -238,18 +240,18 @@ private fun previewNetworth() = UiNetworthCurve(
 
 private fun previewLineup() = UiLineup(
     allies = persistentListOf(
-        UiLineupMember(heroIconUrl = null, isMe = true, role = "Support"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Carry"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Mid"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Offlane"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Hard Support"),
+        UiLineupMember(heroIconUrl = null, isMe = true, role = UiMatchPlayerRole.HARD_SUPPORT),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
     ),
     enemies = persistentListOf(
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Carry"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Mid"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Offlane"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Support"),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = "Hard Support"),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
+        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.HARD_SUPPORT),
     ),
 )
 

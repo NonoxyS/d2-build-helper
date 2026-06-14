@@ -22,6 +22,7 @@ import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space2
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.match.label
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader
 
 private val HERO_ICON_SIZE = 54.dp
@@ -97,8 +98,8 @@ private fun MetaRow(
     }
     val parts = listOfNotNull(
         side,
-        header.role,
-        header.lane,
+        header.role?.label(),
+        header.lane?.label(),
         header.durationText.takeIf { it.isNotBlank() },
         header.level?.let { "lvl $it" },
     )
