@@ -48,7 +48,6 @@
     <string name="guide_detail_xpm">XPM</string>
     <string name="guide_detail_kda">KDA</string>
     <string name="guide_detail_networth">Networth</string>
-    <string name="guide_detail_last_hits_at_10">LH @10мин</string>
 
     <string name="guide_detail_ability_points">Вкачано очков: %d</string>
 
