@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,12 +40,10 @@ internal fun BuildHeaderCard(
                 model = header.heroIconUrl?.raw,
                 contentDescription = header.heroName,
                 contentScale = ContentScale.Crop,
+                placeholder = ColorPainter(D2BuildHelperTheme.colors.surfaceVariant),
+                error = ColorPainter(D2BuildHelperTheme.colors.surfaceVariant),
                 modifier = Modifier
                     .size(HERO_ICON_SIZE)
-                    .background(
-                        color = D2BuildHelperTheme.colors.surfaceVariant,
-                        shape = D2BuildHelperTheme.shapes.cornerRadius8,
-                    )
                     .clip(D2BuildHelperTheme.shapes.cornerRadius8),
             )
             Space8()
@@ -123,14 +122,11 @@ private fun KdaColumn(
             style = D2BuildHelperTheme.typography.bodyLG,
             textAlign = TextAlign.End,
         )
-        header.impact?.let { impact ->
-            val sign = if (impact >= 0) "+$impact" else impact.toString()
-            Text(
-                text = stringResource(MR.strings.guide_detail_impact_format, sign),
-                color = D2BuildHelperTheme.colors.textSecondary,
-                style = D2BuildHelperTheme.typography.captionMD,
-            )
-        }
+        Text(
+            text = stringResource(MR.strings.guide_detail_kda),
+            color = D2BuildHelperTheme.colors.textSecondary,
+            style = D2BuildHelperTheme.typography.captionMD,
+        )
     }
 }
 

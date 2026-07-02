@@ -134,7 +134,6 @@ private fun previewHeader() = UiBuildHeader(
     kills = 4,
     deaths = 3,
     assists = 21,
-    impact = 72,
 )
 
 private fun previewSkillBuild() = UiSkillBuild(

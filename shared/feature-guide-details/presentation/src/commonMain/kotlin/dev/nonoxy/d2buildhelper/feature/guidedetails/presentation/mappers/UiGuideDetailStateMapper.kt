@@ -91,7 +91,6 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             kills = player.kills,
             deaths = player.deaths,
             assists = player.assists,
-            impact = player.impact,
         )
     }
 

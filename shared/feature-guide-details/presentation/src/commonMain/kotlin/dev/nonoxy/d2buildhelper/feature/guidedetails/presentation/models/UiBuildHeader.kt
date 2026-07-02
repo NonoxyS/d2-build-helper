@@ -18,5 +18,4 @@ data class UiBuildHeader(
     val kills: Int?,
     val deaths: Int?,
     val assists: Int?,
-    val impact: Int?,
 )

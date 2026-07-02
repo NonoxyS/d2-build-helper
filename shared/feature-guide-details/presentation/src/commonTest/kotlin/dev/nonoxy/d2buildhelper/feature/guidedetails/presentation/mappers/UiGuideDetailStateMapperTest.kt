@@ -113,7 +113,7 @@ class UiGuideDetailStateMapperTest {
     )
 
     @Test
-    fun `maps header - hero name, side, duration, W L, KDA, level, impact`() {
+    fun `maps header - hero name, side, duration, W L, KDA, level`() {
         // NOTE: position is left null here. `UiMatchPlayerPosition.toUi()` touches
         // `MR.images`, whose generated Android `R$drawable` is not on the host-JVM
         // unit-test classpath (moko-resources limitation) — the same reason the
@@ -148,7 +148,6 @@ class UiGuideDetailStateMapperTest {
         assertEquals(8, header.kills)
         assertEquals(6, header.deaths)
         assertEquals(21, header.assists)
-        assertEquals(9, header.impact)
     }
 
     @Test
