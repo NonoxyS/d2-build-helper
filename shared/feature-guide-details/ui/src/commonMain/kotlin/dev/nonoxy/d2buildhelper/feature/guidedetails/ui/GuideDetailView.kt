@@ -138,10 +138,34 @@ private fun previewSkillBuild() = UiSkillBuild(
     summary = UiSkillSummary(
         talentTierTaken = persistentListOf(true, true, true, false),
         abilities = persistentListOf(
-            UiAbilitySummary(iconUrl = null, name = "Earth Spike", pointCount = 7, isUltimate = false),
-            UiAbilitySummary(iconUrl = null, name = "Hex", pointCount = 7, isUltimate = false),
-            UiAbilitySummary(iconUrl = null, name = "Mana Drain", pointCount = 4, isUltimate = false),
-            UiAbilitySummary(iconUrl = null, name = "Finger of Death", pointCount = 5, isUltimate = true),
+            UiAbilitySummary(
+                iconUrl = null,
+                name = "Earth Spike",
+                pointCount = 7,
+                earlyPointCount = 3,
+                isUltimate = false,
+            ),
+            UiAbilitySummary(
+                iconUrl = null,
+                name = "Hex",
+                pointCount = 7,
+                earlyPointCount = 2,
+                isUltimate = false,
+            ),
+            UiAbilitySummary(
+                iconUrl = null,
+                name = "Mana Drain",
+                pointCount = 4,
+                earlyPointCount = 1,
+                isUltimate = false,
+            ),
+            UiAbilitySummary(
+                iconUrl = null,
+                name = "Finger of Death",
+                pointCount = 5,
+                earlyPointCount = 0,
+                isUltimate = true,
+            ),
         ),
         scepterPurchased = true,
     ),

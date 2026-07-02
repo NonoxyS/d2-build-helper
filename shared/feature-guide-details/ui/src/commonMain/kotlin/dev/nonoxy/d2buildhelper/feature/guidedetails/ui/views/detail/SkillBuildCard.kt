@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,8 +47,11 @@ import kotlinx.collections.immutable.ImmutableList
 private val ABILITY_ICON_SIZE = 34.dp
 private val SCEPTER_ICON_SIZE = 34.dp
 private val POINT_DOT_SIZE = 5.dp
-private val ROW_LABEL_WIDTH = 22.dp
-private val CELL_SIZE = 14.dp
+private val ROW_LABEL_WIDTH = 28.dp
+private val CELL_SIZE = 28.dp
+private val CELL_GAP = 2.dp
+private val CELL_CORNER = RoundedCornerShape(4.dp)
+private val ROW_V_PADDING = 3.dp
 private const val SCEPTER_GREY_ALPHA = 0.3f
 
 private val abilityTints = listOf(
@@ -160,7 +165,7 @@ private fun AbilitySummaryColumn(
         )
         Space4()
 
-        PointDots(pointCount = ability.pointCount, maxPoints = if (ability.isUltimate) 3 else 4)
+        PointDots(pointCount = ability.earlyPointCount, maxPoints = if (ability.isUltimate) 3 else 4)
     }
 }
 
@@ -206,18 +211,26 @@ private fun SkillMatrix(
 ) {
     Column(modifier = modifier.horizontalScroll(rememberScrollState())) {
         HeaderRow()
-        Space4()
 
         matrix.rows.fastForEach { row ->
+            MatrixGridline()
             MatrixRow(row = row)
-            Space4()
         }
+        MatrixGridline()
     }
 }
 
 @Composable
+private fun MatrixGridline(modifier: Modifier = Modifier) {
+    HorizontalDivider(modifier = modifier, thickness = 1.dp, color = D2BuildHelperTheme.colors.outline)
+}
+
+@Composable
 private fun HeaderRow(modifier: Modifier = Modifier) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+    Row(
+        modifier = modifier.padding(vertical = ROW_V_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(CELL_GAP),
+    ) {
         Box(modifier = Modifier.width(ROW_LABEL_WIDTH))
         repeat(UiSkillMatrix.LEVEL_COLUMNS) { index ->
             Box(modifier = Modifier.size(CELL_SIZE), contentAlignment = Alignment.Center) {
@@ -236,25 +249,39 @@ private fun MatrixRow(
     row: UiSkillMatrixRow,
     modifier: Modifier = Modifier,
 ) {
-    val markColor = when {
-        row.isStat -> ABILITY_STAT_COLOR
-        row.isUltimate -> ABILITY_R_COLOR
-        else -> D2BuildHelperTheme.colors.tintColor
-    }
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier.padding(vertical = ROW_V_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(CELL_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RowLabel(row = row)
         row.marks.fastForEach { marked ->
+            MatrixCell(row = row, marked = marked)
+        }
+    }
+}
+
+@Composable
+private fun MatrixCell(
+    row: UiSkillMatrixRow,
+    marked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.size(CELL_SIZE), contentAlignment = Alignment.Center) {
+        if (!marked) return@Box
+        if (row.isStat) {
             Box(
                 modifier = Modifier
-                    .size(CELL_SIZE)
-                    .background(
-                        color = if (marked) markColor else D2BuildHelperTheme.colors.surfaceVariant,
-                        shape = RoundedCornerShape(3.dp),
-                    ),
+                    .fillMaxSize()
+                    .clip(CELL_CORNER)
+                    .background(ABILITY_STAT_COLOR),
+            )
+        } else {
+            AsyncImage(
+                model = row.iconUrl?.raw,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().clip(CELL_CORNER),
             )
         }
     }
@@ -265,18 +292,13 @@ private fun RowLabel(
     row: UiSkillMatrixRow,
     modifier: Modifier = Modifier,
 ) {
-    val label = if (row.isStat) {
-        stringResource(MR.strings.guide_detail_skill_stat_row)
-    } else {
-        null
-    }
     Box(
         modifier = modifier.size(width = ROW_LABEL_WIDTH, height = CELL_SIZE),
         contentAlignment = Alignment.Center,
     ) {
-        if (label != null) {
+        if (row.isStat) {
             Text(
-                text = label,
+                text = stringResource(MR.strings.guide_detail_skill_stat_row),
                 color = D2BuildHelperTheme.colors.textSecondary,
                 style = D2BuildHelperTheme.typography.captionMD,
             )
@@ -285,7 +307,7 @@ private fun RowLabel(
                 model = row.iconUrl?.raw,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(CELL_SIZE).clip(RoundedCornerShape(3.dp)),
+                modifier = Modifier.size(CELL_SIZE).clip(CELL_CORNER),
             )
         }
     }

@@ -236,6 +236,7 @@ class UiGuideDetailStateMapperTest {
                 AbilityLearnEvent(0, q.id, 1, isTalent = false, isUltimate = false),
                 AbilityLearnEvent(60, q.id, 2, isTalent = false, isUltimate = false),
                 AbilityLearnEvent(120, w.id, 3, isTalent = false, isUltimate = false),
+                AbilityLearnEvent(480, q.id, 8, isTalent = false, isUltimate = false),
             ),
             finalItemIds = listOf(scepterItemId, ItemId(3)),
         )
@@ -248,8 +249,10 @@ class UiGuideDetailStateMapperTest {
         )
 
         val summary = ui.skillBuild!!.summary
-        assertEquals(2, summary.abilities.first().pointCount) // Q learned twice
+        assertEquals(3, summary.abilities.first().pointCount) // Q learned at 1, 2, 8
+        assertEquals(2, summary.abilities.first().earlyPointCount) // level 8 past the first 6
         assertEquals(1, summary.abilities[1].pointCount) // W learned once
+        assertEquals(1, summary.abilities[1].earlyPointCount)
         assertTrue(summary.scepterPurchased)
     }
 

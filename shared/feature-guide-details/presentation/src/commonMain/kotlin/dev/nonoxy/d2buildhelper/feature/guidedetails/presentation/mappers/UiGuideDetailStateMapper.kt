@@ -41,6 +41,7 @@ internal const val ULTIMATE_SCEPTER_ITEM_ID_RAW: Short = 108
 
 private const val MAX_LEVEL = UiSkillMatrix.LEVEL_COLUMNS
 private const val MAX_ABILITY_ROWS = 4
+private const val EARLY_LEVELS = 6
 private const val SECONDS_PER_MINUTE = 60
 private const val LAST_HITS_AT_MINUTE = 10
 private val TALENT_TIERS = listOf(10, 15, 20, 25)
@@ -135,6 +136,9 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
                     iconUrl = abilities[abilityId]?.iconUrl,
                     name = abilities[abilityId]?.name,
                     pointCount = skillEvents.count { it.abilityId == abilityId },
+                    earlyPointCount = skillEvents.count {
+                        it.abilityId == abilityId && (it.level ?: 0) in 1..EARLY_LEVELS
+                    },
                     isUltimate = skillEvents.isUltimate(abilityId),
                 )
             }.toImmutableList(),

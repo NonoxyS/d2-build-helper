@@ -19,6 +19,7 @@ data class UiAbilitySummary(
     val iconUrl: ImageUrl?,
     val name: String?,
     val pointCount: Int,
+    val earlyPointCount: Int,
     val isUltimate: Boolean,
 )
 
