@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.mapNotNull
 
 class GuideDetailViewModel internal constructor(
     private val store: GuideDetailStore,
-    private val stateMapper: UiGuideDetailStateMapper,
-    private val labelMapper: UiGuideDetailLabelMapper,
+    stateMapper: UiGuideDetailStateMapper,
+    labelMapper: UiGuideDetailLabelMapper,
 ) : BaseViewModel<UiGuideDetailState, UiGuideDetailLabel>(initialState = UiGuideDetailState()) {
 
     init {

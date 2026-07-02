@@ -17,6 +17,11 @@ val featureGuideDetailsImplModule = module {
     factory<GuideDetailRepository> { new(::GuideDetailRepositoryImpl) }
 
     factory { (matchId: Long, steamAccountId: Long) ->
-        GuideDetailStoreFactory(get(), get(), get(), get()).create(matchId, steamAccountId)
+        GuideDetailStoreFactory(
+            storeFactory = get(),
+            guideDetailRepository = get(),
+            resourcesRepository = get(),
+            dispatchers = get()
+        ).create(matchId = matchId, steamAccountId = steamAccountId)
     }
 }

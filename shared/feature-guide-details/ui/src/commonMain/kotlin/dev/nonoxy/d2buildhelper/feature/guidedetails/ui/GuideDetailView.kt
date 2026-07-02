@@ -23,6 +23,7 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.icon.D2Icon
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D2IconButton
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
+import dev.nonoxy.d2buildhelper.common.ui.compose.utils.navigationBarHeight
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchLane
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
@@ -84,8 +85,10 @@ internal fun GuideDetailView(
                 .padding(innerPadding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(
-                horizontal = CARD_HORIZONTAL_PADDING,
-                vertical = CARD_VERTICAL_SPACING,
+                start = CARD_HORIZONTAL_PADDING,
+                end = CARD_HORIZONTAL_PADDING,
+                top = CARD_VERTICAL_SPACING,
+                bottom = CARD_VERTICAL_SPACING + navigationBarHeight,
             ),
             verticalArrangement = Arrangement.spacedBy(CARD_VERTICAL_SPACING),
         ) {
