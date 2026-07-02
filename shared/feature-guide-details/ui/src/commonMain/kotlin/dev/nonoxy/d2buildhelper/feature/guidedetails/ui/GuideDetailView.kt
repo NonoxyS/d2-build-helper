@@ -27,6 +27,7 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.utils.navigationBarHeight
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchLane
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
 import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.TalentSide
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
@@ -40,9 +41,10 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetwo
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthMarker
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrix
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixBottomCell
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixRow
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillSummary
-import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalent
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalentTier
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.BuildHeaderCard
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.ItemBuildCard
 import dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail.LineupCard
@@ -138,7 +140,12 @@ private fun previewHeader() = UiBuildHeader(
 
 private fun previewSkillBuild() = UiSkillBuild(
     summary = UiSkillSummary(
-        talentTierTaken = persistentListOf(true, true, true, false),
+        talentTiers = persistentListOf(
+            UiTalentTier(tier = 10, taken = true, side = TalentSide.LEFT),
+            UiTalentTier(tier = 15, taken = true, side = TalentSide.RIGHT),
+            UiTalentTier(tier = 20, taken = true, side = TalentSide.LEFT),
+            UiTalentTier(tier = 25, taken = false, side = null),
+        ),
         abilities = persistentListOf(
             UiAbilitySummary(
                 iconUrl = null,
@@ -172,49 +179,42 @@ private fun previewSkillBuild() = UiSkillBuild(
         scepterPurchased = true,
     ),
     matrix = UiSkillMatrix(
-        rows = persistentListOf(
+        abilityRows = persistentListOf(
             UiSkillMatrixRow(
                 iconUrl = null,
                 name = "Earth Spike",
-                isStat = false,
                 isUltimate = false,
-                marks = (1..30).map { it in listOf(1, 3, 5, 8, 10, 12, 14) }.toPersistentList(),
+                marks = (1..UiSkillMatrix.LEVEL_COLUMNS).map { it in listOf(1, 3, 5, 8, 12, 14) }.toPersistentList(),
             ),
             UiSkillMatrixRow(
                 iconUrl = null,
                 name = "Hex",
-                isStat = false,
                 isUltimate = false,
-                marks = (1..30).map { it in listOf(2, 4, 7, 9, 11, 13, 16) }.toPersistentList(),
+                marks = (1..UiSkillMatrix.LEVEL_COLUMNS).map { it in listOf(2, 4, 7, 9, 11, 13) }.toPersistentList(),
             ),
             UiSkillMatrixRow(
                 iconUrl = null,
                 name = "Mana Drain",
-                isStat = false,
                 isUltimate = false,
-                marks = (1..30).map { it in listOf(6, 15, 17, 19) }.toPersistentList(),
+                marks = (1..UiSkillMatrix.LEVEL_COLUMNS).map { it in listOf(16, 17, 19) }.toPersistentList(),
             ),
             UiSkillMatrixRow(
                 iconUrl = null,
                 name = "Finger of Death",
-                isStat = false,
                 isUltimate = true,
-                marks = (1..30).map { it in listOf(18, 20, 24) }.toPersistentList(),
-            ),
-            UiSkillMatrixRow(
-                iconUrl = null,
-                name = null,
-                isStat = true,
-                isUltimate = false,
-                marks = (1..30).map { it in listOf(21, 22, 23, 25) }.toPersistentList(),
+                marks = (1..UiSkillMatrix.LEVEL_COLUMNS).map { it in listOf(6, 18, 24) }.toPersistentList(),
             ),
         ),
-    ),
-    talents = persistentListOf(
-        UiTalent(level = 10, text = "+125 Cast Range"),
-        UiTalent(level = 15, text = "+100 Hex Duration"),
-        UiTalent(level = 20, text = "-4s Earth Spike CD"),
-        UiTalent(level = 25, text = "+250 Finger Damage"),
+        bottomCells = (1..UiSkillMatrix.LEVEL_COLUMNS).map { level ->
+            when (level) {
+                10 -> UiSkillMatrixBottomCell.Talent(tier = 10, side = TalentSide.LEFT, text = "+125 Cast Range")
+                15 -> UiSkillMatrixBottomCell.Talent(tier = 15, side = TalentSide.RIGHT, text = "+100 Hex Duration")
+                20 -> UiSkillMatrixBottomCell.Talent(tier = 20, side = TalentSide.LEFT, text = "-4s Earth Spike CD")
+                25 -> UiSkillMatrixBottomCell.Talent(tier = 25, side = null, text = "+250 Finger Damage")
+                21, 22, 23 -> UiSkillMatrixBottomCell.Stat
+                else -> UiSkillMatrixBottomCell.Empty
+            }
+        }.toPersistentList(),
     ),
 )
 

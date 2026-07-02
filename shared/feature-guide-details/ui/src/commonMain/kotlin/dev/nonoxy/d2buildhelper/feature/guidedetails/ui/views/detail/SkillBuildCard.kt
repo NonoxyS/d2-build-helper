@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import coil3.compose.AsyncImage
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -35,10 +36,11 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrix
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixBottomCell
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixRow
-import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalent
-import androidx.compose.ui.util.fastForEach
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalentTier
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 private val ABILITY_ICON_SIZE = 34.dp
 private val SCEPTER_ICON_SIZE = 34.dp
@@ -48,7 +50,9 @@ private val CELL_SIZE = 28.dp
 private val CELL_GAP = 2.dp
 private val CELL_CORNER = RoundedCornerShape(4.dp)
 private val ROW_V_PADDING = 3.dp
+private val STAT_MARK_SIZE = 16.dp
 private const val SCEPTER_GREY_ALPHA = 0.3f
+private const val MAX_EARLY_DOTS = 3
 
 private val abilityTints = listOf(
     ABILITY_Q_COLOR,
@@ -69,22 +73,6 @@ internal fun SkillBuildCard(
         Space6()
 
         SkillMatrix(matrix = skillBuild.matrix)
-        Space4()
-
-        Text(
-            text = stringResource(MR.strings.guide_detail_skill_matrix_caption),
-            color = D2BuildHelperTheme.colors.textSecondary,
-            style = D2BuildHelperTheme.typography.captionMD,
-        )
-
-        if (skillBuild.talents.isNotEmpty()) {
-            Space6()
-
-            TalentList(
-                tiersTaken = skillBuild.summary.talentTierTaken,
-                talents = skillBuild.talents,
-            )
-        }
     }
 }
 
@@ -98,7 +86,7 @@ private fun SummaryRow(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        TalentTreeIcon(tiersTaken = skillBuild.summary.talentTierTaken)
+        TalentTreeIcon(tiers = skillBuild.summary.talentTiers)
 
         skillBuild.summary.abilities.forEachIndexed { index, ability ->
             AbilitySummaryColumn(
@@ -136,7 +124,7 @@ private fun AbilitySummaryColumn(
             )
             Space4()
 
-            PointDots(pointCount = ability.earlyPointCount, maxPoints = if (ability.isUltimate) 3 else 4)
+            PointDots(pointCount = ability.earlyPointCount, maxPoints = MAX_EARLY_DOTS)
         }
     }
 }
@@ -184,10 +172,12 @@ private fun SkillMatrix(
     Column(modifier = modifier.horizontalScroll(rememberScrollState())) {
         HeaderRow()
 
-        matrix.rows.fastForEach { row ->
+        matrix.abilityRows.fastForEach { row ->
             MatrixGridline()
-            MatrixRow(row = row)
+            AbilityMatrixRow(row = row)
         }
+        MatrixGridline()
+        BottomMatrixRow(cells = matrix.bottomCells)
         MatrixGridline()
     }
 }
@@ -217,7 +207,7 @@ private fun HeaderRow(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MatrixRow(
+private fun AbilityMatrixRow(
     row: UiSkillMatrixRow,
     modifier: Modifier = Modifier,
 ) {
@@ -226,92 +216,65 @@ private fun MatrixRow(
         horizontalArrangement = Arrangement.spacedBy(CELL_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RowLabel(row = row)
-        row.marks.fastForEach { marked ->
-            MatrixCell(row = row, marked = marked)
-        }
-    }
-}
-
-@Composable
-private fun MatrixCell(
-    row: UiSkillMatrixRow,
-    marked: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.size(CELL_SIZE), contentAlignment = Alignment.Center) {
-        if (!marked) return@Box
-        if (row.isStat) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CELL_CORNER)
-                    .background(ABILITY_STAT_COLOR),
-            )
-        } else {
+        Box(
+            modifier = Modifier.size(width = ROW_LABEL_WIDTH, height = CELL_SIZE),
+            contentAlignment = Alignment.Center,
+        ) {
             AsyncImage(
                 model = row.iconUrl?.raw,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(CELL_CORNER),
-            )
-        }
-    }
-}
-
-@Composable
-private fun RowLabel(
-    row: UiSkillMatrixRow,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier.size(width = ROW_LABEL_WIDTH, height = CELL_SIZE),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (row.isStat) {
-            Text(
-                text = stringResource(MR.strings.guide_detail_skill_stat_row),
-                color = D2BuildHelperTheme.colors.textSecondary,
-                style = D2BuildHelperTheme.typography.captionMD,
-            )
-        } else {
-            AsyncImage(
-                model = row.iconUrl?.raw,
-                contentDescription = null,
+                contentDescription = row.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(CELL_SIZE).clip(CELL_CORNER),
             )
         }
+        row.marks.fastForEach { marked ->
+            Box(modifier = Modifier.size(CELL_SIZE), contentAlignment = Alignment.Center) {
+                if (marked) {
+                    AsyncImage(
+                        model = row.iconUrl?.raw,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CELL_CORNER),
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun TalentList(
-    tiersTaken: ImmutableList<Boolean>,
-    talents: ImmutableList<UiTalent>,
+private fun BottomMatrixRow(
+    cells: ImmutableList<UiSkillMatrixBottomCell>,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        TalentTreeIcon(tiersTaken = tiersTaken)
-        Space6()
-
-        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            talents.fastForEach { talent ->
-                ExplainAnchor(title = "${talent.level}", body = talent.text) { onClick ->
-                    Row(
-                        modifier = Modifier.clickable(onClick = onClick),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Text(
-                            text = "${talent.level}",
-                            color = TALENT_GOLD,
-                            style = D2BuildHelperTheme.typography.captionMD,
-                            modifier = Modifier.padding(end = 2.dp),
-                        )
-                        Text(
-                            text = talent.text,
-                            color = D2BuildHelperTheme.colors.textPrimary,
-                            style = D2BuildHelperTheme.typography.captionMD,
+    val talentTitle = stringResource(MR.strings.guide_detail_card_skill_build)
+    Row(
+        modifier = modifier.padding(vertical = ROW_V_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(CELL_GAP),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(modifier = Modifier.width(ROW_LABEL_WIDTH))
+        cells.fastForEach { cell ->
+            Box(modifier = Modifier.size(CELL_SIZE), contentAlignment = Alignment.Center) {
+                when (cell) {
+                    UiSkillMatrixBottomCell.Empty -> Unit
+                    UiSkillMatrixBottomCell.Stat -> Box(
+                        modifier = Modifier
+                            .size(STAT_MARK_SIZE)
+                            .clip(CELL_CORNER)
+                            .background(ABILITY_STAT_COLOR),
+                    )
+                    is UiSkillMatrixBottomCell.Talent -> ExplainAnchor(
+                        title = talentTitle,
+                        body = cell.text,
+                    ) { onClick ->
+                        TalentTreeIcon(
+                            tiers = persistentListOf(
+                                UiTalentTier(tier = cell.tier, taken = true, side = cell.side),
+                            ),
+                            width = CELL_SIZE,
+                            height = CELL_SIZE,
+                            modifier = Modifier.clickable(onClick = onClick),
                         )
                     }
                 }
