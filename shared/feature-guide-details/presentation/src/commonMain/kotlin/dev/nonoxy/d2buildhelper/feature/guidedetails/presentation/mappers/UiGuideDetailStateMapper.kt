@@ -194,23 +194,29 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         return UiItemBuild(neutralItem = neutral, sections = sections)
     }
 
-    // Drop recipes, fold assembled items' components back into the result, and remove
-    // post-laning consumables — leaving the real build path (see item-build model notes).
+    // Fold the assembly chain into the final items and drop post-laning consumables,
+    // leaving the real build path (see item-build model notes). Stratz carries components
+    // on the recipe item, not the assembled one, so a recipe purchase is the assembly
+    // signal: it consumes its ingredients from earlier loose purchases plus itself, while
+    // the assembled item lands as its own later purchase and survives.
     private fun reconstructBuild(
         purchases: List<ItemPurchase>,
         items: Map<ItemId, Item>,
     ): List<ItemPurchase> {
-        val ordered = purchases
-            .sortedBy { it.time ?: Int.MAX_VALUE }
-            .filter { items[it.itemId]?.isRecipe != true }
+        val ordered = purchases.sortedBy { it.time ?: Int.MAX_VALUE }
 
         val consumed = BooleanArray(ordered.size)
         val available = HashMap<ItemId, ArrayDeque<Int>>()
         ordered.forEachIndexed { index, purchase ->
-            items[purchase.itemId]?.components.orEmpty().forEach { componentId ->
-                available[componentId]?.removeFirstOrNull()?.let { consumed[it] = true }
+            val item = items[purchase.itemId]
+            if (item?.isRecipe == true) {
+                item.components.forEach { componentId ->
+                    available[componentId]?.removeFirstOrNull()?.let { consumed[it] = true }
+                }
+                consumed[index] = true
+            } else {
+                available.getOrPut(purchase.itemId) { ArrayDeque() }.addLast(index)
             }
-            available.getOrPut(purchase.itemId) { ArrayDeque() }.addLast(index)
         }
 
         return ordered.filterIndexed { index, purchase ->
