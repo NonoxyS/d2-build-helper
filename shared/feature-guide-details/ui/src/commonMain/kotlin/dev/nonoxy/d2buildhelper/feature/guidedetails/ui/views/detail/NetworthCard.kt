@@ -2,15 +2,17 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -35,10 +38,12 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetwo
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthMarker
 import kotlinx.collections.immutable.ImmutableList
 
-private val CHART_HEIGHT = 86.dp
-private const val LINE_STROKE = 2f
-private const val MARKER_RADIUS = 4f
+private val CHART_HEIGHT = 96.dp
+private const val LINE_STROKE = 2.5f
+private const val BASELINE_STROKE = 1f
 private val MARKER_ICON_SIZE = 28.dp
+private val CHART_INSET = 16.dp
+private const val AREA_ALPHA = 0.28f
 
 @Composable
 internal fun NetworthCard(
@@ -53,6 +58,7 @@ internal fun NetworthCard(
         NetworthChart(
             points = networth.points,
             markers = networth.markers,
+            onMarkerClick = { marker -> explained = marker },
             modifier = Modifier.fillMaxWidth().height(CHART_HEIGHT),
         )
         Space4()
@@ -62,14 +68,6 @@ internal fun NetworthCard(
             color = D2BuildHelperTheme.colors.textSecondary,
             style = D2BuildHelperTheme.typography.captionMD,
         )
-
-        if (networth.markers.isNotEmpty()) {
-            Space8()
-            MarkerLegend(
-                markers = networth.markers,
-                onMarkerClick = { marker -> explained = marker },
-            )
-        }
 
         Space8()
 
@@ -90,87 +88,95 @@ internal fun NetworthCard(
 private fun NetworthChart(
     points: ImmutableList<Int>,
     markers: ImmutableList<UiNetworthMarker>,
+    onMarkerClick: (UiNetworthMarker) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (points.size < 2) return
 
     val lineColor = NETWORTH_LINE_COLOR
-    val markerColor = PURCHASE_MARKER_COLOR
+    val baselineColor = D2BuildHelperTheme.colors.outline
     val maxValue = (points.maxOrNull() ?: 0).coerceAtLeast(1)
+    val stepFraction = 1f / (points.size - 1)
 
-    Canvas(modifier = modifier) {
-        val stepX = size.width / (points.size - 1)
-        fun pointOffset(index: Int): Offset {
-            val value = points.getOrElse(index) { 0 }
-            val x = stepX * index
-            val y = size.height - (value.toFloat() / maxValue) * size.height
-            return Offset(x, y)
-        }
+    BoxWithConstraints(modifier = modifier) {
+        val plotWidth = maxWidth - CHART_INSET * 2
+        val plotHeight = maxHeight - CHART_INSET * 2
 
-        val path = Path().apply {
-            moveTo(pointOffset(0).x, pointOffset(0).y)
-            for (index in 1 until points.size) {
-                val offset = pointOffset(index)
-                lineTo(offset.x, offset.y)
+        Canvas(modifier = Modifier.matchParentSize().padding(CHART_INSET)) {
+            fun offsetAt(index: Int): Offset {
+                val value = points.getOrElse(index) { 0 }
+                val x = size.width * index * stepFraction
+                val y = size.height - (value.toFloat() / maxValue) * size.height
+                return Offset(x, y)
             }
+
+            val line = Path().apply {
+                moveTo(offsetAt(0).x, offsetAt(0).y)
+                for (index in 1 until points.size) {
+                    val offset = offsetAt(index)
+                    lineTo(offset.x, offset.y)
+                }
+            }
+            val area = Path().apply {
+                addPath(line)
+                lineTo(size.width, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+            drawPath(
+                path = area,
+                brush = Brush.verticalGradient(
+                    listOf(lineColor.copy(alpha = AREA_ALPHA), lineColor.copy(alpha = 0f)),
+                ),
+            )
+            drawLine(
+                color = baselineColor,
+                start = Offset(0f, size.height),
+                end = Offset(size.width, size.height),
+                strokeWidth = BASELINE_STROKE,
+            )
+            drawPath(path = line, color = lineColor, style = Stroke(width = LINE_STROKE))
         }
-        drawPath(path = path, color = lineColor, style = Stroke(width = LINE_STROKE))
 
         markers.forEach { marker ->
-            if (marker.minute in points.indices) {
-                drawCircle(color = markerColor, radius = MARKER_RADIUS, center = pointOffset(marker.minute))
-            }
+            if (marker.minute !in points.indices) return@forEach
+            val value = points[marker.minute]
+            MarkerIcon(
+                marker = marker,
+                onClick = { onMarkerClick(marker) },
+                modifier = Modifier.offset(
+                    x = CHART_INSET + plotWidth * (marker.minute * stepFraction) - MARKER_ICON_SIZE / 2,
+                    y = CHART_INSET + plotHeight * (1f - value.toFloat() / maxValue) - MARKER_ICON_SIZE / 2,
+                ),
+            )
         }
     }
 }
 
 @Composable
-private fun MarkerLegend(
-    markers: ImmutableList<UiNetworthMarker>,
-    onMarkerClick: (UiNetworthMarker) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.horizontalScroll(rememberScrollState()),
-        verticalAlignment = Alignment.Top,
-    ) {
-        markers.forEachIndexed { index, marker ->
-            if (index > 0) {
-                Space8()
-            }
-            MarkerItem(marker = marker, onClick = { onMarkerClick(marker) })
-        }
-    }
-}
-
-@Composable
-private fun MarkerItem(
+private fun MarkerIcon(
     marker: UiNetworthMarker,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        AsyncImage(
-            model = marker.iconUrl?.raw,
-            contentDescription = marker.name,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .size(MARKER_ICON_SIZE)
-                .background(
-                    color = D2BuildHelperTheme.colors.surfaceVariant,
-                    shape = D2BuildHelperTheme.shapes.cornerRadius4,
-                )
-                .clip(D2BuildHelperTheme.shapes.cornerRadius4)
-                .clickable(onClick = onClick),
-        )
-        Space4()
-
-        Text(
-            text = "${marker.minute}'",
-            color = D2BuildHelperTheme.colors.textSecondary,
-            style = D2BuildHelperTheme.typography.captionMD,
-        )
-    }
+    AsyncImage(
+        model = marker.iconUrl?.raw,
+        contentDescription = marker.name,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .size(MARKER_ICON_SIZE)
+            .clip(D2BuildHelperTheme.shapes.cornerRadius4)
+            .background(
+                color = D2BuildHelperTheme.colors.surfaceVariant,
+                shape = D2BuildHelperTheme.shapes.cornerRadius4,
+            )
+            .border(
+                width = 1.dp,
+                color = D2BuildHelperTheme.colors.outline,
+                shape = D2BuildHelperTheme.shapes.cornerRadius4,
+            )
+            .clickable(onClick = onClick),
+    )
 }
 
 @Composable

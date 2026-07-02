@@ -50,6 +50,7 @@ private const val LANING_END_SECONDS = 600
 
 private const val MID_GAME_END_SECONDS = 1500
 private const val CONSUMABLE_QUALITY_PREFIX = "consumable"
+private const val MAX_NETWORTH_MARKERS = 8
 
 internal interface UiGuideDetailStateMapper : Mapper<GuideDetailStore.State, UiGuideDetailState>
 
@@ -252,15 +253,13 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     }
 
     private fun buildNetworth(player: BuildPlayer, items: Map<ItemId, Item>): UiNetworthCurve {
-        val significantIds = (
-            player.finalItemIds + player.backpackItemIds + listOfNotNull(player.neutralItemId)
-        ).toSet()
-
-        val markers = player.itemPurchases
-            .filter { it.itemId in significantIds && it.time != null }
+        val markers = reconstructBuild(player.itemPurchases, items)
+            .filter { it.time != null }
+            .filter { items[it.itemId]?.quality?.startsWith(CONSUMABLE_QUALITY_PREFIX) != true }
             .groupBy { it.itemId }
             .map { (_, purchases) -> purchases.minBy { it.time!! } }
             .sortedBy { it.time!! }
+            .take(MAX_NETWORTH_MARKERS)
             .map { purchase ->
                 UiNetworthMarker(
                     minute = purchase.time!! / SECONDS_PER_MINUTE,

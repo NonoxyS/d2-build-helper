@@ -475,43 +475,31 @@ class UiGuideDetailStateMapperTest {
     }
 
     @Test
-    fun `networth markers - only significant items, first purchase kept, non-significant excluded`() {
-        // finalItemIds=[10,40], backpackItemIds=[20], neutralItemId=30
-        // Purchases:
-        //   id=10 @720s  (min 12) — significant (final), FIRST buy → included
-        //   id=99 @300s  (min  5) — NOT significant → excluded
-        //   id=10 @1400s (min 23) — rebuy of id=10 → excluded (first purchase already captured)
-        //   id=20 @900s  (min 15) — significant (backpack) → included
-        //   id=30 @600s  (min 10) — significant (neutral) → included
-        //   id=5  @(-30)s         — negative time, NOT significant → excluded
-        //   id=40  time=null      — significant (final) but time=null → excluded (pins time != null guard)
+    fun `networth markers derive from the build path - consumables, folded parts and rebuys excluded`() {
+        // ogre(1)+mithril(2) fold into bkb(4); item(5) standalone; tango(6) consumable.
+        val items = mapOf(
+            ItemId(1) to item(1, quality = "component"),
+            ItemId(2) to item(2, quality = "component"),
+            ItemId(4) to item(4, quality = "rare", components = listOf(ItemId(1), ItemId(2))),
+            ItemId(5) to item(5, quality = "epic"),
+            ItemId(6) to item(6, quality = "consumable"),
+        )
         val player = emptyPlayer(heroId = 1).copy(
-            finalItemIds = listOf(ItemId(10), ItemId(40)),
-            backpackItemIds = listOf(ItemId(20)),
-            neutralItemId = ItemId(30),
-            networthPerMinute = (0..16).map { it * 100 },
+            networthPerMinute = (0..30).map { it * 100 },
             itemPurchases = listOf(
-                ItemPurchase(ItemId(10), time = 720),
-                ItemPurchase(ItemId(99), time = 300),
-                ItemPurchase(ItemId(10), time = 1400),
-                ItemPurchase(ItemId(20), time = 900),
-                ItemPurchase(ItemId(30), time = 600),
-                ItemPurchase(ItemId(5), time = -30),
-                ItemPurchase(ItemId(40), time = null),
+                ItemPurchase(ItemId(6), time = 60), // consumable → not a marker
+                ItemPurchase(ItemId(1), time = 120), // folded into bkb → excluded
+                ItemPurchase(ItemId(2), time = 140), // folded into bkb → excluded
+                ItemPurchase(ItemId(4), time = 300), // bkb @min5 → marker
+                ItemPurchase(ItemId(5), time = 900), // standalone @min15 → marker
+                ItemPurchase(ItemId(5), time = 1400), // rebuy → excluded (first kept)
             ),
         )
-        val ui = mapper.map(state(detail(player), heroes = mapOf(HeroId(1) to hero(1))))
+        val ui = mapper.map(state(detail(player), heroes = mapOf(HeroId(1) to hero(1)), items = items))
 
         val nw = ui.networth!!
-        // Expect 3 markers: id30@600→min10, id10@720→min12, id20@900→min15.
-        // id=40 (significant, time=null) must NOT produce a marker — pins the `time != null` guard.
-        assertEquals(3, nw.markers.size)
-        assertEquals(listOf(10, 12, 15), nw.markers.map { it.minute })
-        // Items map is empty — iconUrl and name are null
-        nw.markers.forEach { marker ->
-            assertNull(marker.iconUrl)
-            assertNull(marker.name)
-        }
+        assertEquals(listOf(5, 15), nw.markers.map { it.minute })
+        assertEquals(listOf("I4", "I5"), nw.markers.map { it.name })
     }
 
     @Test

@@ -128,7 +128,7 @@ private fun ItemWithTime(
             AsyncImage(
                 model = entry.iconUrl?.raw,
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .width(ITEM_WIDTH)
                     .height(ITEM_HEIGHT)

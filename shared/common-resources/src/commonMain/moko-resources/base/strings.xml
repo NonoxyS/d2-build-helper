@@ -47,7 +47,7 @@
     <string name="guide_detail_gpm">GPM</string>
     <string name="guide_detail_networth">Networth</string>
     <string name="guide_detail_last_hits_at_10">LH @10мин</string>
-    <string name="guide_detail_economy_caption">networth по минутам · ● покупки значимых</string>
+    <string name="guide_detail_economy_caption">Networth по минутам · иконки — ключевые закупки на кривой</string>
 
     <string name="guide_detail_skill_matrix_caption">← скролл до 30 · одна отметка/столбец · тап по иконке → popup</string>
     <string name="guide_detail_skill_stat_row">+</string>
