@@ -354,13 +354,13 @@ class UiGuideDetailStateMapperTest {
 
     @Test
     fun `item build folds components, drops recipes, keeps laning consumables only, dedups`() {
-        // ogre(1)+mithril(2)+recipe(3) assemble bkb(4); Stratz puts the ingredients on the
-        // recipe, not bkb. blink(5) kept standalone; tango(6) consumable.
+        // ogre(1)+mithril(2)+recipe(3) assemble bkb(4); the backend resolves bkb's full
+        // component tree, so ingredients hang off bkb. blink(5) standalone; tango(6) consumable.
         val items = mapOf(
             ItemId(1) to item(1, quality = "component"),
             ItemId(2) to item(2, quality = "component"),
-            ItemId(3) to item(3, isRecipe = true, components = listOf(ItemId(1), ItemId(2))),
-            ItemId(4) to item(4, quality = "rare"),
+            ItemId(3) to item(3, isRecipe = true),
+            ItemId(4) to item(4, quality = "rare", components = listOf(ItemId(1), ItemId(2))),
             ItemId(5) to item(5, quality = "component"),
             ItemId(6) to item(6, quality = "consumable"),
         )
