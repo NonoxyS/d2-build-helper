@@ -27,9 +27,10 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetwo
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiNetworthMarker
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillBuild
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrix
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixBottomCell
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixRow
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillSummary
-import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalent
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiTalentTier
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -113,22 +114,31 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             UiSkillMatrixRow(
                 iconUrl = abilities[abilityId]?.iconUrl,
                 name = abilities[abilityId]?.label,
-                isStat = false,
                 isUltimate = skillEvents.isUltimate(abilityId),
                 marks = levelMarks(skillEvents.filter { it.abilityId == abilityId }),
             )
         }
-        val statsRow = UiSkillMatrixRow(
-            iconUrl = null,
-            name = null,
-            isStat = true,
-            isUltimate = false,
-            marks = levelMarks(statEvents),
-        )
+
+        val statLevels = statEvents.mapNotNull { it.level }.toSet()
+        val talentByLevel = talentEvents
+            .mapNotNull { event -> event.level?.let { it to talentText(event, abilities) } }
+            .toMap()
+        val bottomCells = (1..MAX_LEVEL).map { level ->
+            when {
+                TALENT_TIERS.contains(level) && talentByLevel.containsKey(level) ->
+                    UiSkillMatrixBottomCell.Talent(
+                        tier = level,
+                        side = null,
+                        text = talentByLevel.getValue(level),
+                    )
+                statLevels.contains(level) -> UiSkillMatrixBottomCell.Stat
+                else -> UiSkillMatrixBottomCell.Empty
+            }
+        }.toImmutableList()
 
         val summary = UiSkillSummary(
-            talentTierTaken = TALENT_TIERS.map { tier ->
-                talentEvents.any { it.level == tier }
+            talentTiers = TALENT_TIERS.map { tier ->
+                UiTalentTier(tier = tier, taken = talentEvents.any { it.level == tier }, side = null)
             }.toImmutableList(),
             abilities = orderedAbilityIds.map { abilityId ->
                 UiAbilitySummary(
@@ -146,10 +156,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
 
         return UiSkillBuild(
             summary = summary,
-            matrix = UiSkillMatrix(rows = (abilityRows + statsRow).toImmutableList()),
-            talents = talentEvents
-                .mapNotNull { event -> event.toTalent(abilities) }
-                .toImmutableList(),
+            matrix = UiSkillMatrix(abilityRows = abilityRows.toImmutableList(), bottomCells = bottomCells),
         )
     }
 
@@ -158,14 +165,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun List<AbilityLearnEvent>.isUltimate(abilityId: AbilityId): Boolean =
         any { it.abilityId == abilityId && it.isUltimate }
 
-    private fun AbilityLearnEvent.toTalent(abilities: Map<AbilityId, Ability>): UiTalent? {
-        val level = level ?: return null
-        val tier = TALENT_TIERS.firstOrNull { it == level } ?: return null
-        return UiTalent(
-            level = tier,
-            text = abilityId?.let { abilities[it]?.label }.orEmpty(),
-        )
-    }
+    private fun talentText(event: AbilityLearnEvent, abilities: Map<AbilityId, Ability>): String =
+        event.abilityId?.let { abilities[it]?.label }.orEmpty()
 
     private fun levelMarks(events: List<AbilityLearnEvent>): ImmutableList<Boolean> {
         val levels = events.mapNotNull { it.level }.toSet()

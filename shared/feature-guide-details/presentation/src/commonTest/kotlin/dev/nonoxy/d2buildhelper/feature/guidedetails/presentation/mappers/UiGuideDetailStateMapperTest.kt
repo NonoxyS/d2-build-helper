@@ -19,6 +19,7 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDeta
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildPhase
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixBottomCell
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -152,7 +153,7 @@ class UiGuideDetailStateMapperTest {
     }
 
     @Test
-    fun `skill matrix has exactly one mark per column and stats go to stats row`() {
+    fun `skill matrix has exactly one mark per column and stat goes to bottom row`() {
         // Q at lvl 1, W at lvl 2, stats at lvl 3, R(ult) at lvl 6, talent at lvl 10.
         val q = ability(10)
         val w = ability(11)
@@ -187,45 +188,43 @@ class UiGuideDetailStateMapperTest {
             ),
         )
 
-        val matrix = ui.skillBuild!!.matrix
-        // exactly one mark per used column across all rows
-        for (level in listOf(1, 2, 3, 6)) {
-            val marksAtColumn = matrix.rows.count { it.marks[level - 1] }
-            assertEquals(1, marksAtColumn, "column $level must have exactly one mark")
+        val skillBuild = ui.skillBuild!!
+        val matrix = skillBuild.matrix
+        // exactly one mark per used ability/stat column
+        for (level in listOf(1, 2, 6)) {
+            val abilityMarks = matrix.abilityRows.count { it.marks[level - 1] }
+            val statMark = if (matrix.bottomCells[level - 1] is UiSkillMatrixBottomCell.Stat) 1 else 0
+            assertEquals(1, abilityMarks + statMark, "level $level must have exactly one mark")
         }
-        // talent does not occupy a matrix column (lvl 10 has no mark)
-        assertEquals(0, matrix.rows.count { it.marks[9] })
+        // stat at lvl 3 lands in the bottom row, not an ability row
+        assertEquals(0, matrix.abilityRows.count { it.marks[2] })
+        assertTrue(matrix.bottomCells[2] is UiSkillMatrixBottomCell.Stat)
 
-        // stats row exists and carries the lvl-3 mark
-        val statsRow = matrix.rows.single { it.isStat }
-        assertTrue(statsRow.marks[2])
-        assertNull(statsRow.iconUrl)
-        assertFalse(statsRow.isUltimate)
+        // talent at lvl 10 occupies the bottom row, not an ability column
+        assertEquals(0, matrix.abilityRows.count { it.marks[9] })
+        val talentCell = matrix.bottomCells[9] as UiSkillMatrixBottomCell.Talent
+        assertEquals(10, talentCell.tier)
+        assertEquals("+6 strength", talentCell.text)
+        assertNull(talentCell.side) // side is backend-gated (slot), null until enriched
 
-        // R (lvl 6) is the ultimate row; Q/W are not; stats row never ultimate
-        val ultimateRows = matrix.rows.filter { it.isUltimate }
+        // R (lvl 6) is the only ultimate ability row
+        val ultimateRows = matrix.abilityRows.filter { it.isUltimate }
         assertEquals(1, ultimateRows.size)
         assertEquals(ImageUrl("ab12"), ultimateRows.single().iconUrl) // R = ability(12)
-        assertTrue(matrix.rows.single { it.iconUrl == ImageUrl("ab12") }.isUltimate)
-        assertFalse(matrix.rows.single { it.iconUrl == ImageUrl("ab10") }.isUltimate) // Q
-        assertFalse(matrix.rows.single { it.iconUrl == ImageUrl("ab11") }.isUltimate) // W
+        assertFalse(matrix.abilityRows.single { it.iconUrl == ImageUrl("ab10") }.isUltimate) // Q
+        assertFalse(matrix.abilityRows.single { it.iconUrl == ImageUrl("ab11") }.isUltimate) // W
 
-        // summary mirrors the ultimate flag on the R ability
-        val summaryAbilities = ui.skillBuild!!.summary.abilities
+        // summary mirrors the ultimate flag and ability names
+        val summaryAbilities = skillBuild.summary.abilities
         assertEquals(1, summaryAbilities.count { it.isUltimate })
         assertTrue(summaryAbilities.single { it.iconUrl == ImageUrl("ab12") }.isUltimate)
-        assertFalse(summaryAbilities.single { it.iconUrl == ImageUrl("ab10") }.isUltimate)
-
-        // ability names come from constants; stats matrix row carries no name
         assertEquals("A10", summaryAbilities.single { it.iconUrl == ImageUrl("ab10") }.name) // Q
-        assertEquals("A12", summaryAbilities.single { it.iconUrl == ImageUrl("ab12") }.name) // R
-        assertEquals("A12", matrix.rows.single { it.iconUrl == ImageUrl("ab12") }.name)
-        assertNull(matrix.rows.single { it.isStat }.name)
+        assertEquals("A12", matrix.abilityRows.single { it.iconUrl == ImageUrl("ab12") }.name)
 
-        // talent is separated into talents list
-        assertEquals(1, ui.skillBuild!!.talents.size)
-        assertEquals(10, ui.skillBuild!!.talents.first().level)
-        assertEquals("+6 strength", ui.skillBuild!!.talents.first().text)
+        // summary tier is marked taken, side unknown
+        val tier1 = skillBuild.summary.talentTiers.single { it.tier == 10 }
+        assertTrue(tier1.taken)
+        assertNull(tier1.side)
     }
 
     @Test
