@@ -261,7 +261,7 @@ private fun previewNetworth() = UiNetworthCurve(
     ),
     gpm = 498,
     networth = 19100,
-    lastHitsAt10 = 14,
+    xpm = 620,
 )
 
 private fun previewLineup() = UiLineup(
