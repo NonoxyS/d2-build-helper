@@ -47,7 +47,7 @@ internal data class SerializableCachedDotaConstants(
             },
             abilities = abilities.associate { ab ->
                 val id = AbilityId(ab.id)
-                id to Ability(id = id, name = ab.name, iconUrl = ImageUrl(ab.iconUrl))
+                id to Ability(id = id, name = ab.name, displayName = ab.displayName, iconUrl = ImageUrl(ab.iconUrl))
             },
         ),
         fetchedAt = Instant.fromEpochMilliseconds(fetchedAtEpochMillis),
@@ -77,6 +77,7 @@ internal data class SerializableItem(
 internal data class SerializableAbility(
     val id: Short,
     val name: String,
+    val displayName: String,
     val iconUrl: String,
 )
 
@@ -98,7 +99,7 @@ internal fun CachedDotaConstants.toSerializable(): SerializableCachedDotaConstan
             )
         },
         abilities = data.abilities.values.map {
-            SerializableAbility(it.id.raw, it.name, it.iconUrl.raw)
+            SerializableAbility(it.id.raw, it.name, it.displayName, it.iconUrl.raw)
         },
         fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
     )

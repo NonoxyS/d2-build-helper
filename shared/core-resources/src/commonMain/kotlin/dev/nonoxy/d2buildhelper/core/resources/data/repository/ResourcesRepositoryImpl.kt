@@ -152,5 +152,6 @@ private fun RemoteItemConstant.toDomain(): Item = Item(
 private fun RemoteAbilityConstant.toDomain(): Ability = Ability(
     id = AbilityId(id.toShort()),
     name = name,
+    displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
 )
