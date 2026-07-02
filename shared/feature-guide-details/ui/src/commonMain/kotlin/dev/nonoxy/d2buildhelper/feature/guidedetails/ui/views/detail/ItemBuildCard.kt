@@ -3,6 +3,7 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.ui.views.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -37,6 +38,8 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemB
 private val ITEM_WIDTH = 36.dp
 private val ITEM_HEIGHT = 28.dp
 private val NEUTRAL_SIZE = 26.dp
+private val COUNT_BADGE_PADDING = 3.dp
+private const val COUNT_BADGE_ALPHA = 0.75f
 
 @Composable
 internal fun ItemBuildCard(
@@ -121,20 +124,36 @@ private fun ItemWithTime(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        AsyncImage(
-            model = entry.iconUrl?.raw,
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .width(ITEM_WIDTH)
-                .height(ITEM_HEIGHT)
-                .background(
-                    color = D2BuildHelperTheme.colors.surfaceVariant,
-                    shape = D2BuildHelperTheme.shapes.cornerRadius4,
+        Box {
+            AsyncImage(
+                model = entry.iconUrl?.raw,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .width(ITEM_WIDTH)
+                    .height(ITEM_HEIGHT)
+                    .background(
+                        color = D2BuildHelperTheme.colors.surfaceVariant,
+                        shape = D2BuildHelperTheme.shapes.cornerRadius4,
+                    )
+                    .clip(D2BuildHelperTheme.shapes.cornerRadius4)
+                    .clickable(onClick = onClick),
+            )
+            if (entry.count > 1) {
+                Text(
+                    text = "×${entry.count}",
+                    color = D2BuildHelperTheme.colors.textPrimary,
+                    style = D2BuildHelperTheme.typography.captionMD,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .background(
+                            color = D2BuildHelperTheme.colors.background.copy(alpha = COUNT_BADGE_ALPHA),
+                            shape = D2BuildHelperTheme.shapes.cornerRadius4,
+                        )
+                        .padding(horizontal = COUNT_BADGE_PADDING),
                 )
-                .clip(D2BuildHelperTheme.shapes.cornerRadius4)
-                .clickable(onClick = onClick),
-        )
+            }
+        }
         Space4()
 
         Text(

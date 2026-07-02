@@ -24,4 +24,5 @@ data class UiItemBuildEntry(
     val iconUrl: ImageUrl?,
     val name: String?,
     val timeText: String,
+    val count: Int = 1,
 )

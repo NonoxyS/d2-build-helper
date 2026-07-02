@@ -40,11 +40,19 @@ class UiGuideDetailStateMapperTest {
         iconUrl = ImageUrl("hero$id"),
     )
 
-    private fun item(id: Short) = Item(
+    private fun item(
+        id: Short,
+        quality: String? = null,
+        isRecipe: Boolean = false,
+        components: List<ItemId> = emptyList(),
+    ) = Item(
         id = ItemId(id),
         shortName = "i$id",
         displayName = "I$id",
         iconUrl = ImageUrl("item$id"),
+        quality = quality,
+        isRecipe = isRecipe,
+        components = components,
     )
 
     private fun ability(id: Short, name: String = "A$id") = Ability(
@@ -339,6 +347,41 @@ class UiGuideDetailStateMapperTest {
         val midSection = build.sections.single { it.phase == UiItemBuildPhase.MID_GAME }
         assertEquals(1, midSection.entries.size)
         assertEquals("25:00", midSection.entries.single().timeText)
+    }
+
+    @Test
+    fun `item build folds components, drops recipes, keeps laning consumables only, dedups`() {
+        // ogre(1)+mithril(2)+recipe(3) assemble bkb(4); blink(5) kept standalone; tango(6) consumable.
+        val items = mapOf(
+            ItemId(1) to item(1, quality = "component"),
+            ItemId(2) to item(2, quality = "component"),
+            ItemId(3) to item(3, isRecipe = true),
+            ItemId(4) to item(4, quality = "rare", components = listOf(ItemId(1), ItemId(2))),
+            ItemId(5) to item(5, quality = "component"),
+            ItemId(6) to item(6, quality = "consumable"),
+        )
+        val player = emptyPlayer(heroId = 1).copy(
+            itemPurchases = listOf(
+                ItemPurchase(itemId = ItemId(6), time = 30),
+                ItemPurchase(itemId = ItemId(6), time = 45),
+                ItemPurchase(itemId = ItemId(1), time = 120),
+                ItemPurchase(itemId = ItemId(2), time = 140),
+                ItemPurchase(itemId = ItemId(3), time = 150),
+                ItemPurchase(itemId = ItemId(4), time = 160),
+                ItemPurchase(itemId = ItemId(5), time = 700),
+                ItemPurchase(itemId = ItemId(6), time = 900),
+            ),
+        )
+        val ui = mapper.map(state(detail(player), items = items))
+
+        val build = ui.itemBuild!!
+        val laning = build.sections.single { it.phase == UiItemBuildPhase.LANING }
+        assertEquals(listOf("I6", "I4"), laning.entries.map { it.name })
+        assertEquals(2, laning.entries.first().count)
+        assertEquals(1, laning.entries[1].count)
+
+        val mid = build.sections.single { it.phase == UiItemBuildPhase.MID_GAME }
+        assertEquals(listOf("I5"), mid.entries.map { it.name })
     }
 
     @Test

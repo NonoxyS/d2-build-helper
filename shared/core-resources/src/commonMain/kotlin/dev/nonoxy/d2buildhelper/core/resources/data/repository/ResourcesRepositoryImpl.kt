@@ -144,6 +144,9 @@ private fun RemoteItemConstant.toDomain(): Item = Item(
     shortName = shortName,
     displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
+    quality = quality,
+    isRecipe = isRecipe,
+    components = components.map { ItemId(it.toShort()) },
 )
 
 private fun RemoteAbilityConstant.toDomain(): Ability = Ability(

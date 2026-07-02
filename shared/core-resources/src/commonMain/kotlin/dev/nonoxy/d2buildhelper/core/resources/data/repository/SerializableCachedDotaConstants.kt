@@ -40,6 +40,9 @@ internal data class SerializableCachedDotaConstants(
                     shortName = item.shortName,
                     displayName = item.displayName,
                     iconUrl = ImageUrl(item.iconUrl),
+                    quality = item.quality,
+                    isRecipe = item.isRecipe,
+                    components = item.components.map { ItemId(it) },
                 )
             },
             abilities = abilities.associate { ab ->
@@ -65,6 +68,9 @@ internal data class SerializableItem(
     val shortName: String,
     val displayName: String,
     val iconUrl: String,
+    val quality: String? = null,
+    val isRecipe: Boolean = false,
+    val components: List<Short> = emptyList(),
 )
 
 @Serializable
@@ -81,7 +87,15 @@ internal fun CachedDotaConstants.toSerializable(): SerializableCachedDotaConstan
             SerializableHero(it.id.raw, it.shortName, it.displayName, it.iconUrl.raw)
         },
         items = data.items.values.map {
-            SerializableItem(it.id.raw, it.shortName, it.displayName, it.iconUrl.raw)
+            SerializableItem(
+                id = it.id.raw,
+                shortName = it.shortName,
+                displayName = it.displayName,
+                iconUrl = it.iconUrl.raw,
+                quality = it.quality,
+                isRecipe = it.isRecipe,
+                components = it.components.map { component -> component.raw },
+            )
         },
         abilities = data.abilities.values.map {
             SerializableAbility(it.id.raw, it.name, it.iconUrl.raw)

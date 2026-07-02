@@ -48,6 +48,7 @@ private val TALENT_TIERS = listOf(10, 15, 20, 25)
 private const val LANING_END_SECONDS = 600
 
 private const val MID_GAME_END_SECONDS = 1500
+private const val CONSUMABLE_QUALITY_PREFIX = "consumable"
 
 internal interface UiGuideDetailStateMapper : Mapper<GuideDetailStore.State, UiGuideDetailState>
 
@@ -177,38 +178,71 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             UiItemBuildEntry(iconUrl = items[id]?.iconUrl, name = items[id]?.displayName, timeText = "")
         }
 
-        val phaseOf: (Int?) -> UiItemBuildPhase = { time ->
-            when {
-                time == null -> UiItemBuildPhase.LATE_GAME
-                time <= LANING_END_SECONDS -> UiItemBuildPhase.LANING
-                time <= MID_GAME_END_SECONDS -> UiItemBuildPhase.MID_GAME
-                else -> UiItemBuildPhase.LATE_GAME
-            }
-        }
-
-        val grouped: Map<UiItemBuildPhase, List<ItemPurchase>> = player.itemPurchases
-            .groupBy { phaseOf(it.time) }
+        val shown = reconstructBuild(player.itemPurchases, items)
 
         val sections = UiItemBuildPhase.entries
             .mapNotNull { phase ->
-                val entries = grouped[phase]
-                    ?.sortedBy { it.time ?: Int.MAX_VALUE }
-                    ?.map { it.toEntry(items) }
-                    ?.toImmutableList()
+                val entries = shown
+                    .filter { phaseOf(it.time) == phase }
+                    .let { dedupeEntries(it, items) }
+                    .takeIf { it.isNotEmpty() }
                     ?: return@mapNotNull null
-                UiItemBuildSection(phase = phase, entries = entries)
+                UiItemBuildSection(phase = phase, entries = entries.toImmutableList())
             }
             .toImmutableList()
 
         return UiItemBuild(neutralItem = neutral, sections = sections)
     }
 
-    private fun ItemPurchase.toEntry(items: Map<ItemId, Item>): UiItemBuildEntry =
-        UiItemBuildEntry(
-            iconUrl = items[itemId]?.iconUrl,
-            name = items[itemId]?.displayName,
-            timeText = formatTime(time),
-        )
+    // Drop recipes, fold assembled items' components back into the result, and remove
+    // post-laning consumables — leaving the real build path (see item-build model notes).
+    private fun reconstructBuild(
+        purchases: List<ItemPurchase>,
+        items: Map<ItemId, Item>,
+    ): List<ItemPurchase> {
+        val ordered = purchases
+            .sortedBy { it.time ?: Int.MAX_VALUE }
+            .filter { items[it.itemId]?.isRecipe != true }
+
+        val consumed = BooleanArray(ordered.size)
+        val available = HashMap<ItemId, ArrayDeque<Int>>()
+        ordered.forEachIndexed { index, purchase ->
+            items[purchase.itemId]?.components.orEmpty().forEach { componentId ->
+                available[componentId]?.removeFirstOrNull()?.let { consumed[it] = true }
+            }
+            available.getOrPut(purchase.itemId) { ArrayDeque() }.addLast(index)
+        }
+
+        return ordered.filterIndexed { index, purchase ->
+            when {
+                consumed[index] -> false
+                items[purchase.itemId]?.quality?.startsWith(CONSUMABLE_QUALITY_PREFIX) == true ->
+                    phaseOf(purchase.time) == UiItemBuildPhase.LANING
+                else -> true
+            }
+        }
+    }
+
+    private fun dedupeEntries(purchases: List<ItemPurchase>, items: Map<ItemId, Item>): List<UiItemBuildEntry> {
+        val grouped = LinkedHashMap<ItemId, MutableList<ItemPurchase>>()
+        purchases.forEach { grouped.getOrPut(it.itemId) { mutableListOf() }.add(it) }
+        return grouped.values.map { group ->
+            val first = group.first()
+            UiItemBuildEntry(
+                iconUrl = items[first.itemId]?.iconUrl,
+                name = items[first.itemId]?.displayName,
+                timeText = formatTime(first.time),
+                count = group.size,
+            )
+        }
+    }
+
+    private fun phaseOf(time: Int?): UiItemBuildPhase = when {
+        time == null -> UiItemBuildPhase.LATE_GAME
+        time <= LANING_END_SECONDS -> UiItemBuildPhase.LANING
+        time <= MID_GAME_END_SECONDS -> UiItemBuildPhase.MID_GAME
+        else -> UiItemBuildPhase.LATE_GAME
+    }
 
     private fun buildNetworth(player: BuildPlayer, items: Map<ItemId, Item>): UiNetworthCurve {
         val significantIds = (
