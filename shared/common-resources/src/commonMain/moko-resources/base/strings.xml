@@ -51,6 +51,7 @@
 
     <string name="guide_detail_skill_matrix_caption">← скролл до 30 · одна отметка/столбец · тап по иконке → popup</string>
     <string name="guide_detail_skill_stat_row">+</string>
+    <string name="guide_detail_ability_points">Вкачано очков: %d</string>
 
     <string name="guide_detail_impact_format">imp %1$s</string>
 </resources>

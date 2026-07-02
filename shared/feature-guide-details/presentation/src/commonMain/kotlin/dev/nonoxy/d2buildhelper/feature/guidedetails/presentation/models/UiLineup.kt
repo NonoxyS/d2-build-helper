@@ -11,6 +11,7 @@ data class UiLineup(
 
 data class UiLineupMember(
     val heroIconUrl: ImageUrl?,
+    val heroName: String?,
     val isMe: Boolean,
     val role: UiMatchPlayerRole?,
 )

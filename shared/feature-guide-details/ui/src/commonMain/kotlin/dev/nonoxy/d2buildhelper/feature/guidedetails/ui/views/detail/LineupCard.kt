@@ -64,8 +64,9 @@ private fun HeroPlaque(
     modifier: Modifier = Modifier,
 ) {
     val roleLabel = member.role?.label()
+    val fallbackTitle = stringResource(MR.strings.guide_detail_card_lineup)
     ExplainAnchor(
-        title = stringResource(MR.strings.guide_detail_card_lineup),
+        title = member.heroName?.takeIf { it.isNotBlank() } ?: fallbackTitle,
         body = roleLabel,
         modifier = modifier,
     ) { onClick ->

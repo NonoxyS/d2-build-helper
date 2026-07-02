@@ -120,7 +120,7 @@ private fun AbilitySummaryColumn(
     val fallbackTitle = stringResource(MR.strings.guide_detail_card_skill_build)
     ExplainAnchor(
         title = ability.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-        body = "${ability.pointCount}",
+        body = stringResource(MR.strings.guide_detail_ability_points, ability.pointCount),
         modifier = modifier,
     ) { onClick ->
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

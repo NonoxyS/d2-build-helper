@@ -114,7 +114,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val abilityRows = orderedAbilityIds.map { abilityId ->
             UiSkillMatrixRow(
                 iconUrl = abilities[abilityId]?.iconUrl,
-                name = abilities[abilityId]?.name,
+                name = abilities[abilityId]?.label,
                 isStat = false,
                 isUltimate = skillEvents.isUltimate(abilityId),
                 marks = levelMarks(skillEvents.filter { it.abilityId == abilityId }),
@@ -135,7 +135,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             abilities = orderedAbilityIds.map { abilityId ->
                 UiAbilitySummary(
                     iconUrl = abilities[abilityId]?.iconUrl,
-                    name = abilities[abilityId]?.name,
+                    name = abilities[abilityId]?.label,
                     pointCount = skillEvents.count { it.abilityId == abilityId },
                     earlyPointCount = skillEvents.count {
                         it.abilityId == abilityId && (it.level ?: 0) in 1..EARLY_LEVELS
@@ -155,6 +155,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         )
     }
 
+    private val Ability.label: String get() = displayName.ifEmpty { name }
+
     private fun List<AbilityLearnEvent>.isUltimate(abilityId: AbilityId): Boolean =
         any { it.abilityId == abilityId && it.isUltimate }
 
@@ -163,7 +165,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val tier = TALENT_TIERS.firstOrNull { it == level } ?: return null
         return UiTalent(
             level = tier,
-            text = abilityId?.let { abilities[it]?.name }.orEmpty(),
+            text = abilityId?.let { abilities[it]?.label }.orEmpty(),
         )
     }
 
@@ -298,6 +300,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             .map { member ->
                 UiLineupMember(
                     heroIconUrl = member.heroId?.let { heroes[it]?.iconUrl },
+                    heroName = member.heroId?.let { heroes[it]?.displayName },
                     isMe = member.steamAccountId == mySteamAccountId,
                     role = member.role?.toUi(),
                 )

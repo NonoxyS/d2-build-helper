@@ -264,18 +264,18 @@ private fun previewNetworth() = UiNetworthCurve(
 
 private fun previewLineup() = UiLineup(
     allies = persistentListOf(
-        UiLineupMember(heroIconUrl = null, isMe = true, role = UiMatchPlayerRole.HARD_SUPPORT),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = true, role = UiMatchPlayerRole.HARD_SUPPORT),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
     ),
     enemies = persistentListOf(
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.CORE),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
-        UiLineupMember(heroIconUrl = null, isMe = false, role = UiMatchPlayerRole.HARD_SUPPORT),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.CORE),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.LIGHT_SUPPORT),
+        UiLineupMember(heroIconUrl = null, heroName = null, isMe = false, role = UiMatchPlayerRole.HARD_SUPPORT),
     ),
 )
 

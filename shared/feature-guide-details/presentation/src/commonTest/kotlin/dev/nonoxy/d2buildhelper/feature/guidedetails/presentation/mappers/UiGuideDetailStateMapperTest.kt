@@ -55,9 +55,10 @@ class UiGuideDetailStateMapperTest {
         components = components,
     )
 
-    private fun ability(id: Short, name: String = "A$id") = Ability(
+    private fun ability(id: Short, name: String = "A$id", displayName: String = name) = Ability(
         id = AbilityId(id),
         name = name,
+        displayName = displayName,
         iconUrl = ImageUrl("ab$id"),
     )
 
