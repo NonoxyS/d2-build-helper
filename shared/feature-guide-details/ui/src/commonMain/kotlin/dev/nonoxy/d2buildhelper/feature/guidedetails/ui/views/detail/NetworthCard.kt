@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,15 +46,12 @@ internal fun NetworthCard(
     networth: UiNetworthCurve,
     modifier: Modifier = Modifier,
 ) {
-    var explained by remember { mutableStateOf<UiNetworthMarker?>(null) }
-
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_economy))
 
         NetworthChart(
             points = networth.points,
             markers = networth.markers,
-            onMarkerClick = { marker -> explained = marker },
             modifier = Modifier.fillMaxWidth().height(CHART_HEIGHT),
         )
         Space4()
@@ -73,22 +66,12 @@ internal fun NetworthCard(
 
         StatsRow(networth = networth)
     }
-
-    explained?.let { marker ->
-        val fallbackTitle = stringResource(MR.strings.guide_detail_card_economy)
-        ExplainPopup(
-            title = marker.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-            body = "${marker.minute}'",
-            onDismissRequest = { explained = null },
-        )
-    }
 }
 
 @Composable
 private fun NetworthChart(
     points: ImmutableList<Int>,
     markers: ImmutableList<UiNetworthMarker>,
-    onMarkerClick: (UiNetworthMarker) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (points.size < 2) return
@@ -143,7 +126,6 @@ private fun NetworthChart(
             val value = points[marker.minute]
             MarkerIcon(
                 marker = marker,
-                onClick = { onMarkerClick(marker) },
                 modifier = Modifier.offset(
                     x = CHART_INSET + plotWidth * (marker.minute * stepFraction) - MARKER_ICON_SIZE / 2,
                     y = CHART_INSET + plotHeight * (1f - value.toFloat() / maxValue) - MARKER_ICON_SIZE / 2,
@@ -156,27 +138,33 @@ private fun NetworthChart(
 @Composable
 private fun MarkerIcon(
     marker: UiNetworthMarker,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AsyncImage(
-        model = marker.iconUrl?.raw,
-        contentDescription = marker.name,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .size(MARKER_ICON_SIZE)
-            .clip(D2BuildHelperTheme.shapes.cornerRadius4)
-            .background(
-                color = D2BuildHelperTheme.colors.surfaceVariant,
-                shape = D2BuildHelperTheme.shapes.cornerRadius4,
-            )
-            .border(
-                width = 1.dp,
-                color = D2BuildHelperTheme.colors.outline,
-                shape = D2BuildHelperTheme.shapes.cornerRadius4,
-            )
-            .clickable(onClick = onClick),
-    )
+    val fallbackTitle = stringResource(MR.strings.guide_detail_card_economy)
+    ExplainAnchor(
+        title = marker.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
+        body = "${marker.minute}'",
+        modifier = modifier,
+    ) { onClick ->
+        AsyncImage(
+            model = marker.iconUrl?.raw,
+            contentDescription = marker.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(MARKER_ICON_SIZE)
+                .clip(D2BuildHelperTheme.shapes.cornerRadius4)
+                .background(
+                    color = D2BuildHelperTheme.colors.surfaceVariant,
+                    shape = D2BuildHelperTheme.shapes.cornerRadius4,
+                )
+                .border(
+                    width = 1.dp,
+                    color = D2BuildHelperTheme.colors.outline,
+                    shape = D2BuildHelperTheme.shapes.cornerRadius4,
+                )
+                .clickable(onClick = onClick),
+        )
+    }
 }
 
 @Composable

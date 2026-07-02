@@ -17,10 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -66,16 +62,10 @@ internal fun SkillBuildCard(
     skillBuild: UiSkillBuild,
     modifier: Modifier = Modifier,
 ) {
-    var explainedTalent by remember { mutableStateOf<UiTalent?>(null) }
-    var explainedAbilityIndex by remember { mutableStateOf<Int?>(null) }
-
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_skill_build))
 
-        SummaryRow(
-            skillBuild = skillBuild,
-            onAbilityClick = { index -> explainedAbilityIndex = index },
-        )
+        SummaryRow(skillBuild = skillBuild)
         Space6()
 
         SkillMatrix(matrix = skillBuild.matrix)
@@ -93,34 +83,14 @@ internal fun SkillBuildCard(
             TalentList(
                 tiersTaken = skillBuild.summary.talentTierTaken,
                 talents = skillBuild.talents,
-                onTalentClick = { talent -> explainedTalent = talent },
             )
         }
-    }
-
-    explainedTalent?.let { talent ->
-        ExplainPopup(
-            title = "${talent.level}",
-            body = talent.text,
-            onDismissRequest = { explainedTalent = null },
-        )
-    }
-
-    explainedAbilityIndex?.let { index ->
-        val ability = skillBuild.summary.abilities.getOrNull(index)
-        val fallbackTitle = stringResource(MR.strings.guide_detail_card_skill_build)
-        ExplainPopup(
-            title = ability?.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-            body = ability?.let { "${it.pointCount}" },
-            onDismissRequest = { explainedAbilityIndex = null },
-        )
     }
 }
 
 @Composable
 private fun SummaryRow(
     skillBuild: UiSkillBuild,
-    onAbilityClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -134,7 +104,6 @@ private fun SummaryRow(
             AbilitySummaryColumn(
                 ability = ability,
                 tint = abilityTints.getOrElse(index) { abilityTints.last() },
-                onClick = { onAbilityClick(index) },
             )
         }
 
@@ -146,26 +115,29 @@ private fun SummaryRow(
 private fun AbilitySummaryColumn(
     ability: UiAbilitySummary,
     tint: Color,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    val fallbackTitle = stringResource(MR.strings.guide_detail_card_skill_build)
+    ExplainAnchor(
+        title = ability.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
+        body = "${ability.pointCount}",
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AsyncImage(
-            model = ability.iconUrl?.raw,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(ABILITY_ICON_SIZE)
-                .background(color = tint, shape = D2BuildHelperTheme.shapes.cornerRadius8)
-                .clip(D2BuildHelperTheme.shapes.cornerRadius8)
-                .clickable(onClick = onClick),
-        )
-        Space4()
+    ) { onClick ->
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AsyncImage(
+                model = ability.iconUrl?.raw,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(ABILITY_ICON_SIZE)
+                    .background(color = tint, shape = D2BuildHelperTheme.shapes.cornerRadius8)
+                    .clip(D2BuildHelperTheme.shapes.cornerRadius8)
+                    .clickable(onClick = onClick),
+            )
+            Space4()
 
-        PointDots(pointCount = ability.earlyPointCount, maxPoints = if (ability.isUltimate) 3 else 4)
+            PointDots(pointCount = ability.earlyPointCount, maxPoints = if (ability.isUltimate) 3 else 4)
+        }
     }
 }
 
@@ -317,7 +289,6 @@ private fun RowLabel(
 private fun TalentList(
     tiersTaken: ImmutableList<Boolean>,
     talents: ImmutableList<UiTalent>,
-    onTalentClick: (UiTalent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -326,21 +297,23 @@ private fun TalentList(
 
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
             talents.fastForEach { talent ->
-                Row(
-                    modifier = Modifier.clickable { onTalentClick(talent) },
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Text(
-                        text = "${talent.level}",
-                        color = TALENT_GOLD,
-                        style = D2BuildHelperTheme.typography.captionMD,
-                        modifier = Modifier.padding(end = 2.dp),
-                    )
-                    Text(
-                        text = talent.text,
-                        color = D2BuildHelperTheme.colors.textPrimary,
-                        style = D2BuildHelperTheme.typography.captionMD,
-                    )
+                ExplainAnchor(title = "${talent.level}", body = talent.text) { onClick ->
+                    Row(
+                        modifier = Modifier.clickable(onClick = onClick),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            text = "${talent.level}",
+                            color = TALENT_GOLD,
+                            style = D2BuildHelperTheme.typography.captionMD,
+                            modifier = Modifier.padding(end = 2.dp),
+                        )
+                        Text(
+                            text = talent.text,
+                            color = D2BuildHelperTheme.colors.textPrimary,
+                            style = D2BuildHelperTheme.typography.captionMD,
+                        )
+                    }
                 }
             }
         }

@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,31 +30,13 @@ internal fun LineupCard(
     lineup: UiLineup,
     modifier: Modifier = Modifier,
 ) {
-    var explained by remember { mutableStateOf<UiLineupMember?>(null) }
-
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_lineup))
 
-        TeamRow(
-            members = lineup.enemies,
-            glowColor = ENEMY_GLOW_COLOR,
-            onMemberClick = { explained = it },
-        )
+        TeamRow(members = lineup.enemies, glowColor = ENEMY_GLOW_COLOR)
         Space8()
 
-        TeamRow(
-            members = lineup.allies,
-            glowColor = ALLY_GLOW_COLOR,
-            onMemberClick = { explained = it },
-        )
-    }
-
-    explained?.let { member ->
-        ExplainPopup(
-            title = stringResource(MR.strings.guide_detail_card_lineup),
-            body = member.role?.label(),
-            onDismissRequest = { explained = null },
-        )
+        TeamRow(members = lineup.allies, glowColor = ALLY_GLOW_COLOR)
     }
 }
 
@@ -66,7 +44,6 @@ internal fun LineupCard(
 private fun TeamRow(
     members: ImmutableList<UiLineupMember>,
     glowColor: Color,
-    onMemberClick: (UiLineupMember) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -75,11 +52,7 @@ private fun TeamRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         members.fastForEach { member ->
-            HeroPlaque(
-                member = member,
-                glowColor = glowColor,
-                onClick = { onMemberClick(member) },
-            )
+            HeroPlaque(member = member, glowColor = glowColor)
         }
     }
 }
@@ -88,30 +61,36 @@ private fun TeamRow(
 private fun HeroPlaque(
     member: UiLineupMember,
     glowColor: Color,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(HERO_PLAQUE_SIZE)
-            .then(
-                if (member.isMe) {
-                    Modifier.background(
-                        color = D2BuildHelperTheme.colors.surfaceVariant,
-                        shape = D2BuildHelperTheme.shapes.cornerRadius8,
-                    )
-                } else {
-                    Modifier
-                },
+    val roleLabel = member.role?.label()
+    ExplainAnchor(
+        title = stringResource(MR.strings.guide_detail_card_lineup),
+        body = roleLabel,
+        modifier = modifier,
+    ) { onClick ->
+        Box(
+            modifier = Modifier
+                .size(HERO_PLAQUE_SIZE)
+                .then(
+                    if (member.isMe) {
+                        Modifier.background(
+                            color = D2BuildHelperTheme.colors.surfaceVariant,
+                            shape = D2BuildHelperTheme.shapes.cornerRadius8,
+                        )
+                    } else {
+                        Modifier
+                    },
+                )
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            HeroGlowIcon(
+                iconUrl = member.heroIconUrl,
+                glowColor = glowColor,
+                contentDescription = roleLabel,
+                iconSize = HERO_ICON_SIZE,
             )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        HeroGlowIcon(
-            iconUrl = member.heroIconUrl,
-            glowColor = glowColor,
-            contentDescription = member.role?.label(),
-            iconSize = HERO_ICON_SIZE,
-        )
+        }
     }
 }

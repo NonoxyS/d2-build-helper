@@ -14,10 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,8 +42,6 @@ internal fun ItemBuildCard(
     itemBuild: UiItemBuild,
     modifier: Modifier = Modifier,
 ) {
-    var explained by remember { mutableStateOf<UiItemBuildEntry?>(null) }
-
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_item_build))
 
@@ -56,27 +50,15 @@ internal fun ItemBuildCard(
                 if (sectionIndex > 0) {
                     Space8()
                 }
-                ItemBuildSection(
-                    section = section,
-                    onItemClick = { entry -> explained = entry },
-                )
+                ItemBuildSection(section = section)
             }
 
             itemBuild.neutralItem?.let { neutral ->
                 Space8()
 
-                NeutralItem(entry = neutral, onClick = { explained = neutral })
+                NeutralItem(entry = neutral)
             }
         }
-    }
-
-    explained?.let { entry ->
-        val fallbackTitle = stringResource(MR.strings.guide_detail_card_item_build)
-        ExplainPopup(
-            title = entry.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-            body = entry.timeText,
-            onDismissRequest = { explained = null },
-        )
     }
 }
 
@@ -92,7 +74,6 @@ private fun UiItemBuildPhase.toTitle(): String = stringResource(
 @Composable
 private fun ItemBuildSection(
     section: UiItemBuildSection,
-    onItemClick: (UiItemBuildEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -111,7 +92,7 @@ private fun ItemBuildSection(
                 if (index > 0) {
                     ArrowSeparator()
                 }
-                ItemWithTime(entry = entry, onClick = { onItemClick(entry) })
+                ItemWithTime(entry = entry)
             }
         }
     }
@@ -120,66 +101,78 @@ private fun ItemBuildSection(
 @Composable
 private fun ItemWithTime(
     entry: UiItemBuildEntry,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box {
-            AsyncImage(
-                model = entry.iconUrl?.raw,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(ITEM_WIDTH)
-                    .height(ITEM_HEIGHT)
-                    .background(
-                        color = D2BuildHelperTheme.colors.surfaceVariant,
-                        shape = D2BuildHelperTheme.shapes.cornerRadius4,
-                    )
-                    .clip(D2BuildHelperTheme.shapes.cornerRadius4)
-                    .clickable(onClick = onClick),
-            )
-            if (entry.count > 1) {
-                Text(
-                    text = "×${entry.count}",
-                    color = D2BuildHelperTheme.colors.textPrimary,
-                    style = D2BuildHelperTheme.typography.captionMD,
+    val fallbackTitle = stringResource(MR.strings.guide_detail_card_item_build)
+    ExplainAnchor(
+        title = entry.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
+        body = entry.timeText,
+        modifier = modifier,
+    ) { onClick ->
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box {
+                AsyncImage(
+                    model = entry.iconUrl?.raw,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
+                        .width(ITEM_WIDTH)
+                        .height(ITEM_HEIGHT)
                         .background(
-                            color = D2BuildHelperTheme.colors.background.copy(alpha = COUNT_BADGE_ALPHA),
+                            color = D2BuildHelperTheme.colors.surfaceVariant,
                             shape = D2BuildHelperTheme.shapes.cornerRadius4,
                         )
-                        .padding(horizontal = COUNT_BADGE_PADDING),
+                        .clip(D2BuildHelperTheme.shapes.cornerRadius4)
+                        .clickable(onClick = onClick),
                 )
+                if (entry.count > 1) {
+                    Text(
+                        text = "×${entry.count}",
+                        color = D2BuildHelperTheme.colors.textPrimary,
+                        style = D2BuildHelperTheme.typography.captionMD,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .background(
+                                color = D2BuildHelperTheme.colors.background.copy(alpha = COUNT_BADGE_ALPHA),
+                                shape = D2BuildHelperTheme.shapes.cornerRadius4,
+                            )
+                            .padding(horizontal = COUNT_BADGE_PADDING),
+                    )
+                }
             }
-        }
-        Space4()
+            Space4()
 
-        Text(
-            text = entry.timeText,
-            color = D2BuildHelperTheme.colors.textSecondary,
-            style = D2BuildHelperTheme.typography.captionMD,
-        )
+            Text(
+                text = entry.timeText,
+                color = D2BuildHelperTheme.colors.textSecondary,
+                style = D2BuildHelperTheme.typography.captionMD,
+            )
+        }
     }
 }
 
 @Composable
 private fun NeutralItem(
     entry: UiItemBuildEntry,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AsyncImage(
-        model = entry.iconUrl?.raw,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .size(NEUTRAL_SIZE)
-            .background(color = D2BuildHelperTheme.colors.surfaceVariant, shape = CircleShape)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-    )
+    val fallbackTitle = stringResource(MR.strings.guide_detail_card_item_build)
+    ExplainAnchor(
+        title = entry.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
+        body = entry.timeText,
+        modifier = modifier,
+    ) { onClick ->
+        AsyncImage(
+            model = entry.iconUrl?.raw,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(NEUTRAL_SIZE)
+                .background(color = D2BuildHelperTheme.colors.surfaceVariant, shape = CircleShape)
+                .clip(CircleShape)
+                .clickable(onClick = onClick),
+        )
+    }
 }
 
 @Composable
