@@ -2,7 +2,7 @@
 <resources>
     <color name="background">#0a0a0a</color>
     <color name="surface">#141414</color>
-    <color name="surfaceVariant">#13343a</color>
+    <color name="surfaceVariant">#1f1f1f</color>
     <color name="tintColor">#10a4c1</color>
     <color name="textPrimary">#ffffff</color>
     <color name="textSecondary">#ffffffcc</color>
