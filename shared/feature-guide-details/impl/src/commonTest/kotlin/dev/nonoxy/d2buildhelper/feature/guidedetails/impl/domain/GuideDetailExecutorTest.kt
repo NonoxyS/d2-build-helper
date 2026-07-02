@@ -61,6 +61,7 @@ class GuideDetailExecutorTest {
             impact = null,
             goldPerMinute = null,
             networth = null,
+            experiencePerMinute = null,
             finalItemIds = emptyList(),
             backpackItemIds = emptyList(),
             neutralItemId = null,

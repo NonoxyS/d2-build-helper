@@ -32,6 +32,7 @@ data class BuildPlayer(
     val impact: Int?,
     val goldPerMinute: Int?,
     val networth: Int?,
+    val experiencePerMinute: Int?,
     val finalItemIds: List<ItemId>,
     val backpackItemIds: List<ItemId>,
     val neutralItemId: ItemId?,

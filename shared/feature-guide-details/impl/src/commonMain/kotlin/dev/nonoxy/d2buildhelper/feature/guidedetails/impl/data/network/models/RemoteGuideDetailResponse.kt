@@ -30,6 +30,7 @@ internal data class RemoteGuideDetailPlayerResponse(
     @SerialName("imp") val imp: Int? = null,
     @SerialName("goldPerMinute") val goldPerMinute: Int? = null,
     @SerialName("networth") val networth: Int? = null,
+    @SerialName("experiencePerMinute") val experiencePerMinute: Int? = null,
     @SerialName("finalItemIds") val finalItemIds: List<Int> = emptyList(),
     @SerialName("backpackItemIds") val backpackItemIds: List<Int> = emptyList(),
     @SerialName("neutralItemId") val neutralItemId: Int? = null,

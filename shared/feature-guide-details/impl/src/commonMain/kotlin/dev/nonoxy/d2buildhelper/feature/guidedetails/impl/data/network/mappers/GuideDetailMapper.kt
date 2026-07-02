@@ -49,6 +49,7 @@ internal class GuideDetailMapperImpl : GuideDetailMapper {
         impact = imp,
         goldPerMinute = goldPerMinute,
         networth = networth,
+        experiencePerMinute = experiencePerMinute,
         finalItemIds = finalItemIds.map { ItemId(it.toShort()) },
         backpackItemIds = backpackItemIds.map { ItemId(it.toShort()) },
         neutralItemId = neutralItemId?.toItemId(),

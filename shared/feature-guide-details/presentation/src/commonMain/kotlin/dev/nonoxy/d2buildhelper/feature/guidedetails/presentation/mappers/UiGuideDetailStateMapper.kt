@@ -43,7 +43,6 @@ private const val MAX_LEVEL = UiSkillMatrix.LEVEL_COLUMNS
 private const val MAX_ABILITY_ROWS = 4
 private const val EARLY_LEVELS = 6
 private const val SECONDS_PER_MINUTE = 60
-private const val LAST_HITS_AT_MINUTE = 10
 private val TALENT_TIERS = listOf(10, 15, 20, 25)
 
 private const val LANING_END_SECONDS = 600
@@ -275,7 +274,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             markers = markers,
             gpm = player.goldPerMinute,
             networth = player.networth,
-            lastHitsAt10 = player.lastHitsPerMinute.getOrNull(LAST_HITS_AT_MINUTE),
+            xpm = player.experiencePerMinute,
         )
     }
 

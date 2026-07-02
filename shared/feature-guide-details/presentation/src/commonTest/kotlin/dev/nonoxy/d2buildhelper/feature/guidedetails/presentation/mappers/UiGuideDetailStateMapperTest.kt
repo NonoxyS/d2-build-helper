@@ -76,6 +76,7 @@ class UiGuideDetailStateMapperTest {
         impact = null,
         goldPerMinute = null,
         networth = null,
+        experiencePerMinute = null,
         finalItemIds = emptyList(),
         backpackItemIds = emptyList(),
         neutralItemId = null,
@@ -442,10 +443,11 @@ class UiGuideDetailStateMapperTest {
     }
 
     @Test
-    fun `networth maps points, gpm, networth, last hits at 10 and purchase markers`() {
+    fun `networth maps points, gpm, networth, xpm and purchase markers`() {
         val player = emptyPlayer(heroId = 1).copy(
             goldPerMinute = 412,
             networth = 18400,
+            experiencePerMinute = 615,
             networthPerMinute = listOf(0, 100, 200, 300),
             lastHitsPerMinute = (0..11).map { it * 4 },
             finalItemIds = listOf(ItemId(1), ItemId(2)),
@@ -465,7 +467,7 @@ class UiGuideDetailStateMapperTest {
         val nw = ui.networth!!
         assertEquals(412, nw.gpm)
         assertEquals(18400, nw.networth)
-        assertEquals(40, nw.lastHitsAt10) // index 10 -> 40
+        assertEquals(615, nw.xpm)
         assertEquals(listOf(0, 100, 200, 300), nw.points)
         assertEquals(listOf(2, 3), nw.markers.map { it.minute })
         assertEquals(ImageUrl("item1"), nw.markers[0].iconUrl)
