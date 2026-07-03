@@ -4,6 +4,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.Ability
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
@@ -18,6 +19,7 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlay
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.TalentSide
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiItemBuildPhase
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiSkillMatrixBottomCell
 import kotlin.test.Test
@@ -34,11 +36,12 @@ class UiGuideDetailStateMapperTest {
     private val attributeBonusAbilityId = AbilityId(STAT_ABILITY_ID_RAW)
     private val scepterItemId = ItemId(ULTIMATE_SCEPTER_ITEM_ID_RAW)
 
-    private fun hero(id: Short) = Hero(
+    private fun hero(id: Short, talents: List<HeroTalent> = emptyList()) = Hero(
         id = HeroId(id),
         shortName = "h$id",
         displayName = "H$id",
         iconUrl = ImageUrl("hero$id"),
+        talents = talents,
     )
 
     private fun item(
@@ -177,7 +180,7 @@ class UiGuideDetailStateMapperTest {
         val ui = mapper.map(
             state(
                 detail(player),
-                heroes = mapOf(HeroId(1) to hero(1)),
+                heroes = mapOf(HeroId(1) to hero(1, talents = listOf(HeroTalent(talent.id, slot = 3)))),
                 abilities = mapOf(
                     q.id to q,
                     w.id to w,
@@ -205,7 +208,7 @@ class UiGuideDetailStateMapperTest {
         val talentCell = matrix.bottomCells[9] as UiSkillMatrixBottomCell.Talent
         assertEquals(10, talentCell.tier)
         assertEquals("+6 strength", talentCell.text)
-        assertNull(talentCell.side) // side is backend-gated (slot), null until enriched
+        assertEquals(TalentSide.RIGHT, talentCell.side) // slot 3 (odd) → right branch
 
         // R (lvl 6) is the only ultimate ability row
         val ultimateRows = matrix.abilityRows.filter { it.isUltimate }
@@ -224,7 +227,7 @@ class UiGuideDetailStateMapperTest {
         // summary tier is marked taken, side unknown
         val tier1 = skillBuild.summary.talentTiers.single { it.tier == 10 }
         assertTrue(tier1.taken)
-        assertNull(tier1.side)
+        assertEquals(TalentSide.RIGHT, tier1.side)
     }
 
     @Test

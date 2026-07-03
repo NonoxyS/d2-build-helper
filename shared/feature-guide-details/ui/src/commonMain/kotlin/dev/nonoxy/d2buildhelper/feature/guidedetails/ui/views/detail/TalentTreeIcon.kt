@@ -65,6 +65,6 @@ internal fun TalentTreeIcon(
 private fun branchColor(model: UiTalentTier?, side: TalentSide) = when {
     model == null || !model.taken -> TALENT_EMPTY
     model.side == side -> TALENT_GOLD
-    model.side == null -> TALENT_GOLD.copy(alpha = TAKEN_UNKNOWN_ALPHA) // side backend-gated → dim both
+    model.side == null -> TALENT_GOLD.copy(alpha = TAKEN_UNKNOWN_ALPHA) // talent absent from hero constants → dim both
     else -> TALENT_EMPTY
 }

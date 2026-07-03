@@ -14,6 +14,7 @@ import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlay
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.LineupMember
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.store.GuideDetailStore
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.TalentSide
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiGuideDetailState
@@ -63,7 +64,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val player = detail.player
         return UiGuideDetailState(
             header = buildHeader(detail, player, item.heroes),
-            skillBuild = buildSkillBuild(player, item.abilities),
+            skillBuild = buildSkillBuild(player, item.abilities, item.heroes[player.heroId]),
             itemBuild = buildItemBuild(player, item.items),
             networth = buildNetworth(player, item.items),
             lineup = buildLineup(detail, player, item.heroes),
@@ -97,10 +98,12 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun buildSkillBuild(
         player: BuildPlayer,
         abilities: Map<AbilityId, Ability>,
+        hero: Hero?,
     ): UiSkillBuild? {
         val events = player.abilityLearnEvents
         if (events.isEmpty()) return null
 
+        val slotByAbility = hero?.talents.orEmpty().associate { it.abilityId to it.slot }
         val talentEvents = events.filter { it.isTalent }
         val statEvents = events.filter { !it.isTalent && it.abilityId?.raw == STAT_ABILITY_ID_RAW }
         val skillEvents = events.filter { !it.isTalent && it.abilityId?.raw != STAT_ABILITY_ID_RAW }
@@ -120,17 +123,19 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         }
 
         val statLevels = statEvents.mapNotNull { it.level }.toSet()
-        val talentByLevel = talentEvents
-            .mapNotNull { event -> event.level?.let { it to talentText(event, abilities) } }
+        val talentEventByLevel = talentEvents
+            .mapNotNull { event -> event.level?.let { it to event } }
             .toMap()
         val bottomCells = (1..MAX_LEVEL).map { level ->
             when {
-                TALENT_TIERS.contains(level) && talentByLevel.containsKey(level) ->
+                TALENT_TIERS.contains(level) && talentEventByLevel.containsKey(level) -> {
+                    val event = talentEventByLevel.getValue(level)
                     UiSkillMatrixBottomCell.Talent(
                         tier = level,
-                        side = null,
-                        text = talentByLevel.getValue(level),
+                        side = talentSide(event, slotByAbility),
+                        text = talentText(event, abilities),
                     )
+                }
                 statLevels.contains(level) -> UiSkillMatrixBottomCell.Stat
                 else -> UiSkillMatrixBottomCell.Empty
             }
@@ -138,7 +143,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
 
         val summary = UiSkillSummary(
             talentTiers = TALENT_TIERS.map { tier ->
-                UiTalentTier(tier = tier, taken = talentEvents.any { it.level == tier }, side = null)
+                val event = talentEvents.firstOrNull { it.level == tier }
+                UiTalentTier(tier = tier, taken = event != null, side = event?.let { talentSide(it, slotByAbility) })
             }.toImmutableList(),
             abilities = orderedAbilityIds.map { abilityId ->
                 UiAbilitySummary(
@@ -167,6 +173,13 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
 
     private fun talentText(event: AbilityLearnEvent, abilities: Map<AbilityId, Ability>): String =
         event.abilityId?.let { abilities[it]?.label }.orEmpty()
+
+    private fun talentSide(event: AbilityLearnEvent, slotByAbility: Map<AbilityId, Int>): TalentSide? =
+        event.abilityId?.let { slotByAbility[it] }?.let { sideFromSlot(it) }
+
+    // Stratz talent slot 0-7: even slot = left branch, odd = right (parity verified on-device)
+    private fun sideFromSlot(slot: Int): TalentSide =
+        if (slot % 2 == 0) TalentSide.LEFT else TalentSide.RIGHT
 
     private fun levelMarks(events: List<AbilityLearnEvent>): ImmutableList<Boolean> {
         val levels = events.mapNotNull { it.level }.toSet()
