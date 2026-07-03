@@ -208,7 +208,7 @@ class UiGuideDetailStateMapperTest {
         val talentCell = matrix.bottomCells[9] as UiSkillMatrixBottomCell.Talent
         assertEquals(10, talentCell.tier)
         assertEquals("+6 strength", talentCell.text)
-        assertEquals(TalentSide.RIGHT, talentCell.side) // slot 3 (odd) → right branch
+        assertEquals(TalentSide.LEFT, talentCell.side) // slot 3 (odd) → left branch
 
         // R (lvl 6) is the only ultimate ability row
         val ultimateRows = matrix.abilityRows.filter { it.isUltimate }
@@ -227,7 +227,7 @@ class UiGuideDetailStateMapperTest {
         // summary tier is marked taken, side unknown
         val tier1 = skillBuild.summary.talentTiers.single { it.tier == 10 }
         assertTrue(tier1.taken)
-        assertEquals(TalentSide.RIGHT, tier1.side)
+        assertEquals(TalentSide.LEFT, tier1.side)
     }
 
     @Test

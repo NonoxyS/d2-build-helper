@@ -178,9 +178,9 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun talentSide(event: AbilityLearnEvent, slotByAbility: Map<AbilityId, Int>): TalentSide? =
         event.abilityId?.let { slotByAbility[it] }?.let { sideFromSlot(it) }
 
-    // Stratz talent slot 0-7: even slot = left branch, odd = right (parity verified on-device)
+    // Stratz talent slot 0-7: even slot = right branch, odd = left (verified vs live Stratz + Anti-Mage/Drow tier-1)
     private fun sideFromSlot(slot: Int): TalentSide =
-        if (slot % 2 == 0) TalentSide.LEFT else TalentSide.RIGHT
+        if (slot % 2 == 0) TalentSide.RIGHT else TalentSide.LEFT
 
     private fun levelMarks(events: List<AbilityLearnEvent>): ImmutableList<Boolean> {
         val levels = events.mapNotNull { it.level }.toSet()
