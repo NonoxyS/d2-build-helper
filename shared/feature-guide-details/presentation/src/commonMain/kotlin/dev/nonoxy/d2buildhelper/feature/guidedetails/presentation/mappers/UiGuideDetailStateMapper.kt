@@ -6,6 +6,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.Ability
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
@@ -64,7 +65,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         val player = detail.player
         return UiGuideDetailState(
             header = buildHeader(detail, player, item.heroes),
-            skillBuild = buildSkillBuild(player, item.abilities, item.heroes[player.heroId]),
+            skillBuild = buildSkillBuild(player, item.abilities, item.heroes[player.heroId]?.talents.orEmpty()),
             itemBuild = buildItemBuild(player, item.items),
             networth = buildNetworth(player, item.items),
             lineup = buildLineup(detail, player, item.heroes),
@@ -98,12 +99,12 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun buildSkillBuild(
         player: BuildPlayer,
         abilities: Map<AbilityId, Ability>,
-        hero: Hero?,
+        talents: List<HeroTalent>,
     ): UiSkillBuild? {
         val events = player.abilityLearnEvents
         if (events.isEmpty()) return null
 
-        val slotByAbility = hero?.talents.orEmpty().associate { it.abilityId to it.slot }
+        val slotByAbility = talents.associate { it.abilityId to it.slot }
         val talentEvents = events.filter { it.isTalent }
         val statEvents = events.filter { !it.isTalent && it.abilityId?.raw == STAT_ABILITY_ID_RAW }
         val skillEvents = events.filter { !it.isTalent && it.abilityId?.raw != STAT_ABILITY_ID_RAW }
