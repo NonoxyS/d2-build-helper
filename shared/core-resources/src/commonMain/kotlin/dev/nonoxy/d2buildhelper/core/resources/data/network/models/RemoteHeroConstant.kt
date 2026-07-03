@@ -9,4 +9,11 @@ internal data class RemoteHeroConstant(
     @SerialName("shortName") val shortName: String,
     @SerialName("displayName") val displayName: String,
     @SerialName("iconUrl") val iconUrl: String,
+    @SerialName("talents") val talents: List<RemoteHeroTalentConstant> = emptyList(),
+)
+
+@Serializable
+internal data class RemoteHeroTalentConstant(
+    @SerialName("abilityId") val abilityId: Int,
+    @SerialName("slot") val slot: Int,
 )

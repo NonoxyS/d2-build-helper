@@ -8,6 +8,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
@@ -137,6 +138,7 @@ private fun RemoteHeroConstant.toDomain(): Hero = Hero(
     shortName = shortName,
     displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
+    talents = talents.map { HeroTalent(AbilityId(it.abilityId.toShort()), it.slot) },
 )
 
 private fun RemoteItemConstant.toDomain(): Item = Item(
