@@ -180,7 +180,7 @@ class UiGuideDetailStateMapperTest {
         val ui = mapper.map(
             state(
                 detail(player),
-                heroes = mapOf(HeroId(1) to hero(1, talents = listOf(HeroTalent(talent.id, slot = 3)))),
+                heroes = mapOf(HeroId(1) to hero(1, talents = listOf(HeroTalent(talent.id, slot = 1)))),
                 abilities = mapOf(
                     q.id to q,
                     w.id to w,
@@ -208,7 +208,7 @@ class UiGuideDetailStateMapperTest {
         val talentCell = matrix.bottomCells[9] as UiSkillMatrixBottomCell.Talent
         assertEquals(10, talentCell.tier)
         assertEquals("+6 strength", talentCell.text)
-        assertEquals(TalentSide.LEFT, talentCell.side) // slot 3 (odd) → left branch
+        assertEquals(TalentSide.LEFT, talentCell.side) // slot 1 (odd) → left branch
 
         // R (lvl 6) is the only ultimate ability row
         val ultimateRows = matrix.abilityRows.filter { it.isUltimate }

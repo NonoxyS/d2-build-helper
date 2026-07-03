@@ -124,19 +124,17 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         }
 
         val statLevels = statEvents.mapNotNull { it.level }.toSet()
-        val talentEventByLevel = talentEvents
-            .mapNotNull { event -> event.level?.let { it to event } }
-            .toMap()
+        // Stratz talent learn-events carry level=0, so tier and side come from the hero talent slot
+        // (tier = slot / 2 → level 10/15/20/25, side = slot % 2), not from the event level.
+        val talentByTierLevel = talentEvents.mapNotNull { event ->
+            val slot = event.abilityId?.let { slotByAbility[it] } ?: return@mapNotNull null
+            val level = TALENT_TIERS.getOrNull(slot / 2) ?: return@mapNotNull null
+            level to TalentCell(side = sideFromSlot(slot), text = talentText(event, abilities))
+        }.toMap()
         val bottomCells = (1..MAX_LEVEL).map { level ->
+            val talent = talentByTierLevel[level]
             when {
-                TALENT_TIERS.contains(level) && talentEventByLevel.containsKey(level) -> {
-                    val event = talentEventByLevel.getValue(level)
-                    UiSkillMatrixBottomCell.Talent(
-                        tier = level,
-                        side = talentSide(event, slotByAbility),
-                        text = talentText(event, abilities),
-                    )
-                }
+                talent != null -> UiSkillMatrixBottomCell.Talent(tier = level, side = talent.side, text = talent.text)
                 statLevels.contains(level) -> UiSkillMatrixBottomCell.Stat
                 else -> UiSkillMatrixBottomCell.Empty
             }
@@ -144,8 +142,8 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
 
         val summary = UiSkillSummary(
             talentTiers = TALENT_TIERS.map { tier ->
-                val event = talentEvents.firstOrNull { it.level == tier }
-                UiTalentTier(tier = tier, taken = event != null, side = event?.let { talentSide(it, slotByAbility) })
+                val talent = talentByTierLevel[tier]
+                UiTalentTier(tier = tier, taken = talent != null, side = talent?.side)
             }.toImmutableList(),
             abilities = orderedAbilityIds.map { abilityId ->
                 UiAbilitySummary(
@@ -175,12 +173,11 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun talentText(event: AbilityLearnEvent, abilities: Map<AbilityId, Ability>): String =
         event.abilityId?.let { abilities[it]?.label }.orEmpty()
 
-    private fun talentSide(event: AbilityLearnEvent, slotByAbility: Map<AbilityId, Int>): TalentSide? =
-        event.abilityId?.let { slotByAbility[it] }?.let { sideFromSlot(it) }
-
     // Stratz talent slot 0-7: even slot = right branch, odd = left (verified vs live Stratz + Anti-Mage/Drow tier-1)
     private fun sideFromSlot(slot: Int): TalentSide =
         if (slot % 2 == 0) TalentSide.RIGHT else TalentSide.LEFT
+
+    private data class TalentCell(val side: TalentSide?, val text: String)
 
     private fun levelMarks(events: List<AbilityLearnEvent>): ImmutableList<Boolean> {
         val levels = events.mapNotNull { it.level }.toSet()
