@@ -5,4 +5,7 @@ data class Item(
     val shortName: String,
     val displayName: String,
     val iconUrl: ImageUrl,
+    val quality: String?,
+    val isRecipe: Boolean,
+    val components: List<ItemId>,
 )

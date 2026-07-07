@@ -2,6 +2,8 @@ package dev.nonoxy.d2buildhelper.feature.guides.api.domain.models
 
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
+import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 
 data class Guide(
     val matchId: Long,
@@ -21,16 +23,3 @@ data class PlayerStats(
     val endNeutralItemId: ItemId?,
     val sortedEndItemPurchases: List<ItemPurchase>,
 )
-
-data class ItemPurchase(
-    val itemId: ItemId,
-    val time: Int?,
-)
-
-enum class MatchPlayerPosition {
-    POSITION_1,
-    POSITION_2,
-    POSITION_3,
-    POSITION_4,
-    POSITION_5,
-}

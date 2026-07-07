@@ -45,6 +45,7 @@ include(":shared:common-ui")
 include(":shared:common-resources")
 
 include(":shared:core-domain")
+include(":shared:core-match")
 include(":shared:core-mvikotlin")
 include(":shared:core-presentation")
 include(":shared:core-navigation")
@@ -57,6 +58,11 @@ include(":shared:feature-guides:api")
 include(":shared:feature-guides:impl")
 include(":shared:feature-guides:presentation")
 include(":shared:feature-guides:ui")
+
+include(":shared:feature-guide-details:api")
+include(":shared:feature-guide-details:impl")
+include(":shared:feature-guide-details:presentation")
+include(":shared:feature-guide-details:ui")
 
 if (System.getenv("IS_CI") == null) {
     providers.exec {

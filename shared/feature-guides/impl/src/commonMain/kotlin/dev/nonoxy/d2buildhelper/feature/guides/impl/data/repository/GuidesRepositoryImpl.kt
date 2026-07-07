@@ -5,7 +5,7 @@ import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
 import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
-import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.GuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesPageMapper
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
@@ -24,14 +24,13 @@ internal class GuidesRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             coRunCatching(
                 tryBlock = {
-                    val response = apiClient.getGuides(
+                    apiClient.getGuides(
                         heroId = filters.heroId?.raw,
                         position = filters.position?.toWire(),
                         isRadiant = filters.isRadiant,
                         page = page,
                         pageSize = PAGE_SIZE,
-                    ).getOrThrow()
-                    guidesPageMapper.map(response)
+                    ).map(guidesPageMapper::map)
                 },
                 catchBlock = { throwable ->
                     Napier.e(throwable = throwable, message = "GuidesRepositoryImpl.getGuides failed")

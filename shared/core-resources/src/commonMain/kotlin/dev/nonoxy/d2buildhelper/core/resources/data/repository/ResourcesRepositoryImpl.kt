@@ -8,6 +8,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
@@ -53,10 +54,10 @@ internal class ResourcesRepositoryImpl(
         tryBlock = {
             val cached = readL1OrL2()
             if (cached != null) {
-                scope.launch { runCatching { refreshDotaConstants() } }
-                cached
+                scope.launch { refreshDotaConstants() }
+                Result.success(cached)
             } else {
-                refreshDotaConstants().getOrThrow()
+                refreshDotaConstants()
             }
         },
         catchBlock = { throwable ->
@@ -89,7 +90,7 @@ internal class ResourcesRepositoryImpl(
 
             val deferred = scope.async {
                 coRunCatching(
-                    tryBlock = { fetchAndCache() },
+                    tryBlock = { Result.success(fetchAndCache()) },
                     catchBlock = { throwable ->
                         Napier.e(throwable = throwable, message = "ResourcesRepositoryImpl.fetchAndCache failed")
                         throwable.wrapResultFailure()
@@ -137,6 +138,7 @@ private fun RemoteHeroConstant.toDomain(): Hero = Hero(
     shortName = shortName,
     displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
+    talents = talents.map { HeroTalent(AbilityId(it.abilityId.toShort()), it.slot) },
 )
 
 private fun RemoteItemConstant.toDomain(): Item = Item(
@@ -144,10 +146,14 @@ private fun RemoteItemConstant.toDomain(): Item = Item(
     shortName = shortName,
     displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
+    quality = quality,
+    isRecipe = isRecipe,
+    components = components.map { ItemId(it.toShort()) },
 )
 
 private fun RemoteAbilityConstant.toDomain(): Ability = Ability(
     id = AbilityId(id.toShort()),
     name = name,
+    displayName = displayName,
     iconUrl = ImageUrl(iconUrl),
 )

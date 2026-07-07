@@ -6,6 +6,8 @@ import dev.nonoxy.d2buildhelper.core.mvikotlin.di.coreMVIKotlinModule
 import dev.nonoxy.d2buildhelper.core.network.di.coreNetworkModule
 import dev.nonoxy.d2buildhelper.core.resources.di.coreResourcesModule
 import dev.nonoxy.d2buildhelper.core.storage.di.coreStorageModule
+import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.di.featureGuideDetailsImplModule
+import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.di.featureGuideDetailsPresentationModule
 import dev.nonoxy.d2buildhelper.feature.guides.impl.di.featureGuidesImplModule
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.di.featureGuidesPresentationModule
 import io.github.aakira.napier.Napier
@@ -30,6 +32,9 @@ fun initKoin(appDeclaration: KoinAppDeclaration? = null) {
 
             featureGuidesImplModule,
             featureGuidesPresentationModule,
+
+            featureGuideDetailsImplModule,
+            featureGuideDetailsPresentationModule,
         )
     }
 

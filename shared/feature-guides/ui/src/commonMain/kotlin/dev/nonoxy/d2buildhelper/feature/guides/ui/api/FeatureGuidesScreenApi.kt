@@ -23,8 +23,10 @@ fun NavController.navigateToGuidesScreen(
     }
 }
 
-fun NavGraphBuilder.composableGuidesScreen() {
+fun NavGraphBuilder.composableGuidesScreen(
+    onGuideClick: (matchId: Long, steamAccountId: Long) -> Unit = { _, _ -> },
+) {
     composable<GuidesRoute> {
-        GuidesScreen()
+        GuidesScreen(onGuideClick = onGuideClick)
     }
 }

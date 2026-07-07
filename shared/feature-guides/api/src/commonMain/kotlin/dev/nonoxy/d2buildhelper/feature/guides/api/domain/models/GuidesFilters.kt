@@ -1,6 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guides.api.domain.models
 
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
 
 sealed interface GuidesFilterKind {
     data object Hero : GuidesFilterKind

@@ -5,4 +5,5 @@ data class Hero(
     val shortName: String,
     val displayName: String,
     val iconUrl: ImageUrl,
+    val talents: List<HeroTalent> = emptyList(),
 )

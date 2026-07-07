@@ -26,8 +26,9 @@ internal class ConstantsStorageImpl(
     override suspend fun load(): CachedDotaConstants? = withContext(dispatchers.io) {
         coRunCatching(
             tryBlock = {
-                val raw = dataStore.data.first()[key] ?: return@coRunCatching null
-                json.decodeFromString<SerializableCachedDotaConstants>(raw).toDomain()
+                val raw = dataStore.data.first()[key]
+                    ?: return@coRunCatching Result.success<CachedDotaConstants?>(null)
+                Result.success(json.decodeFromString<SerializableCachedDotaConstants>(raw).toDomain())
             },
             catchBlock = { throwable ->
                 if (throwable is SerializationException) {
@@ -38,7 +39,7 @@ internal class ConstantsStorageImpl(
                     Result.failure(throwable)
                 }
             },
-        ).getOrNull()
+        ).getOrThrow()
     }
 
     override suspend fun save(value: CachedDotaConstants): Unit = withContext(dispatchers.io) {

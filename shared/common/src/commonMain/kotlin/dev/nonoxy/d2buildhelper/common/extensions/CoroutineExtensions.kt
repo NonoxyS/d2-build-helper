@@ -1,14 +1,19 @@
 package dev.nonoxy.d2buildhelper.common.extensions
 
-import kotlinx.coroutines.CancellationException
+import kotlin.coroutines.cancellation.CancellationException
 
-suspend inline fun <T> coRunCatching(
-    crossinline tryBlock: suspend () -> T,
-    crossinline catchBlock: (Throwable) -> Result<T> = { it.wrapResultFailure() },
-): Result<T> = try {
-    Result.success(tryBlock())
-} catch (cancellation: CancellationException) {
-    throw cancellation
+// https://detekt.dev/docs/rules/coroutines/#suspendfunswallowedcancellation
+inline fun <T, R> T.coRunCatching(
+    tryBlock: () -> R,
+    catchBlock: (Throwable) -> R,
+    finallyBlock: () -> Unit = {},
+): R = try {
+    tryBlock()
 } catch (throwable: Throwable) {
-    catchBlock(throwable)
+    when (throwable) {
+        is CancellationException -> throw throwable
+        else -> catchBlock(throwable)
+    }
+} finally {
+    finallyBlock()
 }

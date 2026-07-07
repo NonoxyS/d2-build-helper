@@ -5,6 +5,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
+import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
@@ -31,6 +32,7 @@ internal data class SerializableCachedDotaConstants(
                     shortName = hero.shortName,
                     displayName = hero.displayName,
                     iconUrl = ImageUrl(hero.iconUrl),
+                    talents = hero.talents.map { HeroTalent(AbilityId(it.abilityId), it.slot) },
                 )
             },
             items = items.associate { item ->
@@ -40,11 +42,14 @@ internal data class SerializableCachedDotaConstants(
                     shortName = item.shortName,
                     displayName = item.displayName,
                     iconUrl = ImageUrl(item.iconUrl),
+                    quality = item.quality,
+                    isRecipe = item.isRecipe,
+                    components = item.components.map { ItemId(it) },
                 )
             },
             abilities = abilities.associate { ab ->
                 val id = AbilityId(ab.id)
-                id to Ability(id = id, name = ab.name, iconUrl = ImageUrl(ab.iconUrl))
+                id to Ability(id = id, name = ab.name, displayName = ab.displayName, iconUrl = ImageUrl(ab.iconUrl))
             },
         ),
         fetchedAt = Instant.fromEpochMilliseconds(fetchedAtEpochMillis),
@@ -57,6 +62,13 @@ internal data class SerializableHero(
     val shortName: String,
     val displayName: String,
     val iconUrl: String,
+    val talents: List<SerializableHeroTalent> = emptyList(),
+)
+
+@Serializable
+internal data class SerializableHeroTalent(
+    val abilityId: Short,
+    val slot: Int,
 )
 
 @Serializable
@@ -65,26 +77,44 @@ internal data class SerializableItem(
     val shortName: String,
     val displayName: String,
     val iconUrl: String,
+    val quality: String? = null,
+    val isRecipe: Boolean = false,
+    val components: List<Short> = emptyList(),
 )
 
 @Serializable
 internal data class SerializableAbility(
     val id: Short,
     val name: String,
+    val displayName: String,
     val iconUrl: String,
 )
 
 internal fun CachedDotaConstants.toSerializable(): SerializableCachedDotaConstants =
     SerializableCachedDotaConstants(
         gameVersionId = data.gameVersion.id,
-        heroes = data.heroes.values.map {
-            SerializableHero(it.id.raw, it.shortName, it.displayName, it.iconUrl.raw)
+        heroes = data.heroes.values.map { hero ->
+            SerializableHero(
+                id = hero.id.raw,
+                shortName = hero.shortName,
+                displayName = hero.displayName,
+                iconUrl = hero.iconUrl.raw,
+                talents = hero.talents.map { SerializableHeroTalent(it.abilityId.raw, it.slot) },
+            )
         },
         items = data.items.values.map {
-            SerializableItem(it.id.raw, it.shortName, it.displayName, it.iconUrl.raw)
+            SerializableItem(
+                id = it.id.raw,
+                shortName = it.shortName,
+                displayName = it.displayName,
+                iconUrl = it.iconUrl.raw,
+                quality = it.quality,
+                isRecipe = it.isRecipe,
+                components = it.components.map { component -> component.raw },
+            )
         },
         abilities = data.abilities.values.map {
-            SerializableAbility(it.id.raw, it.name, it.iconUrl.raw)
+            SerializableAbility(it.id.raw, it.name, it.displayName, it.iconUrl.raw)
         },
         fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
     )
