@@ -96,6 +96,23 @@ Every reusable composable in `features/.../ui/views/` should have a `@Preview` i
 - For multi-state composables, render variants in a `Column { ... }`.
 - `private fun` — previews never leak as public API.
 
+## Design System
+
+### D2BuildHelperTheme — only source of tokens
+
+Access colors, typography, and shapes via `D2BuildHelperTheme.colors` / `.typography` / `.shapes`. Never read from `MaterialTheme.colorScheme` or `MaterialTheme.typography` directly in feature UI code — the colorScheme mapping in `Theme.kt` is a safety net, not the primary mechanism.
+
+### D2* wrappers for M3 components
+
+Commonly used Material3 components (`Button`, `TextField`, `Chip`, `ProgressIndicator`, `IconButton`, `ModalBottomSheet`, …) must have a `D2*` wrapper in `:shared:common-ui` that explicitly maps all color slots from `D2BuildHelperTheme`. Use the wrapper at call sites in `feature-*/ui/`. Never use bare M3 components in feature UI modules without a wrapper.
+
+When adding a new M3 component to a feature: stop, create the `D2*` wrapper in `common-ui`, then use it at the call site in the same commit.
+
+### No hardcoded strings or colors
+
+- String literals in `Text("...")` are forbidden — use moko-resources (`stringResource(MR.strings.x)`).
+- `Color(0x...)` / `Color(0xFF...)` literals are forbidden — use DS tokens via `D2BuildHelperTheme.colors`.
+
 ## CompositionLocals
 
 `LocalImageLoader` is the only CompositionLocal in the project. Do not introduce new ones without good reason — they hide dependencies and complicate testing.
