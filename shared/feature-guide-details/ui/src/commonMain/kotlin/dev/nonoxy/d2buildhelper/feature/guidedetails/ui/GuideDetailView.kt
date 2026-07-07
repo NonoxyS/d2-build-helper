@@ -261,6 +261,7 @@ private fun previewNetworth() = UiNetworthCurve(
     ),
     gpm = 498,
     networth = 19100,
+    networthText = "19.1k",
     xpm = 620,
 )
 

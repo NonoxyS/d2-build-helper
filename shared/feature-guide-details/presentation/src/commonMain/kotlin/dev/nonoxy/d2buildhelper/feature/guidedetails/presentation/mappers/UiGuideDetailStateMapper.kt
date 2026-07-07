@@ -201,6 +201,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             .mapNotNull { phase ->
                 val entries = shown
                     .filter { phaseOf(it.time) == phase }
+                    .sortedBy { it.time ?: Int.MAX_VALUE }
                     .let { dedupeEntries(it, items) }
                     .takeIf { it.isNotEmpty() }
                     ?: return@mapNotNull null
@@ -221,7 +222,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
         items: Map<ItemId, Item>,
     ): List<ItemPurchase> {
         val ordered = purchases
-            .sortedBy { it.time ?: Int.MAX_VALUE }
+            .sortedBy { it.time ?: Int.MIN_VALUE }
             .filter { items[it.itemId]?.isRecipe != true }
 
         val consumed = BooleanArray(ordered.size)
@@ -267,6 +268,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
     private fun buildNetworth(player: BuildPlayer, items: Map<ItemId, Item>): UiNetworthCurve {
         val markers = reconstructBuild(player.itemPurchases, items)
             .filter { it.time != null }
+            .filter { items.containsKey(it.itemId) }
             .filter { items[it.itemId]?.quality?.startsWith(CONSUMABLE_QUALITY_PREFIX) != true }
             .groupBy { it.itemId }
             .map { (_, purchases) -> purchases.minBy { it.time!! } }
@@ -286,6 +288,7 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             markers = markers,
             gpm = player.goldPerMinute,
             networth = player.networth,
+            networthText = player.networth?.let { formatNetworth(it) },
             xpm = player.experiencePerMinute,
         )
     }
@@ -317,6 +320,15 @@ internal class UiGuideDetailStateMapperImpl : UiGuideDetailStateMapper {
             }
             .toImmutableList()
 }
+
+private fun formatNetworth(value: Int): String {
+    if (value < NETWORTH_THOUSAND) return value.toString()
+    val thousands = value / NETWORTH_THOUSAND
+    val remainder = (value % NETWORTH_THOUSAND) / 100
+    return "$thousands.${remainder}k"
+}
+
+private const val NETWORTH_THOUSAND = 1000
 
 // TimeConverter collapses negatives to "00:00", so we format pre-horn times here
 private fun formatTime(seconds: Int?): String {

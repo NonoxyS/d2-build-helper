@@ -100,7 +100,7 @@ private fun MetaRow(
         header.role?.label(),
         header.lane?.label(),
         header.durationText.takeIf { it.isNotBlank() },
-        header.level?.let { "lvl $it" },
+        header.level?.let { stringResource(MR.strings.guide_detail_level, it) },
     )
     Text(
         text = parts.joinToString(separator = " · "),

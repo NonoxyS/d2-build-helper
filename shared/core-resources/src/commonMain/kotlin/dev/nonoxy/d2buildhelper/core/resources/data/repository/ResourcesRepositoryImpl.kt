@@ -54,7 +54,7 @@ internal class ResourcesRepositoryImpl(
         tryBlock = {
             val cached = readL1OrL2()
             if (cached != null) {
-                scope.launch { runCatching { refreshDotaConstants() } }
+                scope.launch { refreshDotaConstants() }
                 Result.success(cached)
             } else {
                 refreshDotaConstants()

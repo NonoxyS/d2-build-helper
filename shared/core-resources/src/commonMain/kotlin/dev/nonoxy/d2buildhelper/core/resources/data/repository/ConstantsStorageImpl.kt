@@ -39,7 +39,7 @@ internal class ConstantsStorageImpl(
                     Result.failure(throwable)
                 }
             },
-        ).getOrNull()
+        ).getOrThrow()
     }
 
     override suspend fun save(value: CachedDotaConstants): Unit = withContext(dispatchers.io) {

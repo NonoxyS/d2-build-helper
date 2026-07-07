@@ -44,6 +44,7 @@
     <string name="guide_detail_win">WIN</string>
     <string name="guide_detail_loss">LOSS</string>
 
+    <string name="guide_detail_level">lvl %d</string>
     <string name="guide_detail_gpm">GPM</string>
     <string name="guide_detail_xpm">XPM</string>
     <string name="guide_detail_kda">KDA</string>

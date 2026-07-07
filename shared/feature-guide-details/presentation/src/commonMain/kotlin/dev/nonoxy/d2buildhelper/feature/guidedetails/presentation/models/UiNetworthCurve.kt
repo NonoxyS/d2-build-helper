@@ -8,6 +8,7 @@ data class UiNetworthCurve(
     val markers: ImmutableList<UiNetworthMarker>,
     val gpm: Int?,
     val networth: Int?,
+    val networthText: String?,
     val xpm: Int?,
 )
 

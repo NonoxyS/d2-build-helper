@@ -31,7 +31,6 @@ private val POPUP_MAX_WIDTH = 240.dp
 private val POPUP_PADDING = 12.dp
 private val POPUP_GAP = 6.dp
 
-// Wraps a tappable element and shows an anchored explain tooltip right below it, dismissed by a tap outside.
 @Composable
 internal fun ExplainAnchor(
     title: String,

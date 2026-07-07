@@ -18,7 +18,6 @@ private const val TRUNK_STROKE_FRACTION = 0.09f
 private const val BRANCH_STROKE_FRACTION = 0.09f
 private const val TAKEN_UNKNOWN_ALPHA = 0.5f
 
-// tier1..4 laid bottom -> top
 private val TIER_Y_FRACTIONS = listOf(0.82f, 0.60f, 0.38f, 0.16f)
 private val TALENT_TIERS_ORDER = listOf(10, 15, 20, 25)
 

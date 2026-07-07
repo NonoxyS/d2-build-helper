@@ -468,6 +468,7 @@ class UiGuideDetailStateMapperTest {
 
         val nw = ui.networth!!
         assertEquals(412, nw.gpm)
+        assertEquals("18.4k", nw.networthText)
         assertEquals(18400, nw.networth)
         assertEquals(615, nw.xpm)
         assertEquals(listOf(0, 100, 200, 300), nw.points)

@@ -247,7 +247,7 @@ private fun StatsRow(
         StatColumn(value = networth.gpm?.toString(), label = stringResource(MR.strings.guide_detail_gpm))
         StatColumn(value = networth.xpm?.toString(), label = stringResource(MR.strings.guide_detail_xpm))
         StatColumn(
-            value = networth.networth?.let { formatNetworth(it) },
+            value = networth.networthText,
             label = stringResource(MR.strings.guide_detail_networth),
         )
     }
@@ -271,13 +271,4 @@ private fun StatColumn(
             style = D2BuildHelperTheme.typography.captionMD,
         )
     }
-}
-
-private const val THOUSAND = 1000
-
-private fun formatNetworth(value: Int): String {
-    if (value < THOUSAND) return value.toString()
-    val thousands = value / THOUSAND
-    val remainder = (value % THOUSAND) / 100
-    return "$thousands.${remainder}k"
 }
