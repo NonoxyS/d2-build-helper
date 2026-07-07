@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,6 +102,7 @@ private fun NetworthChart(
     val maxValue = (points.maxOrNull() ?: 0).coerceAtLeast(1)
     val lastIndex = points.size - 1
     val density = LocalDensity.current
+    val visibleMarkers = remember(markers, lastIndex) { markers.filter { it.minute in 0..lastIndex } }
 
     BoxWithConstraints(modifier = modifier) {
         val insetPx = with(density) { CHART_INSET.toPx() }
@@ -109,13 +111,16 @@ private fun NetworthChart(
         val fullWidthPx = with(density) { maxWidth.toPx() }
         val plotWidthPx = (fullWidthPx - insetPx * 2f).coerceAtLeast(1f)
 
-        val visibleMarkers = markers.filter { it.minute in 0..lastIndex }
-        val trueX = visibleMarkers.map { insetPx + plotWidthPx * (it.minute.toFloat() / lastIndex) }
-        val laidCenters = declusterCenters(
-            trueCenters = trueX,
-            minGap = iconPx + gapPx,
-            maxCenter = fullWidthPx - iconPx / 2f,
-        )
+        val trueX = remember(visibleMarkers, insetPx, plotWidthPx, lastIndex) {
+            visibleMarkers.map { insetPx + plotWidthPx * (it.minute.toFloat() / lastIndex) }
+        }
+        val laidCenters = remember(trueX, iconPx, gapPx, fullWidthPx) {
+            declusterCenters(
+                trueCenters = trueX,
+                minGap = iconPx + gapPx,
+                maxCenter = fullWidthPx - iconPx / 2f,
+            )
+        }
 
         Column {
             MarkerLane(
