@@ -45,7 +45,12 @@ Core bindings live in `core/di/AppModule.kt`; per-feature bindings live in `<fea
 - `single<T> { ... }` for clients (`HttpClient`, `*ApiClient`), datasources, repositories.
 - `factory { <Feature>StoreFactory(get(), ...).create() }` to expose a feature `Store` (the StoreFactory itself is `internal` and lives in the same module).
 - `viewModelOf(::SomeViewModel)` for view-models (via `koin-compose-viewmodel`).
-- `singleOf(::Impl) bind Api::class` to expose mappers and other interface-backed services.
+
+Binding interfaces to implementations — choose form by constructor params:
+
+- **No constructor params** → `singleOf<I>(::Impl)` / `factoryOf<I>(::Impl)` (typed target on the `Of` builder).
+- **Has constructor params** → `single<I> { new(::Impl) }` / `factory<I> { new(::Impl) }`.
+- **NEVER** `factoryOf(::Impl) { bind<I>() }` / `singleOf(::Impl) { bind<I>() }` — registers the definition under `Impl` as the primary key and `I` as a secondary bind, so `get<Impl>()` resolves → impl leaks into the graph.
 
 Resolve dependencies:
 - In classes (datasources, repos, StoreFactories, executors, view-models): via **constructor parameters**. Koin wires them automatically. No `get()` inside class bodies.
@@ -68,15 +73,64 @@ Navigation uses type-safe routes based on the `Screen` marker interface in `:sha
   @Serializable
   data object GuidesRoute : Screen
   ```
-- Per-feature `ScreenApi` extension functions live in `<feature>/ui/api/Feature*ScreenApi.kt` and register composables on `NavGraphBuilder`:
+- Per-feature `ScreenApi` extension functions live in `<feature>/ui/api/Feature<X>ScreenApi.kt`. Strict top-to-bottom order:
   ```kotlin
-  fun NavGraphBuilder.composableGuidesScreen() {
-      composable<GuidesRoute> { GuidesScreen() }
+  @Serializable
+  data object <X>Route : Screen
+
+  fun NavController.navigateTo<X>Screen(
+      popUpInclusive: Boolean = true,
+      popUpToScreen: Screen? = null,
+  ) {
+      navigateOnResumed(<X>Route) {
+          launchSingleTop = true
+          popUpToScreen?.let { screen -> popUpTo(screen) { inclusive = popUpInclusive } }
+      }
+  }
+
+  fun NavGraphBuilder.composable<X>Screen(
+      // onNavigateTo<Y>: () -> Unit = {},
+  ) {
+      composable<<X>Route> { <X>Screen(/* callbacks */) }
   }
   ```
+  Route object (`<X>Route`) is NOT placed in `:shared:core-navigation` — only the `Screen` marker interface lives there.
 - `NavigationUtils.kt` (`:shared:core-navigation`) provides `NavController` helpers (`navigateOnResumed`, `popBackStackOnResumed`, `CheckNavigationResult`, etc.).
 
 `NavController` is threaded through the composable call-site rather than via a `CompositionLocal`. Prefer `NavController` parameters for explicit navigation; reserve `NavigationUtils` helpers for deep-link and result-passing scenarios.
+
+## Presentation Layer Discipline
+
+### UiX models are mandatory
+
+Domain types (`Hero`, `Item`, `Guide`, `MatchPlayerPosition`) must never reach `@Composable`. Map them to `Ui*` models in `<feature>/presentation/models/` via `UiXStateMapper` / `UiXLabelMapper`. The mapper is a pure function (`Store.State → UiXState`) — no suspend, no Repository calls.
+
+### ImmutableList / ImmutableMap only in UiX models
+
+`List<T>` / `Map<K,V>` in domain and Store.State. `ImmutableList<T>` / `ImmutableMap<K,V>` only in `UiX*` models (converted via `.toImmutableList()` in the mapper).
+
+### Enum → UiEnum with resource field
+
+When an enum needs a resource in the UI, declare a `UiX`-enum with the resource field and map it in the Mapper — not in the composable:
+
+```kotlin
+enum class UiMatchPlayerPosition(val iconResource: ImageResource?) {
+    POSITION_1(MR.images.position_1),
+    UNKNOWN(null),
+}
+```
+
+### Maps keyed by flat ID, not domain object
+
+`Map<Short, String>` (e.g. heroId → iconUrl) not `Map<Hero, String>`. Better: mapper zips the resolved URL into `UiHero.iconUrl` so the composable does zero lookup.
+
+### Mapper never calls Repository
+
+Everything the Mapper needs must be in `Store.State` (loaded by the Executor). If you feel the mapper needs an external call, the real fix is enriching State, not injecting a Repository.
+
+### Feature template invariants
+
+`Store.Label`, `UiXLabel`, `UiXLabelMapper(Impl)` are always present — even if `sealed interface` is empty. Never remove these "empty" slots; the next one-shot effect (navigation, snackbar) reuses them without scaffolding work.
 
 ## Build conventions
 
