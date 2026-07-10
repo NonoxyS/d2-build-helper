@@ -58,8 +58,6 @@ internal fun ExplainAnchor(
     }
 }
 
-// Anchors the card above the target, flipping below when it would clip the top edge,
-// and clamps horizontally within the window.
 private class ExplainPositionProvider(private val gap: Int) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,

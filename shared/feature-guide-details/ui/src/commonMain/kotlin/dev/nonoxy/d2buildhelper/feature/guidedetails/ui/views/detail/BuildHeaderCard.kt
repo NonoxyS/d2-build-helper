@@ -117,7 +117,12 @@ private fun KdaColumn(
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.End) {
         Text(
-            text = "${header.kills ?: 0}/${header.deaths ?: 0}/${header.assists ?: 0}",
+            text = stringResource(
+                MR.strings.guide_detail_kda_format,
+                header.kills ?: 0,
+                header.deaths ?: 0,
+                header.assists ?: 0,
+            ),
             color = D2BuildHelperTheme.colors.textPrimary,
             style = D2BuildHelperTheme.typography.bodyLG,
             textAlign = TextAlign.End,
@@ -138,7 +143,7 @@ private fun WinLossBadge(
     val label = stringResource(
         if (isVictory) MR.strings.guide_detail_win else MR.strings.guide_detail_loss,
     )
-    val color = if (isVictory) WIN_COLOR else LOSS_COLOR
+    val color = if (isVictory) D2BuildHelperTheme.colors.positive else D2BuildHelperTheme.colors.negative
     Text(
         text = label,
         color = color,

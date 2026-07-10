@@ -51,5 +51,9 @@
     <string name="guide_detail_networth">Networth</string>
 
     <string name="guide_detail_ability_points">Вкачано очков: %d</string>
+    <string name="guide_detail_item_count_format">×%d</string>
+    <string name="guide_detail_phase_arrow">›</string>
+    <string name="guide_detail_minute_format">%d\'</string>
+    <string name="guide_detail_kda_format">%d/%d/%d</string>
 
 </resources>

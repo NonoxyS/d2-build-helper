@@ -33,10 +33,10 @@ internal fun LineupCard(
     DetailCard(modifier = modifier) {
         CardLabel(text = stringResource(MR.strings.guide_detail_card_lineup))
 
-        TeamRow(members = lineup.enemies, glowColor = ENEMY_GLOW_COLOR)
+        TeamRow(members = lineup.enemies, glowColor = D2BuildHelperTheme.colors.negative)
         Space8()
 
-        TeamRow(members = lineup.allies, glowColor = ALLY_GLOW_COLOR)
+        TeamRow(members = lineup.allies, glowColor = D2BuildHelperTheme.colors.positive)
     }
 }
 
