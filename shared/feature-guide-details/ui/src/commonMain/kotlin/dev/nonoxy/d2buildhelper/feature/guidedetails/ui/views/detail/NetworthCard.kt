@@ -69,7 +69,7 @@ internal fun NetworthCard(
 
 // Space marker icon centers left->right with a minimum gap so early clustered
 // purchases don't overlap; connector lines re-point each icon at its true minute.
-internal fun declusterCenters(trueCenters: List<Float>, minGap: Float, maxCenter: Float): List<Float> {
+private fun declusterCenters(trueCenters: List<Float>, minGap: Float, maxCenter: Float): List<Float> {
     if (trueCenters.isEmpty()) return emptyList()
     val out = FloatArray(trueCenters.size)
     var prev = -Float.MAX_VALUE
@@ -96,7 +96,7 @@ private fun NetworthChart(
 ) {
     if (points.size < 2) return
 
-    val lineColor = NETWORTH_LINE_COLOR
+    val lineColor = D2BuildHelperTheme.colors.positive
     val baselineColor = D2BuildHelperTheme.colors.outline
     val connectorColor = D2BuildHelperTheme.colors.outline
     val maxValue = (points.maxOrNull() ?: 0).coerceAtLeast(1)
@@ -211,7 +211,7 @@ private fun MarkerIcon(
     val fallbackTitle = stringResource(MR.strings.guide_detail_card_economy)
     ExplainAnchor(
         title = marker.name?.takeIf { it.isNotBlank() } ?: fallbackTitle,
-        body = "${marker.minute}'",
+        body = stringResource(MR.strings.guide_detail_minute_format, marker.minute),
         modifier = modifier,
     ) { onClick ->
         AsyncImage(

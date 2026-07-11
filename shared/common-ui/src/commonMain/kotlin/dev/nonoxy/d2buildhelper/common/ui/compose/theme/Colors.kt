@@ -21,6 +21,15 @@ class D2BuildHelperColorScheme internal constructor(
     val textPrimary: Color,
     val textSecondary: Color,
     val outline: Color,
+    val positive: Color,
+    val negative: Color,
+    val talentGold: Color,
+    val talentEmpty: Color,
+    val purchaseMarker: Color,
+    val abilityQ: Color,
+    val abilityW: Color,
+    val abilityE: Color,
+    val abilityR: Color,
 )
 
 @Composable
@@ -32,4 +41,13 @@ internal fun getDarkColorScheme(): D2BuildHelperColorScheme = D2BuildHelperColor
     textPrimary = colorResource(MR.colors.textPrimary),
     textSecondary = colorResource(MR.colors.textSecondary),
     outline = colorResource(MR.colors.outline),
+    positive = colorResource(MR.colors.positive),
+    negative = colorResource(MR.colors.negative),
+    talentGold = colorResource(MR.colors.talentGold),
+    talentEmpty = colorResource(MR.colors.talentEmpty),
+    purchaseMarker = colorResource(MR.colors.purchaseMarker),
+    abilityQ = colorResource(MR.colors.abilityQ),
+    abilityW = colorResource(MR.colors.abilityW),
+    abilityE = colorResource(MR.colors.abilityE),
+    abilityR = colorResource(MR.colors.abilityR),
 )

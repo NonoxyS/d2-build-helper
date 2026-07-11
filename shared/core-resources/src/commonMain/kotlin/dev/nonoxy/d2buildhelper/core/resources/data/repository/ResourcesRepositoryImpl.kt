@@ -19,7 +19,7 @@ import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteHeroCon
 import dev.nonoxy.d2buildhelper.core.resources.data.network.models.RemoteItemConstant
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.CachedDotaConstants
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
-import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ConstantsStorage
+import dev.nonoxy.d2buildhelper.core.resources.data.storage.ConstantsStorage
 import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ResourcesRepository
 import io.github.aakira.napier.Napier
 import kotlin.concurrent.Volatile

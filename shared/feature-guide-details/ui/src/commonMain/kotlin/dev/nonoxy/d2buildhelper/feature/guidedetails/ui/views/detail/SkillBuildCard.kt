@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
+import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.divider.D2Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,13 +54,6 @@ private val STAT_MARK_SIZE = 16.dp
 private const val SCEPTER_GREY_ALPHA = 0.3f
 private const val MAX_EARLY_DOTS = 3
 
-private val abilityTints = listOf(
-    ABILITY_Q_COLOR,
-    ABILITY_W_COLOR,
-    ABILITY_E_COLOR,
-    ABILITY_R_COLOR,
-)
-
 @Composable
 internal fun SkillBuildCard(
     skillBuild: UiSkillBuild,
@@ -81,6 +74,12 @@ private fun SummaryRow(
     skillBuild: UiSkillBuild,
     modifier: Modifier = Modifier,
 ) {
+    val abilityTints = listOf(
+        D2BuildHelperTheme.colors.abilityQ,
+        D2BuildHelperTheme.colors.abilityW,
+        D2BuildHelperTheme.colors.abilityE,
+        D2BuildHelperTheme.colors.abilityR,
+    )
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
@@ -141,7 +140,8 @@ private fun PointDots(
                 modifier = Modifier
                     .size(POINT_DOT_SIZE)
                     .background(
-                        color = if (index < pointCount) TALENT_GOLD else TALENT_EMPTY,
+                        color = if (index < pointCount) D2BuildHelperTheme.colors.talentGold
+                        else D2BuildHelperTheme.colors.talentEmpty,
                         shape = CircleShape,
                     ),
             )
@@ -184,7 +184,7 @@ private fun SkillMatrix(
 
 @Composable
 private fun MatrixGridline(modifier: Modifier = Modifier) {
-    HorizontalDivider(modifier = modifier, thickness = 1.dp, color = D2BuildHelperTheme.colors.outline)
+    D2Divider(modifier = modifier)
 }
 
 @Composable
@@ -262,7 +262,7 @@ private fun BottomMatrixRow(
                         modifier = Modifier
                             .size(STAT_MARK_SIZE)
                             .clip(CELL_CORNER)
-                            .background(ABILITY_STAT_COLOR),
+                            .background(D2BuildHelperTheme.colors.purchaseMarker),
                     )
                     is UiSkillMatrixBottomCell.Talent -> ExplainAnchor(
                         title = talentTitle,

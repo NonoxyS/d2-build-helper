@@ -7,4 +7,13 @@
     <color name="textPrimary">#ffffff</color>
     <color name="textSecondary">#ffffffcc</color>
     <color name="outline">#ffffff14</color>
+    <color name="positive">#3FB950</color>
+    <color name="negative">#F85149</color>
+    <color name="talentGold">#E3A008</color>
+    <color name="talentEmpty">#2B3340</color>
+    <color name="purchaseMarker">#5B8FC0</color>
+    <color name="abilityQ">#2F6FB0</color>
+    <color name="abilityW">#B07D2F</color>
+    <color name="abilityE">#2FB074</color>
+    <color name="abilityR">#A02FA0</color>
 </resources>

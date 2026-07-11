@@ -7,14 +7,14 @@ import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesP
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.repository.GuidesRepositoryImpl
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.GuidesStoreFactory
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository
-import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.new
 import org.koin.dsl.module
 
 val featureGuidesImplModule = module {
-    factoryOf(::GuidesApiClientImpl) { bind<GuidesApiClient>() }
-    factoryOf(::GuidesPageMapperImpl) { bind<GuidesPageMapper>() }
-    factoryOf(::GuidesRepositoryImpl) { bind<GuidesRepository>() }
+    factory<GuidesApiClient> { new(::GuidesApiClientImpl) }
+    factoryOf<GuidesPageMapper>(::GuidesPageMapperImpl)
+    factory<GuidesRepository> { new(::GuidesRepositoryImpl) }
 
     factory { GuidesStoreFactory(get(), get(), get(), get()).create() }
 }

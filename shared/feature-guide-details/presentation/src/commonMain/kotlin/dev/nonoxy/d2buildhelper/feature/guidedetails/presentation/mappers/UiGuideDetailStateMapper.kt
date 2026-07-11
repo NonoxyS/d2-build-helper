@@ -49,7 +49,6 @@ private const val SECONDS_PER_MINUTE = 60
 private val TALENT_TIERS = listOf(10, 15, 20, 25)
 
 private const val LANING_END_SECONDS = 600
-
 private const val MID_GAME_END_SECONDS = 1500
 private const val CONSUMABLE_QUALITY_PREFIX = "consumable"
 private const val MAX_NETWORTH_MARKERS = 8

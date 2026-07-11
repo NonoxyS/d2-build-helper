@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.core.resources.data.repository
+package dev.nonoxy.d2buildhelper.core.resources.data.storage
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,8 +6,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.nonoxy.d2buildhelper.common.coroutines.CoroutineDispatchers
 import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
+import dev.nonoxy.d2buildhelper.core.resources.data.repository.SerializableCachedDotaConstants
+import dev.nonoxy.d2buildhelper.core.resources.data.repository.toSerializable
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.CachedDotaConstants
-import dev.nonoxy.d2buildhelper.core.resources.domain.repository.ConstantsStorage
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

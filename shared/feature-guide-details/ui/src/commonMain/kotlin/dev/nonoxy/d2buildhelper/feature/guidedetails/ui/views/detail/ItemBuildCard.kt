@@ -127,7 +127,7 @@ private fun ItemWithTime(
                 )
                 if (entry.count > 1) {
                     Text(
-                        text = "×${entry.count}",
+                        text = stringResource(MR.strings.guide_detail_item_count_format, entry.count),
                         color = D2BuildHelperTheme.colors.textPrimary,
                         style = D2BuildHelperTheme.typography.captionMD,
                         modifier = Modifier
@@ -178,7 +178,7 @@ private fun NeutralItem(
 @Composable
 private fun ArrowSeparator(modifier: Modifier = Modifier) {
     Text(
-        text = "›",
+        text = stringResource(MR.strings.guide_detail_phase_arrow),
         color = D2BuildHelperTheme.colors.outline,
         style = D2BuildHelperTheme.typography.bodyLG,
         modifier = modifier.padding(horizontal = 4.dp),
