@@ -1,6 +1,6 @@
 package dev.nonoxy.d2buildhelper.feature.guides.presentation.models
 
-import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.presentation.UiMatchPlayerPosition
 import kotlinx.collections.immutable.ImmutableList
 
 data class UiGuide(

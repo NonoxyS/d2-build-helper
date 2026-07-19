@@ -4,10 +4,10 @@ import dev.nonoxy.d2buildhelper.common.mappers.Mapper
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.match.MatchLane
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchLane
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail

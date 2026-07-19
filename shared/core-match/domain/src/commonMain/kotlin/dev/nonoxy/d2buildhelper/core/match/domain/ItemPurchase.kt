@@ -1,4 +1,4 @@
-package dev.nonoxy.d2buildhelper.core.match
+package dev.nonoxy.d2buildhelper.core.match.domain
 
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 

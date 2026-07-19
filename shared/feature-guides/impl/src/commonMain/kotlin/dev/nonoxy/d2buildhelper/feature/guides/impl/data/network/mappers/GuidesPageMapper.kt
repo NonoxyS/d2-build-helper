@@ -6,8 +6,8 @@ import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Pagination
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.PlayerStats
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.models.RemoteGuidePlayerResponse

@@ -2,8 +2,8 @@ package dev.nonoxy.d2buildhelper.feature.guides.api.domain.models
 
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 
 data class Guide(
     val matchId: Long,

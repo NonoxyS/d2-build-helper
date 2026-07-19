@@ -5,7 +5,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.GameVersion
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ImageUrl
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.core.resources.domain.models.DotaConstants
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail

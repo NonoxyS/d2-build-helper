@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.mappers
 
 import dev.nonoxy.d2buildhelper.common.mappers.Mapper
-import dev.nonoxy.d2buildhelper.common.ui.match.toUi
+import dev.nonoxy.d2buildhelper.core.match.presentation.toUi
 import dev.nonoxy.d2buildhelper.core.domain.models.Ability
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.Hero
@@ -9,7 +9,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroTalent
 import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.AbilityLearnEvent
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.BuildPlayer
 import dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models.GuideDetail

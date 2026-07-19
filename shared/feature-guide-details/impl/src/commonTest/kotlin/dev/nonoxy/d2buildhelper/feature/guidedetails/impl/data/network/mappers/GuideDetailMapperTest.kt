@@ -3,9 +3,9 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.mappers
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.core.match.MatchLane
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchLane
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteAbilityLearnEventResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailPlayerResponse
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.network.models.RemoteGuideDetailResponse

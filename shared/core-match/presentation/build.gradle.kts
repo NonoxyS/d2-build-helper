@@ -7,9 +7,13 @@ plugins {
 }
 
 androidLibraryConfig {
-    namespace = "dev.nonoxy.d2buildhelper.core.match"
+    namespace = "dev.nonoxy.d2buildhelper.core.match.presentation"
 }
 
 commonMainDependencies {
-    implementations(projects.shared.coreDomain)
+    implementations(
+        projects.shared.coreMatch.domain,
+        projects.shared.commonResources,
+        libs.moko.resources,
+    )
 }

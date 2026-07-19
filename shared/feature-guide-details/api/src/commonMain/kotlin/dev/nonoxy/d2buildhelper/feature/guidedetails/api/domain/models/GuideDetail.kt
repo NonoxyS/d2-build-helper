@@ -3,10 +3,10 @@ package dev.nonoxy.d2buildhelper.feature.guidedetails.api.domain.models
 import dev.nonoxy.d2buildhelper.core.domain.models.AbilityId
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
-import dev.nonoxy.d2buildhelper.core.match.MatchLane
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerRole
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchLane
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerRole
 
 data class GuideDetail(
     val matchId: Long,

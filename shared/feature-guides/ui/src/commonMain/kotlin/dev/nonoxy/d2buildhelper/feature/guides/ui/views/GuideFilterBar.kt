@@ -16,7 +16,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.chip.D2FilterChip
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.presentation.UiMatchPlayerPosition
 
 private val SIDE_OPTIONS = listOf(true, false)
 

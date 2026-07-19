@@ -51,7 +51,9 @@ class KmpLibraryPlugin : Plugin<Project> {
                 jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
             }
 
-            withHostTestBuilder { }
+            withHostTestBuilder { }.configure {
+                isIncludeAndroidResources = true
+            }
         }
     }
 
