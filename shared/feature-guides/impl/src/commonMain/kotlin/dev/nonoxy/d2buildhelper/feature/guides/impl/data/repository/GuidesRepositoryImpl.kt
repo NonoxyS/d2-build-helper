@@ -5,7 +5,7 @@ import dev.nonoxy.d2buildhelper.common.extensions.coRunCatching
 import dev.nonoxy.d2buildhelper.common.extensions.wrapResultFailure
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilters
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesPage
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.GuidesApiClient
 import dev.nonoxy.d2buildhelper.feature.guides.impl.data.network.mappers.GuidesPageMapper
 import dev.nonoxy.d2buildhelper.feature.guides.impl.domain.repository.GuidesRepository

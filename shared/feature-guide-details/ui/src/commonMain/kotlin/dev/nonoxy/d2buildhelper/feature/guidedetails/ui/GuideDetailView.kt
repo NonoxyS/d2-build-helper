@@ -24,9 +24,9 @@ import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.iconbutton.D
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.topbar.D2TopBar
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
 import dev.nonoxy.d2buildhelper.common.ui.compose.utils.navigationBarHeight
-import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchLane
-import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerPosition
-import dev.nonoxy.d2buildhelper.common.ui.match.UiMatchPlayerRole
+import dev.nonoxy.d2buildhelper.core.match.presentation.UiMatchLane
+import dev.nonoxy.d2buildhelper.core.match.presentation.UiMatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.presentation.UiMatchPlayerRole
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.TalentSide
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiAbilitySummary
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiBuildHeader

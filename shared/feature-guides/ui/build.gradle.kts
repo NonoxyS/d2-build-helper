@@ -13,6 +13,7 @@ androidLibraryConfig {
 
 commonMainDependencies {
     implementations(
+        projects.shared.coreMatch.presentation,
         libs.compose.multiplatform.material.iconsExtended,
         libs.coil.compose,
         libs.kotlinx.collections.immutable

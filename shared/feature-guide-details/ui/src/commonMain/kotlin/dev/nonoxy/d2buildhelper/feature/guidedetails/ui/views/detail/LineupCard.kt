@@ -17,7 +17,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
 import dev.nonoxy.d2buildhelper.common.ui.compose.components.shared.space.Space8
 import dev.nonoxy.d2buildhelper.common.ui.compose.theme.D2BuildHelperTheme
-import dev.nonoxy.d2buildhelper.common.ui.match.label
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineup
 import dev.nonoxy.d2buildhelper.feature.guidedetails.presentation.models.UiLineupMember
 import kotlinx.collections.immutable.ImmutableList
@@ -63,7 +62,7 @@ private fun HeroPlaque(
     glowColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val roleLabel = member.role?.label()
+    val roleLabel = member.role?.let { stringResource(it.labelRes) }
     val fallbackTitle = stringResource(MR.strings.guide_detail_card_lineup)
     ExplainAnchor(
         title = member.heroName?.takeIf { it.isNotBlank() } ?: fallbackTitle,

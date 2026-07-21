@@ -1,7 +1,7 @@
 package dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.repository
 
 import dev.nonoxy.d2buildhelper.core.domain.models.HeroId
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.FakeGuideDetailApiClient
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.TestCoroutineDispatchers
 import dev.nonoxy.d2buildhelper.feature.guidedetails.impl.data.guideDetailResponse

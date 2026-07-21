@@ -13,7 +13,8 @@ androidLibraryConfig {
 
 commonMainDependencies {
     implementations(
-        projects.shared.coreMatch,
+        projects.shared.coreMatch.domain,
+        projects.shared.coreMatch.presentation,
         projects.shared.commonUi,
         projects.shared.commonResources,
         libs.kotlinx.collections.immutable,

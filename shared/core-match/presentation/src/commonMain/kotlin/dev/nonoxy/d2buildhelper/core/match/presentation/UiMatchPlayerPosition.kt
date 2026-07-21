@@ -1,8 +1,8 @@
-package dev.nonoxy.d2buildhelper.common.ui.match
+package dev.nonoxy.d2buildhelper.core.match.presentation
 
 import dev.icerock.moko.resources.ImageResource
 import dev.nonoxy.d2buildhelper.common.resources.MR
-import dev.nonoxy.d2buildhelper.core.match.MatchPlayerPosition
+import dev.nonoxy.d2buildhelper.core.match.domain.MatchPlayerPosition
 
 enum class UiMatchPlayerPosition(
     val iconResource: ImageResource,

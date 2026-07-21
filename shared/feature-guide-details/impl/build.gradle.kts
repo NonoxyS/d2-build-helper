@@ -17,7 +17,7 @@ commonMainDependencies {
     implementations(
         projects.shared.coreNetwork,
         projects.shared.coreResources,
-        projects.shared.coreMatch,
+        projects.shared.coreMatch.domain,
     )
 }
 

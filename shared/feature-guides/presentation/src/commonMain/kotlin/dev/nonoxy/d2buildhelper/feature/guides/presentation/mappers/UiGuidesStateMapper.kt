@@ -8,7 +8,7 @@ import dev.nonoxy.d2buildhelper.core.domain.models.Item
 import dev.nonoxy.d2buildhelper.core.domain.models.ItemId
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.Guide
 import dev.nonoxy.d2buildhelper.feature.guides.api.domain.models.GuidesFilterKind
-import dev.nonoxy.d2buildhelper.core.match.ItemPurchase
+import dev.nonoxy.d2buildhelper.core.match.domain.ItemPurchase
 import dev.nonoxy.d2buildhelper.feature.guides.api.store.GuidesStore
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiFilterPicker
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuide
@@ -16,7 +16,7 @@ import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiGuidesState
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHero
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiHeroFilter
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiItemPurchase
-import dev.nonoxy.d2buildhelper.common.ui.match.toUi
+import dev.nonoxy.d2buildhelper.core.match.presentation.toUi
 import dev.nonoxy.d2buildhelper.feature.guides.presentation.models.UiNeutralItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

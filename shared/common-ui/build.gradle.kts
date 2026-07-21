@@ -16,8 +16,6 @@ commonMainDependencies {
     implementations(
         projects.shared.common,
         projects.shared.commonResources,
-        projects.shared.coreMatch,
-
         libs.compose.multiplatform.material3,
         libs.moko.resources.compose,
         libs.coil.compose,
